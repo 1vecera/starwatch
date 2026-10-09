@@ -185,7 +185,7 @@ def news(url, title, highlights=(), date="2026-10-02"):
 def test_articles_match_names_with_city_context_and_drop_polls(snapshot):
     results = [
         news("https://www.idnes.cz/praha/a1", "Lídr Jan Hušbauer chce v Praze stavět byty - iDNES.cz"),
-        news("https://www.idnes.cz/sport/a2", "Jan Hušbauer vyhrál turnaj"),  # no city: possible namesake
+        news("https://www.idnes.cz/sport/a2", "Jan Hušbauer otevřel turnaj"),  # no city: possible namesake
         news("https://www.irozhlas.cz/a3", "Praha sobě představila program", ["Komunální volby v Praze."]),
         news("https://www.novinky.cz/a4", "Průzkum: v Brně vede ANO", ["Václav Trojan a volby v Brně"]),
         news("https://www.novinky.cz/a5", "Starý článek o Praze a Janu Hušbauerovi", date="2026-08-01"),
@@ -203,7 +203,7 @@ def test_articles_match_names_with_city_context_and_drop_polls(snapshot):
     assert by_url["https://www.irozhlas.cz/a3"]["lists"] == ["kv2026:554782:1373"]
     assert by_url["https://www.seznamzpravy.cz/a7"] | {"match": "text", "city_id": "582786"} == \
         by_url["https://www.seznamzpravy.cz/a7"]
-    assert stats["poll_or_betting"] == 1 and stats["outside_window_or_undated"] == 1
+    assert (stats["poll_or_betting"], stats["outside_window_or_undated"]) == (1, 1), stats
     assert set(items[0]) == {"id", "url", "title", "outlet", "published_at", "city_id", "cities", "lists", "cands",
                              "match", "matched", "observed_at"}
 
@@ -223,3 +223,20 @@ def test_js_output_is_byte_stable(tmp_path):
     write_js(tmp_path / "b.js", "SW_X", {"a": {"x": [2, 1], "y": "ž"}, "b": 1})
     assert (tmp_path / "a.js").read_bytes() == (tmp_path / "b.js").read_bytes()
     assert read_js(tmp_path / "a.js") == {"a": {"x": [2, 1], "y": "ž"}, "b": 1}
+
+
+def test_generic_party_text_without_city_or_candidate_is_rejected(tmp_path, snapshot):
+    generic = """<html><head><title>Program místního sdružení</title></head><body><main>
+    <p>Prioritou jsou pro nás stabilní, zdravé a efektivní finance, které umožní dlouhodobý rozvoj města.</p>
+    <p>Garantujeme stabilní a předvídatelné financování spolků a zavedeme plnohodnotný Portál občana.</p>
+    <p>U všech nových investic budeme posuzovat náklady v celém jejich životním cyklu.</p></main></body></html>"""
+    cache = Cache(tmp_path / "cache", offline=True)
+    seed_page(cache, "https://party.example.cz/clanek/program", generic)
+    exa = FakeExa(lambda query: [{"url": "https://party.example.cz/clanek/program", "title": "P", "highlights": []}])
+    triage = FakeLLM(lambda tag, prompt: {"selected": [1], "reason": "looks like a programme"})
+    extractor = FakeLLM(lambda tag, prompt: pytest.fail("a page naming neither city nor candidate is not extracted"))
+    collector = ProgramCollector(snapshot, exa, Fetcher(cache), None, triage, extractor, workers=1,
+                                 log=lambda message: None)
+    [run] = collector.run(snapshot.select(ids=["kv2026:554782:1373"]))
+    assert run.entry["status"] == "not_found"
+    assert "name neither the city" in run.entry["note"]

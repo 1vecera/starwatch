@@ -20,7 +20,7 @@ from dataclasses import dataclass, field
 from .common import BudgetExceeded, OfflineMiss, digest
 from .exa import Exa
 from .llm import LLM, LLMError
-from .names import distinctive_name
+from .names import city_pattern, distinctive_name, parties_in, person_pattern
 from .snapshot import ElectionList, Snapshot
 from .text import Document, find_quote, registered_domain
 from .web import Fetcher, Renderer, canonical
@@ -30,6 +30,12 @@ EXCLUDED_DOMAINS = {
     "linkedin.com", "threads.net", "wikipedia.org", "wikidata.org", "volby.cz", "gov.cz", "google.com",
     "mapy.cz", "lines.com", "polymarket.com", "kalshi.com", "spotify.com", "apple.com", "flickr.com",
 }
+# City halls publish registrations and candidate lists, not programmes; third-party guides are not the list's own.
+CITY_HALL_DOMAINS = {
+    "praha.eu", "brno.cz", "ostrava.cz", "plzen.eu", "usti-nad-labem.cz", "usti.cz", "pardubice.eu", "liberec.cz",
+    "hradeckralove.org", "mmhk.cz", "c-budejovice.cz", "olomouc.eu", "volby.cz",
+}
+THIRD_PARTY_GUIDES = {"programydovoleb.cz", "volimprahu.cz", "volebnikalkulacka.cz", "kohovolit.eu", "demagog.cz"}
 NEWS_DOMAINS = {
     "idnes.cz", "lidovky.cz", "novinky.cz", "seznamzpravy.cz", "irozhlas.cz", "rozhlas.cz", "ceskatelevize.cz",
     "denik.cz", "aktualne.cz", "echo24.cz", "forum24.cz", "denikn.cz", "e15.cz", "metro.cz", "blesk.cz",
@@ -38,10 +44,18 @@ NEWS_DOMAINS = {
     "brnenskadrbna.cz", "ostravskadrbna.cz", "plzenskadrbna.cz", "libereckadrbna.cz", "olomouckadrbna.cz",
     "budejckadrbna.cz", "hradeckadrbna.cz", "pardubickadrbna.cz", "ustecky.denik.cz", "ostravan.cz",
     "ustionline.cz", "libereckelisty.cz", "kurzy.cz", "euro.cz", "eurozpravy.cz", "super.cz", "ahaonline.cz",
-    "cnn.iprima.cz", "deník.cz", "zitusti.cz", "mfdnes.cz", "frekvence1.cz", "radiozurnal.cz", "hlidacipes.org",
+    "cnn.iprima.cz", "zitusti.cz", "mfdnes.cz", "frekvence1.cz", "radiozurnal.cz", "hlidacipes.org",
+    # Further outlets seen in the October 2026 news search.
+    "drbna.cz", "okraj.cz", "polar.cz", "rej.cz", "salonkyhk.cz", "dvtv.cz", "domacipolitika.cz", "newstream.cz",
+    "report.cz", "tvmorava.cz", "telegraph.cz", "nasepraha.cz", "naseplzen.cz", "nasliberec.cz", "plzen.cz",
+    "iplzensko.cz", "regionplzen.cz", "regionpraha.cz", "praha4online.cz", "praha5online.cz", "prazskypatriot.cz",
+    "pardubiceonline.cz", "hanackenovinky.cz", "hkcity.cz", "denikreferendum.cz", "e-news.cz", "extra.cz",
+    "iportal24.cz", "mujrozhlas.cz", "neovlivni.cz", "odkryto.cz", "voxpot.cz", "moderniobec.cz", "medialive.cz",
+    "cerstvezpravy.cz", "focuson.cz", "patriotmagazin.cz", "nasepravda.cz", "zdravotnickydenik.cz",
 }
 PROGRAM_HINT = re.compile(
     r"program|priorit|krok[ůu]|vize|vizi|plán|chceme|slib|řešení|reseni|tem[ay]|pro-[a-z]+|\.pdf", re.I)
+PROGRAMME_WORD = re.compile(r"program|priorit|100.krok|vize", re.I)
 TOPIC_LABELS = {
     "culture_sport": "culture, sport, leisure, events, heritage",
     "economy_work": "local economy, jobs, business, tourism",
@@ -112,10 +126,21 @@ def search_queries(lst: ElectionList) -> list[str]:
     ]
 
 
+def deep_queries(lst: ElectionList) -> list[str]:
+    """Second-pass searches for lists whose first pass found no programme: homepage and priorities."""
+    parties = parties_in(lst.name)
+    label = distinctive_name(lst.name) or (" ".join(parties) if parties else _query_name(lst))
+    return [
+        f"{label} {lst.city} 2026",
+        f"{label} {lst.city} co chceme pro {lst.city} priority komunální volby",
+    ]
+
+
 def allowed_candidate(url: str) -> bool:
     domain = registered_domain(url)
     host = url.split("/")[2].lower() if "://" in url else ""
-    if domain in EXCLUDED_DOMAINS or domain in NEWS_DOMAINS or host.removeprefix("www.") in NEWS_DOMAINS:
+    blocked = EXCLUDED_DOMAINS | NEWS_DOMAINS | CITY_HALL_DOMAINS | THIRD_PARTY_GUIDES
+    if domain in blocked or host.removeprefix("www.") in blocked:
         return False
     return not re.search(r"\.(?:jpe?g|png|gif|webp|svg|mp4|mp3|zip|docx?|xlsx?)(?:$|\?)", url, re.I)
 
@@ -133,10 +158,10 @@ class ProgramCollector:
         self.log = log
 
     # Phase 1 ---------------------------------------------------------------------------------
-    def discover(self, run: ListRun) -> None:
+    def discover(self, run: ListRun, deep: bool = False) -> None:
         seen: dict[str, Candidate] = {}
         times = []
-        for query in search_queries(run.lst):
+        for query in search_queries(run.lst) + (deep_queries(run.lst) if deep else []):
             record = self.exa.search(query, num_results=10)
             times.append(record["searched_at"])
             for rank, item in enumerate(record["results"]):
@@ -149,7 +174,7 @@ class ProgramCollector:
                 else:
                     seen[url].rank = min(seen[url].rank, rank)
         run.searched_at = max(times)
-        run.candidates = sorted(seen.values(), key=lambda c: (c.rank, c.url))[:8]
+        run.candidates = sorted(seen.values(), key=lambda c: (c.rank, c.url))[:12 if deep else 8]
 
     # Phase 2 ---------------------------------------------------------------------------------
     def fetch(self, runs: list[ListRun]) -> None:
@@ -264,6 +289,10 @@ class ProgramCollector:
             run.entry = self._missing(run)
             return
         documents = [c.document for c in run.selected]
+        if not any(names_city_or_leader(lst, document) for document in documents):
+            run.triage_reason = "rejected: the selected pages name neither the city nor a leading candidate"
+            run.entry = self._missing(run)
+            return
         per_doc = MODEL_CHARS // len(documents)
         blocks, truncated = [], False
         for index, document in enumerate(documents, 1):
@@ -354,8 +383,8 @@ class ProgramCollector:
     def _missing(self, run: ListRun, note: str | None = None) -> dict:
         """``unreachable`` when a programme-looking page could not be read, else ``not_found``."""
         for candidate in run.candidates:
-            hinted = PROGRAM_HINT.search(candidate.url.split("/", 3)[-1]) or PROGRAM_HINT.search(candidate.title)
-            if hinted and candidate.document is None and candidate.error and candidate.origin == "search":
+            named = PROGRAMME_WORD.search(candidate.url.split("/", 3)[-1]) or PROGRAMME_WORD.search(candidate.title)
+            if named and candidate.document is None and candidate.error and candidate.origin == "search":
                 meta = self.fetcher.meta(candidate.url)
                 return {"status": "unreachable", "program_url": candidate.url, "error": candidate.error,
                         "fetched_at": meta.get("fetched_at"), "checked_at": run.searched_at,
@@ -378,21 +407,51 @@ class ProgramCollector:
         return wrapped
 
     def run(self, lists: list[ElectionList]) -> list[ListRun]:
-        """All phases for these lists; lists that hit an unexpected error are returned without entry."""
+        """All phases for these lists, then a deeper search for lists still without a programme.
+
+        A list that hits an unexpected error is returned without an entry (and left out of the output).
+        """
         runs = [ListRun(lst) for lst in lists]
-        with ThreadPoolExecutor(self.workers) as pool:
-            list(pool.map(self._safe(self.discover), runs))
-        runs_ok = [run for run in runs if not run.error]
-        self.log(f"discover: {sum(len(r.candidates) for r in runs_ok)} candidates for {len(runs_ok)} lists")
-        self.fetch(runs_ok)
-        self.log(f"fetch: {sum(len(r.candidates) for r in runs_ok)} candidates after programme links")
-        self.render(runs_ok)
-        with ThreadPoolExecutor(self.workers) as pool:
-            list(pool.map(self._safe(self.triage), runs_ok))
-        self.log(f"triage: {sum(1 for r in runs_ok if r.selected)} lists with a selected programme")
-        with ThreadPoolExecutor(self.workers) as pool:
-            list(pool.map(self._safe(self.extract), runs_ok))
+        self._pass(runs, deep=False)
+        retry = [run for run in runs if not run.error and run.entry.get("status") != "found"]
+        if retry:
+            self._pass(retry, deep=True)
         return runs
+
+    def _pass(self, runs: list[ListRun], deep: bool) -> None:
+        previous = {id(run): (run.entry, run.stats, run.triage_reason) for run in runs}
+        for run in runs:
+            run.selected, run.entry, run.stats = [], {}, {}
+
+        def discover(run: ListRun) -> None:
+            self.discover(run, deep=deep)
+
+        with ThreadPoolExecutor(self.workers) as pool:
+            list(pool.map(self._safe(discover), runs))
+        active = [run for run in runs if not run.error]
+        self.log(f"pass {2 if deep else 1}: {sum(len(r.candidates) for r in active)} search candidates "
+                 f"for {len(active)} lists")
+        self.fetch(active)
+        self.render(active)
+        with ThreadPoolExecutor(self.workers) as pool:
+            list(pool.map(self._safe(self.triage), active))
+        with ThreadPoolExecutor(self.workers) as pool:
+            list(pool.map(self._safe(self.extract), active))
+        for run in runs:
+            if run.error and previous[id(run)][0]:  # keep the earlier pass's result
+                run.entry, run.stats, run.triage_reason = previous[id(run)]
+                self.log(f"{run.lst.id}: keeping first-pass result after {run.error}")
+                run.error = None
+        self.log(f"pass {2 if deep else 1}: {sum(1 for r in runs if r.entry.get('status') == 'found')} "
+                 f"of {len(runs)} lists found")
+
+
+def names_city_or_leader(lst: ElectionList, document: Document) -> bool:
+    """A city programme names its city or its candidates; a generic party text does not."""
+    text = "\n".join([document.title, *document.pages])
+    if city_pattern(lst.city).search(text):
+        return True
+    return any((pattern := person_pattern(cand.name)) and pattern.search(text) for cand in lst.leaders(5))
 
 
 def _distinct(candidates: list[Candidate]) -> list[Candidate]:

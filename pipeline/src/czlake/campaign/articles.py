@@ -11,6 +11,8 @@ import re
 from dataclasses import dataclass, field
 from urllib.parse import urlsplit
 
+from unidecode import unidecode
+
 from .common import sha1
 from .exa import Exa
 from .names import (brand_pattern, city_pattern, distinctive_name, parties_in, party_pattern,
@@ -23,13 +25,27 @@ from .web import canonical
 WINDOW_START = "2026-09-01"
 WINDOW_END = "2026-10-09"
 LEADING_POSITIONS = 5
+# Polls, forecasts, betting and vote counts are dropped (election silence and project scope).
 POLL_OR_BETTING = re.compile(
     r"průzkum|volební model|preferenc|sázk|sázen|kurz[yůu]? |odds|prediction|polymarket|kalshi|tipsport|fortuna|"
-    r"\bSTEM\b|Median|Kantar|\bNMS\b|Ipsos|SANEP|exit poll|odhad výsledk",
+    r"\bSTEM\b|Median|Kantar|\bNMS\b|Ipsos|SANEP|exit poll|odhad výsledk|prognóz|predikc|sečteno",
     re.I,
 )
-ELECTION_CONTEXT = re.compile(r"volb|volič|kandid|komunál|zastupitel|primátor|radnic|koalic|lídr|kampa|magistrát",
-                              re.I)
+# In titles only: forecasts and result reports (including misdated reports on earlier elections).
+FORECAST_TITLE = re.compile(
+    r"favorit|šanc\w* (?:vyhrát|na vítězství|zůstat)|vyhrál[aiy]?\b|vyhraje\b|zvítězil|by získal|"
+    r"výsledk\w* (?:\w+ )?voleb|kdo vyhraje",
+    re.I,
+)
+# Tag, author, profile and section pages list many articles; they are not articles themselves.
+LISTING_URL = re.compile(
+    r"/(?:stitky|stitek|tagy|tag|tags|autor|author|kategorie|category|tema|temata|osobnosti|osobnost|rubrika|"
+    r"rubriky|hledat|search|archiv)(?:/|$)|\.K\d+$|/(?:novinky|aktuality|zpravy)/?$", re.I)
+PARTY_DOMAIN = re.compile(r"^(?:ods|pirati|piratsk|spd|kdu|top09|trikolora|kscm|socdem|motoriste|starostove|"
+                          r"svobodni|zeleni|prisaha|stacilo|ano20)")
+POLITICAL_CONTEXT = re.compile(
+    r"volb|volič|kandid|komunál|zastupitel|primátor|radnic|koalic|lídr|kampa|magistrát|náměst|starost|radní|"
+    r"politi|stran[aěyu]\b|hnutí|opozic", re.I)
 PARTY_DOMAINS = {
     "ods.cz", "anobudelip.cz", "anobudelepe.cz", "pirati.cz", "spd.cz", "starostove-nezavisli.cz", "kdu.cz",
     "top09.cz", "zeleni.cz", "svobodni.cz", "motoriste.cz", "motoristesobe.cz", "trikolora.cz", "stacilo.cz",
@@ -99,25 +115,25 @@ class Match:
 def match_article(title: str, text: str, index: list[Entry]) -> list[Match]:
     """Per city: candidates by exact (declined) full name, lists by brand or unique party name.
 
-    Every hit needs the city in the title or highlights. Brand hits also need election context;
-    party-name hits must be in the title, with election context in title or highlights.
+    Every hit needs the city in the title or highlights. Brand hits, and candidate names found only
+    in the highlights, also need political context; party-name hits must be in the title.
     """
     matches = []
     both = f"{title}\n{text}"
-    election = bool(ELECTION_CONTEXT.search(both))
+    political = bool(POLITICAL_CONTEXT.search(both))
     for entry in index:
         if not entry.city_re.search(both):
             continue
         lists, cands, names, in_title, score = set(), set(), set(), False, 0
         for cand_id, list_id, name, pattern in entry.cands:
-            where = "title" if pattern.search(title) else "text" if pattern.search(text) else None
+            where = "title" if pattern.search(title) else "text" if political and pattern.search(text) else None
             if where:
                 cands.add(cand_id)
                 lists.add(list_id)
                 names.add(name)
                 in_title |= where == "title"
                 score += 3
-        if election:
+        if political:
             for list_id, brand, pattern in entry.brands:
                 where = "title" if pattern.search(title) else "text" if pattern.search(text) else None
                 if where:
@@ -137,13 +153,16 @@ def match_article(title: str, text: str, index: list[Entry]) -> list[Match]:
 
 
 def published_date(value: str | None, url: str) -> str | None:
-    if value and re.match(r"\d{4}-\d{2}-\d{2}", value):
-        return value[:10]
+    """A date written in the URL wins over the search index's date, which is occasionally wrong."""
     found = re.search(r"[./_-]A(\d{2})(\d{2})(\d{2})_", url)  # iDNES/Lidovky article ids: A261005_...
     if found:
         return f"20{found.group(1)}-{found.group(2)}-{found.group(3)}"
     found = re.search(r"/(20\d{2})[/-](\d{2})[/-](\d{2})/", url)
-    return "-".join(found.groups()) if found else None
+    if found:
+        return "-".join(found.groups())
+    if value and re.match(r"\d{4}-\d{2}-\d{2}", value):
+        return value[:10]
+    return None
 
 
 def outlet_name(url: str) -> str:
@@ -170,12 +189,33 @@ def clean_title(title: str, url: str) -> str:
 
 
 def allowed_outlet(url: str, extra_excluded: set[str]) -> bool:
+    """Czech news pages only: no party, list, candidate, city-hall, aggregator or listing pages."""
     host = (urlsplit(url).hostname or "").lower()
     domain = registered_domain(url)
-    if not host.endswith(".cz"):
+    if not host.endswith(".cz") or LISTING_URL.search(urlsplit(url).path) or PARTY_DOMAIN.match(domain):
         return False
     return not ({domain, host.removeprefix("www.")} & (EXCLUDED_DOMAINS | PARTY_DOMAINS | CITY_HALL_DOMAINS
                                                        | AGGREGATORS | extra_excluded))
+
+
+def campaign_domains(snapshot: Snapshot) -> set[str]:
+    """Domains spelled like a list brand or a leading candidate's name are campaign sites, not news."""
+    names = set()
+
+    def add(text: str) -> None:
+        words = re.sub(r"[^a-z0-9 ]", "", unidecode(text).lower()).split()
+        if len(words) >= 2 or (words and len(words[0]) >= 6):
+            for variant in (words, [words[0], words[-1]]):
+                names.update({"".join(variant) + ".cz", "".join(reversed(variant)) + ".cz",
+                              "-".join(variant) + ".cz"})
+
+    for lst in snapshot.lists:
+        brand = distinctive_name(lst.name)
+        if brand:
+            add(brand)
+        for cand in lst.leaders(LEADING_POSITIONS):
+            add(cand.name)
+    return names
 
 
 def article_queries(snapshot: Snapshot, lists: list[ElectionList]) -> list[tuple[str, str, int]]:
@@ -199,7 +239,7 @@ class ArticleCollector:
     def __init__(self, snapshot: Snapshot, exa: Exa, extra_excluded: set[str] | None = None, log=print):
         self.snapshot = snapshot
         self.exa = exa
-        self.extra_excluded = extra_excluded or set()
+        self.extra_excluded = (extra_excluded or set()) | campaign_domains(snapshot)
         self.index = build_index(snapshot)
         self.log = log
 
@@ -237,7 +277,7 @@ class ArticleCollector:
             return None
         title = clean_title(result.get("title") or "", url)
         text = " ".join(result.get("highlights") or [])
-        if not title or POLL_OR_BETTING.search(title) or POLL_OR_BETTING.search(text):
+        if not title or POLL_OR_BETTING.search(title) or POLL_OR_BETTING.search(text) or FORECAST_TITLE.search(title):
             stats["poll_or_betting"] += 1
             return None
         matches = match_article(title, text, self.index)
