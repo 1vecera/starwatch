@@ -1,0 +1,8 @@
+{
+  "searchTerms": [
+    "from:kolovratnikm filter:media -filter:replies -filter:retweets"
+  ],
+  "sort": "Latest",
+  "maxItems": 1200,
+  "includeSearchTerms": true
+}

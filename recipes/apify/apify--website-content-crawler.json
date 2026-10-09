@@ -1,0 +1,18 @@
+{
+  "startUrls": [
+    {
+      "url": "https://www.starostoveolomouc.cz/"
+    }
+  ],
+  "maxCrawlDepth": 1,
+  "maxCrawlPages": 15,
+  "maxResults": 15,
+  "crawlerType": "cheerio",
+  "proxyConfiguration": {
+    "useApifyProxy": true
+  },
+  "requestTimeoutSecs": 20,
+  "maxRequestRetries": 1,
+  "saveMarkdown": false,
+  "saveHtml": false
+}

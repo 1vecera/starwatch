@@ -1,0 +1,17 @@
+{
+  "profiles": [
+    "andrejbabis",
+    "tomiospd"
+  ],
+  "resultsPerPage": 5,
+  "profileSorting": "latest",
+  "excludePinnedPosts": true,
+  "profileScrapeSections": [
+    "videos"
+  ],
+  "shouldDownloadVideos": false,
+  "shouldDownloadCovers": false,
+  "commentsPerPost": 0,
+  "maxFollowersPerProfile": 0,
+  "maxFollowingPerProfile": 0
+}
