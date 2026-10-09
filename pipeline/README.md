@@ -1,10 +1,21 @@
-# Starwatch evidence backend
+# Starwatch pipeline (`czlake`)
 
-The Python backend collects bounded public evidence, keeps uncertain account ownership explicit, and exposes immutable DuckDB checkpoints through a local read API. Source data, credentials, authorization receipts, worker outputs and retained media stay outside Git.
+The evidence side of [Starwatch](../README.md). It turns the official 2026 candidate registry and public social accounts into an immutable DuckDB evidence graph that the app's exporter reads. It collects bounded public evidence with Apify Actors, keeps uncertain account ownership explicit, and serves each checkpoint read-only through a local API. Source data, credentials, authorization receipts, worker outputs and retained media stay outside Git.
+
+| Stage | Main modules |
+| --- | --- |
+| Official data: municipalities, 2026 candidacies, 2022 results (ČSÚ volby.cz open data) | `build/universe.py`, `build/fetch_volby.py`, `build/stage_volby.py`, `build/ballot2026.py`, `production_elections.py` |
+| Account discovery and ownership review | `production_social_discovery.py`, `production_identity.py`, `production_facebook_binding.py`, `production_new_platforms.py` |
+| Capped Apify collection with a spending ledger | `production_budget.py`, `production_collect.py`, `apify_run.py` |
+| Media, portraits, logos and web text with source bindings | `production_media.py`, `production_images.py`, `production_portraits.py`, `production_logos.py`, `production_web.py` |
+| Topic labels with independent review | `production_labels.py`, `production_topic_graph.py` |
+| Checkpoint export and read API | `production_graph.py`, `production_api.py` |
+
+The app's exporter (`../app/tools/export_real.py`) reads a checkpoint and writes the snapshot the static screens load. The Apify Actors, inputs and costs are documented in [the Apify recipes](../docs/apify-recipes.md).
 
 ## Local use
 
-Use Python 3.12 or newer and the locked environment with `uv sync`. Point commands at the project home containing the existing official registry, relevance selection and source lake. Run these commands from this worktree.
+Use Python 3.12 or newer and the locked environment with `uv sync`. Point commands at the project home containing the existing official registry, relevance selection and source lake. Run these commands from this directory.
 
 ```bash
 export CZLAKE_PROJECT=/absolute/path/to/project
@@ -69,9 +80,10 @@ Topic navigation uses accepted, current classification records, exact evidence s
 ## Validation
 
 ```bash
-mkdir -p tmp/tests
-TMPDIR="$PWD/tmp/tests" IDENTITY_TEST_SCRATCH="$PWD/tmp/tests/identity" \
-  uv run --offline python -m unittest discover -s tests
+uv sync
+uv run --with pytest pytest
 ```
 
-Tests exercise spending and crash recovery, source/privacy filtering, independent provenance, historical contradictions, exact claim spans, atomic publication, media limits and local API boundaries. Real-source checks and current collection coverage are retained in the project home's ignored production report and versioned manifests.
+The suite also runs under the standard library runner (`uv run python -m unittest discover -s tests`). Test scratch stays in ignored `tmp/` directories; set `IDENTITY_TEST_SCRATCH` to move the identity fixtures elsewhere.
+
+Tests exercise spending and crash recovery, source/privacy filtering, independent provenance, historical contradictions, exact claim spans, atomic publication, media limits and local API boundaries. They use local fixtures only and never call Apify or another paid service. Real-source checks and collection coverage are recorded in the project's ignored production reports and versioned manifests, not in this repository.
