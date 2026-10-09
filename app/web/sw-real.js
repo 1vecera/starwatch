@@ -15,9 +15,9 @@ SW.snapshot={short:'8–9 Oct 2026',long:'8–9 October 2026',live:false};
 SW.TOPIC_NOTE='Reviewed labels come from a checked sample; machine labels cover the rest, each backed by a quoted phrase, and can be wrong.';
 SW.topicMeta=(a,t)=>({label:(SW.TOP[t]||[])[0]||'',issue:false,machine:false,reviewed:false,evidence:null});
 SW.topicSource={reviewed:0,machine:0};
-// a screen can require a minimum of verified assets before it trusts live data (data-min-assets on this script tag)
+// a screen can require a minimum of verified assets before it trusts the snapshot (data-min-assets on this script tag)
 const me=document.currentScript, minA=me&&+me.dataset.minAssets||0, nReal=RAW&&RAW.assets?RAW.assets.length:0;
-if(RAW&&want!=='sim'&&nReal<minA){SW.source={kind:'sim',fallback:true,label:'Simulated universe',detail:`Live data has ${nReal} verified assets so far; this screen needs ${minA}+ to be meaningful, so it shows the simulated universe instead.`};return}
+if(RAW&&want!=='sim'&&nReal<minA){SW.source={kind:'sim',fallback:true,label:'Simulated universe',detail:`The snapshot has ${nReal} verified assets; this screen needs ${minA}+ to be meaningful, so it shows the simulated universe instead.`};return}
 if(!RAW||want==='sim'){SW.source={kind:'sim',label:'Simulated universe',detail:'Generated names, lists, posts and metrics. Per-city candidate and list counts follow the KV2026 registry.'};return}
 
 // Named local issues are independently reviewed caption memberships, kept separate
@@ -100,7 +100,7 @@ Object.entries(byCity).forEach(([cid,ls])=>{
     const t=(li+.35)/ls.length, ang=arm+li*2.39996+Math.sqrt(t)*2.4, rad=city.R*(.06+.86*Math.sqrt(t));
     const size=Math.max(1,l.size||1), S=city.R*.085*Math.sqrt(size/40)+city.R*.03;
     const key=fold(l.short||l.name).replace(/[^a-z0-9]/g,'');
-    const L={i:lists.length,id:l.id,logos:l.logos||[],result2022:l.result2022||null,forecast:l.forecast||[],city:city.i,name:l.name,short:(l.short||l.name).slice(0,14),number:l.number,size,relevant:!!l.relevant,
+    const L={i:lists.length,id:l.id,logos:l.logos||[],result2022:l.result2022||null,city:city.i,name:l.name,short:(l.short||l.name).slice(0,14),number:l.number,size,relevant:!!l.relevant,
       x:city.x+Math.cos(ang)*rad,y:city.y+Math.sin(ang)*rad,S,col:PARTY[hash(key)%PARTY.length],cands:[],assets:[],popular:1};
     listIx[l.id]=L.i;lists.push(L);city.lists.push(L.i);
   });
@@ -112,7 +112,7 @@ const followers={};(RAW.accounts||[]).forEach(a=>{if(a.followers!=null)followers
 (RAW.cands||[]).forEach(c=>{const li=listIx[c.list_id];if(li==null)return;const L=lists[li];const k=c.position||L.cands.length+1;
   const fol=followers[c.id]||0, lead=Math.exp(-(k-1)/5);
   const rad2=L.S*(.16+.84*Math.sqrt((k-.5)/Math.max(L.size,k)));
-  const cnd={i:cands.length,id:c.id,photo:c.photo||null,photo_source:c.photo_source||null,pref2022:c.pref2022||null,forecast:c.forecast||[],name:c.name,list:li,city:L.city,k,fol,folKnown:followers[c.id]!=null,qualified:!!c.qualified,occupation:c.occupation||null,
+  const cnd={i:cands.length,id:c.id,photo:c.photo||null,photo_source:c.photo_source||null,pref2022:c.pref2022||null,name:c.name,list:li,city:L.city,k,fol,folKnown:followers[c.id]!=null,qualified:!!c.qualified,occupation:c.occupation||null,
     or:rad2,ph:k*2.39996+((hash(c.id)%40)-20)/100,sp:((hash(c.id)&1)?-1:1)*0.035/(0.4+rad2),assets:[],about:[],age:c.age||null};
   cnd.size=.02+(fol?.075*Math.min(1,Math.log10(fol)/4.3):0)+.06*lead+(c.qualified?.012:0);
   candIx[c.id]=cnd.i;cands.push(cnd);L.cands.push(cnd.i);cities[L.city].cands.push(cnd.i);

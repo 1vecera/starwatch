@@ -22,7 +22,7 @@ window.SWSel={
 const q=new URLSearchParams(location.search);
 ['cand','list','asset'].forEach(t=>{if(q.has(t))SWSel.set(t,+q.get(t))});
 
-// screens were designed on the simulation; in live mode their 'mock' notes would be false
+// screens were designed on the simulation; with the real snapshot their mock notes would be false
 if(SW.source.kind==='real'){const fix=()=>document.querySelectorAll('body *').forEach(el=>{if(el.children.length)return;const t=el.textContent.trim();
   if(/^All (data|names).*mock/i.test(t))el.textContent='Snapshot of public posts collected '+SW.snapshot.long+' · '+SW.source.detail;
   else if(/^mock$/i.test(t))el.textContent='computed';
