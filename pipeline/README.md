@@ -77,6 +77,20 @@ Historical election exports preserve every 2022 source row, list votes, raw vote
 
 Topic navigation uses accepted, current classification records, exact evidence spans and independently registered reviewers. Related topics describe co-occurrence, not causation. Public YouTube, X and TikTok observations retain the same owner/source separation as Instagram and Facebook; platform visibility and exact returned author identity are required before admission.
 
+## Programmes and articles
+
+`czlake.campaign` adds two optional launch files to an exported snapshot: each list's own 2026 programme with promises whose Czech quotes are verified verbatim against the fetched text (`programs.js`), and Czech news articles that name a list or a leading candidate together with its city (`articles.js`). It caches every response, enforces cumulative spend caps for Exa, Bedrock and Apify, and rebuilds identical files with `--offline`.
+
+```bash
+uv run python -m czlake.campaign --snapshot ../app/web/data/real.js --cache ../tmp/campaign \
+  programs --lists relevant --out ../app/web/data/programs.js
+uv run python -m czlake.campaign --snapshot ../app/web/data/real.js --cache ../tmp/campaign \
+  articles --lists all --programs ../app/web/data/programs.js --out ../app/web/data/articles.js
+uv run pytest tests/test_campaign_*.py
+```
+
+The recipe, costs and failure modes are in [docs/collection/programs-and-articles.md](../docs/collection/programs-and-articles.md).
+
 ## Validation
 
 ```bash
