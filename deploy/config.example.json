@@ -1,0 +1,18 @@
+{
+  "host": "starwatch.example.org",
+  "cloudflare_zone": "example.org",
+  "cloudflare_account": "<cloudflare account id>",
+  "worker_name": "starwatch-edge",
+  "aws_region": "eu-central-1",
+  "bucket": "<private S3 bucket>",
+  "distribution_id": "<CloudFront distribution id>",
+  "cloudfront_domain": "<id>.cloudfront.net",
+  "cloudfront_function": "<viewer-request function name>",
+  "secret_name": "starwatch-edge-keys",
+  "legacy_secret_arn": "",
+  "state_file": "tmp/deploy-state.json",
+  "web_root": "app/web",
+  "exclude_prefixes": ["media/"],
+  "retire": ["studio.html"],
+  "verify_media": "/media/<some video>.mp4"
+}

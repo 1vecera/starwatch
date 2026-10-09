@@ -1,0 +1,13 @@
+{
+  "name": "starwatch-edge",
+  "private": true,
+  "type": "module",
+  "description": "Cloudflare Worker: social sign-in and public legal pages for Starwatch",
+  "scripts": {
+    "test": "node --test worker.test.mjs",
+    "build": "esbuild worker.mjs --bundle --format=esm --target=es2022 --outfile=dist/worker.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
+}
