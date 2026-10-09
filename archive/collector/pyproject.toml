@@ -1,8 +1,10 @@
 [project]
 name = "starwatch"
 version = "0.1.0"
-description = "Live public social-media research on a politician, with every fact linked to its source."
+description = "Archived first Starwatch engine: live public social-media research on one politician, with every fact linked to its source."
 readme = "README.md"
+license = "MIT"
+authors = [{ name = "Daniel Večeřa" }]
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115",
