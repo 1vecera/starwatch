@@ -15,12 +15,12 @@ const root=new URL('../',self&&self.src||location.href).href;      // web root, 
 const abs=p=>new URL(p,root).href;
 
 const NAME='Starwatch';
-const SCREENS={atlas:'Star Atlas',spotlight:'Spotlight',pulse:'Pulse',radar:'Radar',studio:'Studio'};
+const SCREENS={atlas:'Star Atlas',spotlight:'Spotlight',pulse:'Pulse',radar:'Radar',data:'By the numbers',about:'About'};
 const file=(location.pathname.split('/').pop()||'index.html').replace(/\.html?$/,'');
 const key=(self&&self.dataset.screen)||d.documentElement.dataset.screen||file||'index';
 const screen=SCREENS[key]||null;
 const TAGLINE="Who's being heard. Not just who's talking.";
-const DESC='Starwatch maps the public posts, videos and statements of the 2026 Czech city-council races, linked to the people and lists behind them. Every number opens its public source.';
+const DESC='A snapshot of public posts by candidates in the 2026 Czech municipal elections in ten cities, collected 8–9 October 2026 and linked to the people and lists behind them. Every number opens its public source.';
 const BG=(getComputedStyle(d.documentElement).getPropertyValue('--space')||'').trim()||'#F2F7F7'; // browser bar blends into the canvas
 
 /* ----- tab title ----- */
@@ -41,7 +41,7 @@ link('icon',abs('brand/favicon.svg'),{type:'image/svg+xml'});
 link('apple-touch-icon',abs('brand/app-icon-180.png'),{sizes:'180x180'});
 link('manifest',abs('manifest.webmanifest'));
 const shareTitle=screen?`${screen} · ${NAME}`:`${NAME}: ${TAGLINE}`;
-const img=abs('img/og.png'),alt='Starwatch: a map of Czechia with Praha raised under the Starwatch star. '+TAGLINE;
+const img=abs('og.png'),alt='Starwatch: '+TAGLINE+' A snapshot of public posts in the 2026 Czech municipal elections.';
 const url=location.origin+location.pathname;
 [['og:type','website'],['og:site_name',NAME],['og:title',shareTitle],['og:description',DESC],['og:url',url],
  ['og:image',img],['og:image:type','image/png'],['og:image:width','1200'],['og:image:height','630'],['og:image:alt',alt]]

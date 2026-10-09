@@ -10,9 +10,11 @@ const q=new URLSearchParams(location.search);
 let want=q.get('data');
 try{if(want)localStorage.setItem('sw-data',want);else want=localStorage.getItem('sw-data')}catch(e){}
 SW.available={real:!!RAW,sim:true};
+// the public snapshot: posts collected by the production run on 8–9 October 2026; nothing here updates live
+SW.snapshot={short:'8–9 Oct 2026',long:'8–9 October 2026',live:false};
 // a screen can require a minimum of verified assets before it trusts live data (data-min-assets on this script tag)
 const me=document.currentScript, minA=me&&+me.dataset.minAssets||0, nReal=RAW&&RAW.assets?RAW.assets.length:0;
-if(RAW&&want!=='sim'&&nReal<minA){SW.source={kind:'sim',fallback:true,label:'Simulated universe',detail:`Live data has ${nReal} verified assets so far; this screen needs ${minA}+ to be meaningful, so it shows the simulated universe until collection catches up.`};return}
+if(RAW&&want!=='sim'&&nReal<minA){SW.source={kind:'sim',fallback:true,label:'Simulated universe',detail:`Live data has ${nReal} verified assets so far; this screen needs ${minA}+ to be meaningful, so it shows the simulated universe instead.`};return}
 if(!RAW||want==='sim'){SW.source={kind:'sim',label:'Simulated universe',detail:'Generated names, lists, posts and metrics. Per-city candidate and list counts follow the KV2026 registry.'};return}
 
 // Named local issues are independently reviewed caption memberships, kept separate
@@ -126,7 +128,7 @@ assets.forEach(a=>{if(a.mention!=null)cands[a.mention].about.push(a.i)});
 lists.forEach(L=>{const n=L.assets.length+L.cands.reduce((s,k)=>s+cands[k].assets.length,0);L.popular=.6+Math.min(1,Math.log10(1+n)/2)});
 
 const nAcc=(RAW.accounts||[]).length;
-SW.source={kind:'real',label:'Live production data',checkpoint:RAW.source&&RAW.source.checkpoint_id,exported_at:RAW.source&&RAW.source.exported_at,
+SW.source={kind:'real',label:'Collected snapshot',checkpoint:RAW.source&&RAW.source.checkpoint_id,exported_at:RAW.source&&RAW.source.exported_at,
   detail:`${cands.length.toLocaleString('en-US')} registered candidacies · ${lists.length} lists · ${nAcc} verified accounts · ${assets.length} verified assets${TOP.length?'':' · topics pending review'}`};
 SW.coverage=RAW.coverage||[];
 // verified-account coverage per entity: "not observed" (no verified account) is different from zero posts
