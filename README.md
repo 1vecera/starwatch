@@ -40,7 +40,7 @@ flowchart LR
   A["Apify Actors<br/>public posts, profiles, media"] --> P
   P["pipeline/<br/>ownership review, capped collection,<br/>DuckDB evidence graph"] --> E["app/tools/export_real.py<br/>snapshot + media"]
   E --> W["app/web<br/>static HTML, CSS, JS"]
-  W --> H["AWS S3 + CloudFront<br/>behind Cloudflare sign-in"]
+  W --> H["deploy/<br/>S3 + CloudFront behind<br/>Cloudflare sign-in"]
 ```
 
 1. **Universe.** The official registry of 2026 candidacies and the 2022 results for the ten cities come from Czech Statistical Office open data.
@@ -48,9 +48,9 @@ flowchart LR
 3. **Evidence graph.** [`pipeline/`](pipeline/) attributes a post only when the account owner was confirmed by an independent public anchor, keeps uncertain matches as unknown, and writes immutable DuckDB checkpoints with dated metrics, reviewed topic labels and quoted statements.
 4. **Export.** [`app/tools/export_real.py`](app/tools/export_real.py) turns one checkpoint into the snapshot file and retained media that the screens load.
 5. **Static app.** [`app/web`](app/web/) is plain HTML, CSS and JavaScript with MapLibre and ECharts. There is no build step.
-6. **Hosting.** The site is a private S3 bucket behind CloudFront, fronted by Cloudflare. A Cloudflare Worker handles GitHub, Google and Facebook sign-in, and a CloudFront Function lets visitors without a session reach only the public welcome pages. The collected snapshot never enters Git.
+6. **Hosting.** [`deploy/`](deploy/) holds everything that runs in production. The site is a private S3 bucket behind CloudFront, fronted by Cloudflare. A Cloudflare Worker ([`deploy/edge`](deploy/edge/)) handles GitHub, Google and Facebook sign-in and serves the privacy and data-deletion pages; it stores no user data, only a signed seven-day session cookie. A CloudFront Function ([`deploy/aws/gate.js`](deploy/aws/gate.js)) lets visitors without a session reach only the public welcome pages, and an idempotent script ([`deploy/launch.py`](deploy/launch.py)) sets up keys, certificate, CloudFront, Cloudflare, the Worker and the upload. The collected snapshot never enters Git.
 
-The full write-up is in [docs/architecture.md](docs/architecture.md) and [docs/methodology.md](docs/methodology.md).
+The full write-up is in [docs/architecture.md](docs/architecture.md), [docs/methodology.md](docs/methodology.md) and [deploy/README.md](deploy/README.md).
 
 ## Quick start
 
@@ -71,9 +71,10 @@ To collect your own data, set `APIFY_TOKEN` in your environment and follow [the 
 ```sh
 (cd pipeline && uv sync && uv run --with pytest pytest)
 (cd app && uv run --with pytest pytest tools/test_serve.py)
+(cd deploy/edge && npm ci && npm test)
 ```
 
-Both suites use local fixtures only. The archived components keep their own tests; see [archive/README.md](archive/README.md).
+The edge tests need Node.js. All suites use local fixtures only and call no outside service. The archived components keep their own tests; see [archive/README.md](archive/README.md).
 
 ## Repository map
 
@@ -81,7 +82,7 @@ Both suites use local fixtures only. The archived components keep their own test
 | --- | --- |
 | [`app/`](app/) | The static app, the snapshot exporter and a small local server with HTTP range support for video. |
 | [`pipeline/`](pipeline/) | The evidence pipeline (`czlake`): official data, account discovery and ownership review, capped Apify collection, media retention, topic labels, DuckDB checkpoints and a read-only local API. |
-| [`deploy/`](deploy/) | The Cloudflare sign-in Worker and the CloudFront gate. |
+| [`deploy/`](deploy/) | Production hosting: the Cloudflare sign-in Worker, the CloudFront gate and the idempotent deploy script. See [deploy/README.md](deploy/README.md). |
 | [`docs/`](docs/) | The story, method, architecture, Apify recipes, learnings and the privacy and ethics notes. |
 | [`recipes/`](recipes/) | Reusable Apify Actor inputs described in the recipes guide. |
 | [`archive/`](archive/) | Earlier hackathon code: the first research engine, prototypes and the project control room. Not needed to run Starwatch. |

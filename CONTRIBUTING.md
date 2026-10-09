@@ -18,6 +18,7 @@ Run the checks before opening a pull request:
 ```sh
 (cd pipeline && uv sync && uv run --with pytest pytest)
 (cd app && uv run --with pytest pytest tools/test_serve.py)
+(cd deploy/edge && npm ci && npm test)    # sign-in Worker and CloudFront gate; needs Node.js
 ```
 
 Tests must not call Apify, other paid services or live websites; use local fixtures. Collection needs your own `APIFY_TOKEN` in the environment and is described in [docs/apify-recipes.md](docs/apify-recipes.md) and [pipeline/README.md](pipeline/README.md). Never commit credentials, `.env` files, collected posts, media, exported snapshots or DuckDB checkpoints; `.gitignore` keeps the usual locations out, but check `git status` before you commit.
