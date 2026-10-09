@@ -1,7 +1,9 @@
 [project]
 name = "starwatch-project-tracker"
 version = "0.1.0"
-description = "Private local project dashboard, reading the existing backlog and worker evidence"
+description = "Archived hackathon control room: local dashboard over the project task list, decisions and agent activity."
+license = "MIT"
+authors = [{ name = "Daniel Večeřa" }]
 requires-python = ">=3.13"
 dependencies = []
 

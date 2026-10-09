@@ -1,3 +1,5 @@
+> **Archived.** This is the first Starwatch engine, written in the opening hours of the Agents 0.0.7 hackathon (8–9 October 2026). It researched one politician at a time and streamed the run to a single screen. The public product moved to the ten-city evidence pipeline in [`../../pipeline`](../../pipeline) and the static app in [`../../app`](../../app). The stage table below shows the original scaffold; identity resolution, the collectors, transcription, claim extraction, writing and rendering were implemented afterwards and are covered by `tests/`. Kept for reference; not maintained.
+
 # Starwatch
 
 Starwatch researches a public politician's public social media live. You give it a person, one identifying anchor (official website, party, city or IČO) and a goal; it collects their posts and videos through Apify Actors, transcribes the videos with ElevenLabs Scribe, and writes a goal-specific brief in which every fact links to its source.

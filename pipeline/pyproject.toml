@@ -1,9 +1,11 @@
 [project]
 name = "czlake"
 version = "0.1.0"
-description = "Add your description here"
+description = "Starwatch evidence pipeline: public-source collection with Apify Actors, account-ownership checks and an immutable DuckDB evidence graph with a read-only local API."
+readme = "README.md"
+license = "MIT"
 authors = [
-    { name = "Daniel Vecera" }
+    { name = "Daniel Večeřa" }
 ]
 requires-python = ">=3.12"
 dependencies = [

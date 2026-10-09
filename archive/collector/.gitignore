@@ -1,0 +1,13 @@
+# Credentials stay in the environment or a local .env; only the example is committed.
+.env
+.env.*
+!.env.example
+
+# Run data (SQLite index, run folders, downloaded media) and scratch stay local.
+/data/
+/tmp/
+
+__pycache__/
+.venv/
+.pytest_cache/
+.DS_Store

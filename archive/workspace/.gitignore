@@ -1,0 +1,11 @@
+# Local state, scratch and build output stay out of Git.
+/data/
+/tmp/
+.env
+.env.*
+__pycache__/
+.venv/
+.pytest_cache/
+node_modules/
+dist/
+.DS_Store

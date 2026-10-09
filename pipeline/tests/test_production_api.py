@@ -27,8 +27,10 @@ INGEST = PRODUCTION / 'src/czlake/production_ingest.py' if (PRODUCTION / 'src/cz
 spec = importlib.util.spec_from_file_location('production_api', MODULE)
 api = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(api)
-SCRATCH = HERE.parent / 'test-scratch'
-SCRATCH.mkdir(exist_ok=True)
+SCRATCH = HERE.parent / 'tmp/tests/production-api'
+SCRATCH.mkdir(parents=True, exist_ok=True)
+# Fixture source files live under SCRATCH; confine retained-source reads there, whatever the checkout path.
+api.PROJECT_ROOT = SCRATCH
 AT = '2026-10-09T02:00:00+00:00'
 TEXT = 'Bydlení 🏘️ potřebuje opravy.'
 

@@ -31,7 +31,7 @@ AT = '2026-10-09T02:00:00+00:00'
 TEXT = 'Bydlení 🏘️ potřebuje opravy.'
 NAME = 'Same Name'
 WEB_TEXT = NAME + ' writes about repairs. 🏡'
-SCRATCH = ROOT / 'tmp/production/native/topic_graph/test-scratch'
+SCRATCH = HERE.parent / 'tmp/tests/topic-graph'
 
 
 def constant(path, name):
