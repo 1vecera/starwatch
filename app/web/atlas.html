@@ -186,6 +186,7 @@ body{overflow:hidden;background:var(--space)}
 .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}.acts a{text-decoration:none}
 .clm{margin:6px 0;padding:7px 10px;background:var(--sunken);border-radius:6px;font-size:13px;line-height:1.4}
 .note{font-size:12px;color:var(--label3);margin-top:8px;line-height:1.45}
+.ctxp{margin-top:18px;padding-top:14px;border-top:1px solid var(--hairline)}
 .agrid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:8px}
 .agrid .th{position:relative;aspect-ratio:1}
 .agrid .th:first-child{grid-column:span 2;grid-row:span 2}
@@ -231,7 +232,7 @@ body{overflow:hidden;background:var(--space)}
     <section><div class="sh"><span class="t-cap">Rank by</span></div><div class="seg" id="fRank"></div><div class="rnote" id="subtitle"></div>
       <div class="frow"><div class="seg" id="fWin"></div></div>
       <div class="frow"><span id="fPlat" style="display:contents"></span><button id="fBare" hidden></button></div></section>
-    <section id="partyS"><div class="sh"><span class="t-cap">Party or list</span><span class="u" id="partyU"></span></div><button class="swp-trigger" id="pFind" aria-haspopup="dialog"></button><div id="partyOn"></div></section>
+    <section id="partyS"><div class="sh"><span class="t-cap">Party or list</span><span class="u" id="partyU"></span></div><button class="swk-trigger" id="pFind" aria-haspopup="dialog"></button><div id="partyOn"></div></section>
     <section id="picker"><div class="sh"><span class="t-cap">City councils</span><span class="u" id="pickU"></span></div><div id="clist"></div></section>
     <section id="topicS" hidden><div class="sh"><span class="t-cap">Topics</span><span class="u" id="topicU"></span></div><div class="topics" id="topics"></div><div class="rnote" id="topicN"></div></section>
     <section id="candS" hidden><div class="sh"><span class="t-cap">Top candidates</span><span class="u" id="candU"></span></div><button class="bigc" id="bigc" hidden></button><div id="topc"></div></section>
@@ -251,6 +252,9 @@ body{overflow:hidden;background:var(--space)}
 <script src="mock.js"></script>
 <script src="sw-real.js"></script>
 <script src="sw-picker.js"></script>
+<script src="data/programs.js"></script>
+<script src="data/articles.js"></script>
+<script src="sw-panels.js"></script>
 <script src="geo/cz.js"></script>
 <script src="geo/cz-border.js"></script>
 <script src="vendor/maplibre-gl-4.7.1.js"></script>
@@ -552,6 +556,9 @@ function inspCity(){
   <div class="k"><span>${tn?'Top posts on '+esc(tn):'Top posts'}</span><span class="x">by ${esc(S.rank==='posts'?'reach':U().long)}</span></div>${ids.length?topGrid(ids,9):'<div class="note">No posts in the current filter.</div>'}
   ${cc.length?`<div class="k"><span>${tn?'Who posts about it':'Biggest candidates'}</span><span class="x">by ${esc(U().long)}</span></div><div class="plist">${cc.slice(0,5).map(({C,v})=>`<button data-k="${C.i}">${avatar(C,col(lists[C.list]))}<b>${esc(C.name)} <small>${esc(lists[C.list].short)}</small></b><span>${mv(v)}</span></button>`).join('')}</div>`:''}
   <div class="note">${fmtN(c.n)} registered candidates on ${fmtN(c.L)} lists. Party islands are arranged by rank around the town, not by address.</div>`]}
+const P_=window.SWPanels;
+const allOf=L=>[...L.assets,...L.cands.flatMap(k=>cands[k].assets)];
+const ctx=(html,cls)=>html?`<div class="ctxp${cls?' '+cls:''}">${html}</div>`:'';
 function inspList(L){const ids=listAssets(L).sort(byT);const pp=listPeople(L);
   const row=({C,v})=>{const p=C.pref2022;return `<button data-k="${C.i}">${avatar(C,col(L))}<b>#${C.k} ${esc(C.name)}${p&&p.votes!=null?` <small>2022: ${fmtN(p.votes)} pref.${p.elected?' · elected':''}</small>`:''}</b><span>${v>0?mv(v):'—'}</span></button>`};
   return ['Party list · '+cities[L.city].name,`<h2>${logoSrc(L)?`<img class="plogo" src="${esc(logoSrc(L))}" alt="">`:''}${esc(L.name)}</h2>
@@ -559,11 +566,16 @@ function inspList(L){const ids=listAssets(L).sort(byT);const pp=listPeople(L);
   <div class="acts" style="margin-top:12px"><button class="pill primary" data-spot="list:${L.i}">Open in Spotlight</button><button class="pill" data-go="pulse.html?list=${L.i}">Compare in Pulse</button></div>
   ${ids.length?hero(ids):'<div class="note">No verified posts from this list yet; the people and the 2022 result are below.</div>'}
   ${ids.length?`<div class="k"><span>Top posts</span><span class="x">by ${esc(S.rank==='posts'?'reach':U().long)}</span></div>${topGrid(ids,12)}`:''}
+  ${P_?ctx(P_.topicMix(allOf(L),{attr:'data-t',active:S.topic,max:6,emptyHidden:true})):''}
+  ${P_?ctx(P_.programs(L.i,{attr:'data-t'})):''}
+  ${P_?ctx(P_.news({list:L.i},{max:4})):''}
   ${pp.length?`<div class="k"><span>Candidates · ${fmtN(L.size||pp.length)}</span><span class="x">by ${esc(U().long)}, then 2022 votes</span></div><div class="plist">${pp.slice(0,15).map(row).join('')}</div>${pp.length>15?`<button class="pill" style="margin-top:8px" data-spot="list:${L.i}">All ${fmtN(pp.length)} in Spotlight</button>`:''}`:''}`]}
 function inspCand(C){const L=lists[C.list];const ids=cvis(C).sort(byT);const p=C.pref2022;
   return [`Candidate #${C.k} · ${L.name}`,`<h2>${avatar(C,col(L)).replace('style="--gc:','style="width:44px;height:44px;font-size:15px;--gc:')}${esc(C.name)}</h2>
   ${hero(ids)}
   ${ids.length?`<div class="k"><span>Top posts</span><span class="x">by ${esc(S.rank==='posts'?'reach':U().long)}</span></div>${topGrid(ids,9)}`:''}
+  ${P_?ctx(P_.topicMix(C.assets,{attr:'data-t',active:S.topic,max:6,emptyHidden:true})):''}
+  ${P_?ctx(P_.news({cand:C.i},{max:4})):''}
   ${kv([['List',`<button class="lnk" data-l="${L.i}">${esc(L.name)}</button>`],['City',esc(cities[C.city].name)],...(p&&p.votes!=null?[['2022 preference votes',`${fmtN(p.votes)}${p.rank_in_list!=null?`<small>#${p.rank_in_list} on the list${p.elected?' · elected':''}</small>`:''}`]]:[]),...(REAL&&C.accounts.length?[['Verified accounts',C.accounts.map(a=>esc(a.platform)+' @'+esc(a.handle||'')).join(', ')]]:[]),...(C.folKnown?[['Followers (snapshot)',fmtN(C.fol)]]:[]),...(C.about.length?[['Posts about them',fmtN(C.about.length)]]:[])])}
   ${C.photo_source?`<div class="note">Portrait: <a href="${esc(C.photo_source)}" target="_blank" rel="noopener">source ↗</a></div>`:''}
   <div class="acts"><button class="pill primary" data-spot="cand:${C.i}">Open in Spotlight</button><button class="pill" data-go="pulse.html?cand=${C.i}">Compare in Pulse</button><button class="pill" data-go="radar.html?cand=${C.i}">Watch on Radar</button></div>`]}
