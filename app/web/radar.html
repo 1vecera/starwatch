@@ -131,20 +131,6 @@ html,body{overflow:hidden;background:var(--space)}
 .why p{font-size:12px!important}
 .bars{display:grid;gap:7px}.bar{display:grid;grid-template-columns:90px 1fr 44px;gap:8px;align-items:center;font-size:12px;color:var(--label2)}.bar .tr{height:6px;background:var(--sunken);overflow:hidden;border-radius:1px}.bar .tr i{display:block;height:100%;background:var(--label2)!important}.bar b{text-align:right;color:var(--label);font-weight:600;font-variant-numeric:tabular-nums}
 .obs{display:flex;justify-content:space-between;gap:12px;margin-top:12px;border-top:1px solid var(--hairline);padding-top:10px}.obs div{flex:1;font-size:11px;color:var(--label2);line-height:1.5}.obs b{display:block;color:var(--label);font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}.obs div:last-child{text-align:right}
-.pa{margin-top:16px;padding:14px;border-radius:10px;background:var(--surface);border:1px solid var(--hairline-strong)}
-.pa-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.pa-h .k{font-size:14px;font-weight:650;display:flex;align-items:center;gap:7px;color:var(--label)}.pa-h .k svg{color:var(--brand)}
-.pa-h .dr{margin-left:auto;font-size:11px;font-weight:600;color:var(--label2);padding:2px 6px;border:1px dashed var(--hairline-strong);border-radius:4px}
-.pa-sub{font-size:12px;color:var(--label2);margin:6px 0 12px;line-height:1.5}.pa .seg{display:flex;width:100%}.pa .seg button{flex:1}
-.draft{margin-top:10px;min-height:96px;padding:12px 13px;border-radius:8px;background:var(--sunken);font-size:13px;line-height:1.6;color:var(--label);white-space:pre-wrap;overflow-wrap:anywhere}
-.draft[contenteditable=true]{outline:2px solid var(--brand);background:var(--surface)}.draft .ph{color:var(--brand);background:var(--brand-soft);border-radius:3px;padding:0 2px}
-.draft::before{content:"Czech draft";display:block;font:650 12px var(--font);letter-spacing:0;color:var(--label2);margin-bottom:4px}
-.thinking{display:flex;align-items:center;gap:7px;color:var(--label2);font-size:12px}.thinking i,.caret{display:none}.shimmer{color:var(--label2)}
-.gloss{margin-top:8px;padding:0 13px;font-size:12px;line-height:1.55;color:var(--label2);display:none}.gloss.on{display:block}.gloss b{display:block;font-size:12px;font-weight:650;letter-spacing:0;color:var(--label2);margin-bottom:3px}
-.ev{margin-top:14px;border-top:1px solid var(--hairline);padding-top:10px}.ev .l{font-size:12px;font-weight:650;letter-spacing:0;text-transform:none;color:var(--label2);margin-bottom:4px}
-.evr{display:grid;grid-template-columns:18px 1fr;gap:6px;align-items:start;padding:5px 0;font-size:12px;line-height:1.5;color:var(--label2);overflow-wrap:anywhere}.evr .n{font:500 11px var(--mono);color:var(--brand);padding-top:2px}.evr b{color:var(--label);font-weight:600}.evr .source-link{font-size:12px;margin-top:0}
-.acts{display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:7px;margin-top:12px}.acts .pill{min-width:0;height:34px;justify-content:center;font-size:12.5px;padding:0 11px;gap:6px}.acts svg{width:14px;height:14px;flex:none}.pill:disabled{opacity:.45;cursor:default}
-.guard{display:flex;gap:8px;margin-top:12px;font-size:11px;line-height:1.5;color:var(--label2)}.guard svg,.none svg{flex:none;margin-top:1px}
-.none{display:flex;gap:10px;align-items:flex-start;font-size:12px;line-height:1.5;color:var(--label2)}.pa.empty{border-style:dashed;border-color:var(--hairline-strong)}
 .sh-foot{display:flex;gap:8px;margin-top:16px}.sh-foot .pill{flex:1;justify-content:center;height:34px;font-size:12.5px}
 .lock{position:absolute;inset:0;z-index:50;background:var(--space);overflow:hidden}.lock.gone{display:none}.lock .lk{position:absolute;top:36px;left:0;right:0;text-align:center}.lock .lk>svg,.lock .bigstar,.lock .lw,.lock .qb{display:none}.lock .date{font-size:13px;color:var(--label2)}.lock .clock{font-size:36px;font-weight:600;line-height:1.5;font-variant-numeric:tabular-nums}
 .lock .stack{position:absolute;left:14px;right:14px;top:150px;display:grid;gap:10px}.ln{display:grid;grid-template-columns:24px 1fr;gap:9px;padding:12px;border-radius:10px;background:var(--surface);border:1px solid var(--hairline);cursor:pointer}.ln .app-ico{color:var(--brand)}.ln .h{display:flex;justify-content:space-between;gap:8px;font-size:12px;font-weight:600}.ln .h em{font-style:normal;font-size:11px;color:var(--label2);font-weight:400}.ln p{font-size:12px;line-height:1.5;color:var(--label2);margin-top:4px}.ln .pr{display:inline-flex;gap:5px;margin-top:6px;font-size:11px;color:var(--brand);font-weight:600}.lock .swipe{position:absolute;bottom:30px;left:0;right:0;text-align:center;font-size:12px;color:var(--label2)}
@@ -240,7 +226,7 @@ html,body{background:#EEF2F6}
 .al.nothumb{grid-template-columns:minmax(0,1fr)}
 .bare{width:calc(100% - 36px);margin:10px 18px 0;border-style:solid;border-color:var(--pane-edge);background:rgba(255,255,255,.5);border-radius:9px}
 .endnote{margin:18px 18px 0;padding:12px 0 0;border-top:1px solid rgba(15,23,42,.07)}
-/* sheet: the proposed answer is the hero */
+/* sheet: the source post is the hero */
 .scrim{background:rgba(15,23,42,.16);transition:opacity .35s var(--ease)}
 .app{transition:transform .46s var(--ease),filter .46s var(--ease)}.app.behind{transform:scale(.965) translateY(4px);filter:saturate(.85);border-radius:16px}
 #scr #sheet{top:12px;border-radius:18px 18px 0 0;background:rgba(255,255,255,.94)!important;backdrop-filter:blur(22px) saturate(1.2)!important;-webkit-backdrop-filter:blur(22px) saturate(1.2)!important;border:0!important;box-shadow:0 -1px 0 rgba(15,23,42,.06),0 -24px 48px -28px rgba(15,23,42,.4)!important;transition:transform .5s cubic-bezier(.2,.9,.22,1)}
@@ -252,17 +238,6 @@ html,body{background:#EEF2F6}
 .box{margin-top:18px;padding-top:16px;border-top:1px solid rgba(15,23,42,.07)}
 .asset-player{border-radius:12px;max-height:320px}
 .mthumb{border-radius:10px}
-.pa{margin-top:20px;padding:16px;border-radius:16px;background:linear-gradient(180deg,rgba(227,241,240,.75) 0,rgba(255,255,255,.95) 120px);border:1px solid rgba(14,110,107,.22);box-shadow:0 12px 30px -22px rgba(14,110,107,.45)}
-.pa-h .k{font:650 16px var(--display);letter-spacing:-.01em}
-.pa-h .dr{background:rgba(255,255,255,.8)}
-.pa .seg{background:rgba(255,255,255,.7)}
-.draft{position:relative;margin-top:12px;padding:14px 16px 14px 18px;background:#fff;border:1px solid rgba(15,23,42,.08);border-radius:12px;font-size:13.5px;line-height:1.68;box-shadow:0 1px 2px rgba(15,23,42,.04)}
-.draft.in{animation:draftIn .45s var(--ease) both}@keyframes draftIn{from{opacity:.15;transform:translateY(4px)}to{opacity:1;transform:none}}
-.draft[contenteditable=true]{outline:2px solid var(--brand);outline-offset:1px}
-.gloss{margin-top:10px;padding:0 4px 0 18px;transition:opacity .4s var(--ease)}.gloss b{letter-spacing:0}
-.ev{margin-top:16px}.evr{grid-template-columns:22px 1fr;gap:8px;padding:6px 0}
-.evr .n{display:grid;place-items:center;width:18px;height:18px;padding:0;border-radius:50%;background:var(--brand-soft);color:var(--brand);font-size:10.5px;transition:background .3s,color .3s}.evr.lit .n{background:var(--brand);color:#fff}
-.acts .pill{height:36px;border-radius:10px}
 .sh-foot .pill{height:36px;border-radius:10px}
 .banner{background:rgba(255,255,255,.9);backdrop-filter:var(--pane-blur);-webkit-backdrop-filter:var(--pane-blur);border-color:var(--pane-edge);border-radius:14px;box-shadow:var(--pane-shadow);transition:transform .45s cubic-bezier(.2,.9,.22,1)}
 .lock .ln{opacity:0;transform:translateY(-12px) scale(.98);transition:opacity .45s var(--ease),transform .55s cubic-bezier(.2,.9,.22,1)}.lock .ln.in{opacity:1;transform:none}
@@ -345,8 +320,6 @@ const topicLabel=a=>!a.topics.length?'No topic assigned':a.topics.map(t=>TOP[t][
 const topicNote=a=>{if(!a.topics.length)return 'No topic label';const m=SW.topicMeta(a,a.topics[0]);return m.issue?'Issue reviewed from the caption':m.machine?`Machine label${m.evidence?' · “'+m.evidence+'”':''} · can be wrong`:'Reviewed label'};
 const mlab=(a,t)=>{const m=SW.topicMeta(a,t);return m.machine?`<span class="sw-mlab" title="Machine label${m.evidence?` · “${esc(m.evidence)}”`:''}">machine</span>`:''};
 const claimNote=c=>c.status==='admitted'?'Admitted excerpt':c.status==='reviewed_pending_promotion'?'Pending promotion':c.status?'Pending review':'Review status not supplied';
-const sourceQuote=a=>a&&(a.claims.find(c=>c.quote)?.quote||rawAssets.get(a.id)?.text||(a.cap==='(no caption)'?'':a.cap)||'').trim();
-const draftable=x=>x.type!=='snap'&&(!REAL||!!sourceQuote(x.a));
 const LOADED=new Set();
 const preview=(a,compact=false)=>a.img?`<img src="${esc(a.img)}" alt="Preview from ${esc(platN(a))} source" decoding="async"${LOADED.has(a.img)?'':` class="ld" onload="this.classList.remove('ld');this.parentNode.classList.remove('sk');LOADED.add(this.getAttribute('src'))" onerror="this.parentNode.classList.remove('sk')"`}>`:mediaURL(a)?`<video class="sw-vthumb${LOADED.has(mediaURL(a))?'':' ld'}" src="${esc(mediaURL(a))}#t=0.5" preload="metadata" muted playsinline aria-hidden="true" onloadeddata="this.classList.remove('ld');this.parentNode.classList.remove('sk');LOADED.add(this.getAttribute('src').split('#')[0])" onerror="this.parentNode.classList.remove('sk')"></video>`:`<div class="preview-empty" aria-label="${REAL?'Preview unavailable':'Simulated item; no media supplied'}">${compact?(REAL?'—':'SIM'):(REAL?'Preview unavailable':'Simulation · no media')}</div>`;
 const mediaURL=a=>{
@@ -483,64 +456,6 @@ function body(x){const a=x.a,e=x.e;switch(x.type){
   case 'video':case 'post':return `“${a.cap}”`;
   case 'topic':return `${Math.round(x.ts.sh0*100)}% of city-wide response in 24 h vs ${Math.round(x.ts.sh30*100)}% over 30 days · top-10 topic #${x.ts.rank}.`;
   case 'snap':return REAL?`${fmtN(x.account.followers)} followers · @${x.account.handle} · ${dateText(x.account.followers_observed_at)}. One retained snapshot; no growth claimed.`:`${fmtN(e.fol)} followers across tracked profiles. First observation, so no change is claimed.`}}
-function kindLbl(x){return !draftable(x)?null:REAL?'Review draft':x.type==='news'?'Proposed statement':x.type==='spike'&&x.e.me?'Proposed reply':'Proposed post idea'}
-
-/* ================= proposed answers (templated, grounded, placeholders = you fill) ================= */
-function draftKind(x){if(x.type==='news')return 'statement';if(x.type==='spike'&&x.e.me)return 'reply';if(x.type==='topic')return 'surge';return 'idea'}
-function drafts(x){
-  if(REAL){
-    const a=x.a,text=sourceQuote(a);
-    const quote=text.length>220?text.slice(0,217)+'…':text,date=dateText(a.published_at),name=x.e.name,url=a.url||'[odkaz na zdroj]';
-    return {label:'Prepared template · Czech with an English gloss · verify before using',
-      factual:[`Veřejný příspěvek ${name} (${date}) uvádí: „${quote}“ Zdroj: ${url}. Jde o citaci zdroje, nikoli nezávislé ověření tvrzení. [Doplňte ověřenou odpověď]. [odkaz na program]`,
-        `The public post by ${name} (${date}) states: “${quote}” Source: ${url}. This is a source quotation, not independent verification. [Add a verified response]. [programme link]`],
-      warm:[`Děkuji za tento veřejný podnět. Příspěvek ${name} (${date}) uvádí: „${quote}“ Zdroj: ${url}. [Doplňte ověřenou odpověď a příslušný odkaz].`,
-        `Thank you for this public contribution. The post by ${name} (${date}) states: “${quote}” Source: ${url}. [Add a verified response and the relevant link].`],
-      brief:[`Citace z příspěvku ${name} (${date}): „${quote}“ Zdroj: ${url}. [ověřená odpověď]`,
-        `Quotation from the post by ${name} (${date}): “${quote}” Source: ${url}. [verified response]`]};
-  }
-  const ti=x.type==='topic'?x.ts.t:(x.a?topicOf(x.a):null);
-  const t=ti==null?'dění ve městě':TOP[ti][1], en=ti==null?'city affairs':TOP[ti][0].toLowerCase(), T=t[0].toUpperCase()+t.slice(1), EN=en[0].toUpperCase()+en.slice(1);
-  const ra=YOU.fem?'ráda':'rád', a_=YOU.fem?'a':'';
-  const o=x.a&&x.a.outlet, rr=(x.ratio||1).toFixed(1);
-  const K={
-   reply:{label:'Reply comment · under your own '+(x.a?platN(x.a)+' '+kindN(x.a):'post'),
-     factual:[`Děkuji za ${fmtN(x.a?x.a.comments:0)} komentářů k tématu ${t}. Nejčastější otázky shrnu v jednom příspěvku [kdy]. Konkrétní návrh najdete v programu: [odkaz na program].`,`Thank you for the ${fmtN(x.a?x.a.comments:0)} comments on ${en}. I'll answer the most common questions in one post [when]. The concrete proposal is in our programme: [programme link].`],
-     warm:[`Tolik reakcí jsem nečekal${a_}, děkuji! Je vidět, že vám téma ${t} není jedno. Čtu všechny komentáře a na ty nejčastější odpovím osobně [kdy].`,`I didn't expect so many reactions, thank you! Clearly ${en} matters to you. I'm reading every comment and will answer the most common ones personally [when].`],
-     brief:[`Díky za reakce! Odpovědi na nejčastější dotazy k tématu ${t}: [odkaz].`,`Thanks for the reactions! Answers to the most common questions on ${en}: [link].`]},
-   statement:{label:'Short statement · on the article',
-     factual:[`Děkuji redakci ${o} za článek k tématu ${t}. Pro úplnost doplňuji náš konkrétní návrh: [odkaz na program]. Na dotazy ${ra} odpovím.`,`Thank you to ${o} for the article on ${en}. For completeness, here is our concrete proposal: [programme link]. Happy to answer questions.`],
-     warm:[`Jsem ${ra}, že se o tématu ${t} píše. Týká se každého z nás. Pokud máte otázky, napište mi, odpovídám osobně.`,`I'm glad ${en} is being written about. It concerns all of us. If you have questions, message me; I answer personally.`],
-     brief:[`Náš návrh k tématu ${t}, o kterém dnes píše ${o}: [odkaz].`,`Our proposal on ${en}, which ${o} writes about today: [link].`]},
-   surge:{label:'Post idea · join the topic',
-     factual:[`Téma ${t} dnes ve městě ${P.name} přitahuje ${rr.replace('.',',')}× víc pozornosti než obvykle. Co navrhujeme my: [3 body z programu]. Ptejte se v komentářích, odpovím do večera.`,`${EN} is drawing ${rr}× its usual attention in ${P.name} today. What we propose: [3 points from the programme]. Ask in the comments, I'll reply by tonight.`],
-     warm:[`Vidím, že vás téma ${t} teď hodně zajímá. Mě taky. Napište mi, co vás v tom trápí nejvíc, a pojďme to probrat osobně [kde a kdy].`,`I can see ${en} matters a lot to you right now. To me too. Tell me what bothers you most, and let's talk it through in person [where and when].`],
-     brief:[`Téma ${t} hýbe městem ${P.name}. Náš plán ve třech bodech: [odkaz]`,`${EN} is moving ${P.name}. Our plan in three points: [link]`]},
-   idea:{label:'Post idea · on the topic, not the person',
-     factual:[`K tématu ${t} máme vlastní návrh: [jedna věta z programu]. Podrobnosti a čísla najdete tady: [odkaz na program].`,`On ${en}, we have our own proposal: [one sentence from the programme]. Details and figures here: [programme link].`],
-     warm:[`O tématu ${t} se teď ve městě ${P.name} hodně mluví a je to dobře. Chci slyšet i vás: co by vám ve vaší čtvrti pomohlo nejvíc? Napište do komentářů.`,`People in ${P.name} are talking about ${en} right now, and that's good. I want to hear from you too: what would help most in your neighbourhood? Tell me in the comments.`],
-     brief:[`${T}: náš návrh v jedné větě → [odkaz]`,`${EN}: our proposal in one sentence → [link]`]}};
-  return K[draftKind(x)]}
-function evidence(x){const a=x.a,e=x.e,L=[];
-  if(REAL){
-    L.push(`<b>${esc(e.name)}</b> · ${platN(a)} ${kindN(a)} · published ${esc(dateText(a.published_at))} ${sourceLink(a.url)}`);
-    L.push(`Observed ${esc(dateText(a.observed_at))}${METRICS.filter(([k])=>reported(a,k)).map(([k,l])=>` · ${l.toLowerCase()} ${fmt(a[k])}`).join('')}`);
-    if(a.topics.length)L.push(`Topics: <b>${esc(topicLabel(a))}</b> · ${esc(topicNote(a))}`);
-    if(x.type==='spike')L.push(`Median ${fmt(x.median)} ${responseLabel} across ${x.baseline.length} retained same-platform/format posts. <span class="bl-links">Baseline posts ${x.baseline.map((b,k)=>{try{const u=new URL(b.url);return ['http:','https:'].includes(u.protocol)?`<a href="${esc(u.href)}" target="_blank" rel="noopener noreferrer" aria-label="Baseline source ${k+1}">${k+1}</a>`:''}catch(e){return ''}}).join('')}</span>`);
-    L.push(`Programme facts are not supplied; <b>[odkaz na program]</b> stays a placeholder. The source's statements are not independently verified.`);
-    return L;
-  }
-  if(x.type==='topic'){L.push(`<b>${TOP[x.ts.t][0]}</b> · ${fmt(x.ts.last)} interactions city-wide in 24 h (${Math.round(x.ts.sh0*100)}% share)`);L.push(`30-day share <b>${Math.round(x.ts.sh30*100)}%</b> across ${fmtN(P.assets.length)} ${esc(P.name)} items`);
-    if(a)L.push(`Top item: <b>${esc(SW.ownerName(a))}</b> · ${platN(a)} ${kindN(a)} · ${fmt(a.inter)} interactions`)}
-  else{L.push(`<b>${esc(x.type==='news'?a.outlet:SW.ownerName(a))}</b> · ${platN(a)} ${x.type==='news'?'article':kindN(a)} · ${whenLong(a.age)} · ${fmt(a.inter)} interactions`);
-    if(x.type==='spike')L.push(`Baseline: median <b>${fmt(e.median)}</b> over ${e.created.length} items, 30 days`);
-    else if(x.type==='news')L.push(`Headline text only; no claim beyond what was published`);
-    else L.push(`Topic tag: <b>${topicOf(a)==null?'unclassified':TOP[topicOf(a)][0]}</b> (classifier, observed text)`)}
-  const ti=x.type==='topic'?x.ts.t:(a?topicOf(a):null);
-  const mine=ti==null?null:YOU.created.map(i=>assets[i]).filter(z=>z.topics.includes(ti)&&z!==a).sort((p,q)=>p.age-q.age)[0];
-  if(mine)L.push(`Your latest on ${TOP[ti][0].toLowerCase()}: ${platN(mine)} · ${whenLong(mine.age).replace('Today ','today ')} · ${fmt(mine.inter)} interactions`);
-  else L.push(`Your programme text: <b>not in Starwatch</b>, so it stays a placeholder`);
-  return L}
 
 /* ================= render: feed ================= */
 let filt='all',chip=null,platform='all',order='reach',showBare=false,revealed=false,ARRIVING=null;
@@ -560,7 +475,7 @@ function card(x){const a=x.a,e=x.e,tier=tierOf.get(x)||'';
   const meta=[];if(x.type==='spike')meta.push(`<b>${x.ratio.toFixed(1)}× ${REAL?'sample median':'median'}</b>`);if(x.type==='topic')meta.push(`<b>${x.ratio.toFixed(1)}× usual share</b>`);
   if(rt&&tier!=='lead')meta.push(`<b>${rt}</b>`);if(a)meta.push(esc(platN(a)));
   if(REAL&&a&&a.topics.length)meta.push(esc(TOP[a.topics[0]][0])+mlab(a,a.topics[0]));
-  meta.push(kindLbl(x)?`<span class="act">${starSvg(10)} ${kindLbl(x)}</span>`:`<span class="act base">${x.type==='snap'?'Dated count · no change inferred':'Source text unavailable · inspect only'}</span>`);
+  if(x.type==='snap')meta.push('<span class="act base">Dated count · no change inferred</span>');
   return `<button class="al${tier?' '+tier:''}${a&&!hasPreview(x)?' nothumb':''}${unread.has(x.id)?' unread':''}${x===ARRIVING?' arrive':''}" data-id="${x.id}">${lead}<span class="al-b"><span class="top"><span class="ty${x.type==='snap'?' base':''}">${TY[x.type].n}</span><span class="tm">${rel(x.age)}</span></span>
     <span class="who">${who}</span><span class="bd">${esc(body(x))}</span><span class="ft">${meta.join('<i>·</i>')}</span></span></button>`}
 function renderFeed(fresh){const sc=$('#scroll');const st=sc.scrollTop;
@@ -614,7 +529,7 @@ function cityMenu(btn){let m=$('#cmenu');if(m){m.remove();btn.setAttribute('aria
   addEventListener('pointerdown',off,true);addEventListener('keydown',off,true)}
 
 /* ================= render: sheet ================= */
-let cur=null,tone='factual',streamTok=0;
+let cur=null;
 function whyHtml(x){const a=x.a,e=x.e;
   if(REAL){
     if(x.type==='snap')return `<div class="box why"><h4>What is observed <em>single account snapshot</em></h4><div class="ratio"><b>${fmtN(x.account.followers)}</b><span>followers on ${esc(x.account.platform)} · @${esc(x.account.handle)}</span></div><div class="src">Observed ${esc(dateText(x.account.followers_observed_at))}</div>${sourceLink(x.account.url,'Open verified account')}<p style="font-size:12.5px;color:var(--label2);line-height:1.5;margin-top:12px">The export retains one dated count for this account. Growth, decline and local audience are unknown. No next collection is scheduled here.</p></div>`;
@@ -644,44 +559,22 @@ function mediaHtml(x){const a=x.a;if(!a)return '';const w=100,h=Math.round(Math.
    ${REAL?`<div class="src">Metrics observed ${esc(dateText(a.observed_at))}</div>`:''}
    ${(M=>M.length?`<div class="mgrid" style="grid-template-columns:repeat(${M.length},minmax(0,1fr))">${M.map(([k,l])=>`<div><b>${fmt(a[k])}</b><span>${l}</span></div>`).join('')}</div>`:'')(METRICS.filter(([k])=>reported(a,k)))}</div></div>
    ${REAL?`${a.topics.length?`<div class="evidence-label">${esc(topicLabel(a))}</div><span class="evidence-label">${esc(topicNote(a))}</span>`:''}${a.claims.length?`<div class="src">Source-statement excerpts · truth not independently verified</div>${a.claims.map(c=>`<blockquote class="claim-quote">“${esc(c.quote||c.text||'')}”<span class="evidence-label">${esc(claimNote(c))}</span></blockquote>`).join('')}`:''}`:''}</div>`}
-function paHtml(x){
-  if(!draftable(x))return `<div class="pa empty"><div class="none">${starSvg(18,'currentColor')}<div><b style="color:var(--label)">No answer proposed.</b><br>${x.type==='snap'?'A single follower count does not establish change.':'No source text or reviewed quotation is supplied for this post.'} Inspect the source before preparing a response.</div></div></div>`;
-  const D=drafts(x),ev=evidence(x);
-  return `<div class="pa"><div class="pa-h"><span class="k">${starSvg(16)} Proposed answer</span><span class="dr">Draft · never sent</span></div>
-   <div class="pa-sub">${esc(D.label)}${REAL?' · source quotation stays Czech':''}</div>
-   <div class="seg" id="tone">${[['factual','Factual'],['warm','Warm'],['brief','Brief']].map(([k,l])=>`<button data-t="${k}" class="${tone===k?'on':''}">${l}</button>`).join('')}</div>
-   <div class="draft" id="draft" spellcheck="false"></div>
-   <div class="gloss" id="gloss"></div>
-   <div class="ev"><div class="l">Grounded in</div>${ev.map((s,k)=>`<div class="evr" data-k="${k}"><span class="n">${k+1}</span><span>${s}</span></div>`).join('')}</div>
-   <div class="acts"><button class="pill" id="bEdit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4Z"/></svg><span>Edit</span></button><button class="pill" id="bCopy" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="3"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Copy</button></div>
-   <div class="guard"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v5.5c0 4.6 3.1 8.2 7.5 9.5 4.4-1.3 7.5-4.9 7.5-9.5V6L12 3Z"/></svg><span>For your review. Starwatch never posts on its own. Drafts use only the observed public items above, say nothing about opponents beyond what they published, and never target or profile voters. Placeholders in <span style="border-bottom:1px dashed var(--label2)">[brackets]</span> are yours to fill.</span></div></div>`}
-function openSheet(id,instant){const x=ALERTS.find(z=>z.id===id);if(!x)return;cur=x;tone='factual';unread.delete(id);
+function openSheet(id){const x=ALERTS.find(z=>z.id===id);if(!x)return;cur=x;unread.delete(id);
   const e=x.e;
   $('#shb').innerHTML=`<div class="sh-head" id="shh"><span class="meta"><span class="ty">${TY[x.type].n}</span><em>${rel(x.age)}</em></span><button class="cbtn" id="shx" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 7l10 10M17 7 7 17"/></svg></button></div>
    <div class="sh-title">${esc(head(x))}</div>
    ${e?`<div class="ent">${av(e,36)}<span class="who2"><b>${esc(e.name)}</b><em>${esc(e.kind==='list'?'Party list · '+P.name:e.list.name)}${e.me?(REAL?' · focus':' · you'):''}</em></span></div>`:`<div class="ent">${starSvg(16,'currentColor')}<span class="who2"><b>${esc(P.name)}</b><em>all ${P.L} lists · ${fmtN(P.n)} candidates</em></span></div>`}
-   ${x.a?mediaHtml(x)+paHtml(x)+whyHtml(x):whyHtml(x)+paHtml(x)}
+   ${x.a?mediaHtml(x)+whyHtml(x):whyHtml(x)}
    <div class="sh-foot">${e?`<button class="pill" id="bSpot">Open in Spotlight</button>`:''}<button class="pill" id="bAtlas">${starSvg(13,'currentColor')} Atlas</button><button class="pill" id="bMute">Mute similar</button></div>`;
   $('#shb').scrollTop=0;
   requestAnimationFrame(()=>{const c=$('#shx');if(c)c.focus({preventScroll:true})});
   $('#sheet').classList.add('on');$('#scrim').classList.add('on');$('#app').classList.add('behind');
   $('#shb').querySelectorAll('video').forEach(video=>{const unavailable=()=>{video.hidden=true;video.nextElementSibling.hidden=false};video.addEventListener('error',unavailable);if(video.error)unavailable()});
   $('#shx').onclick=closeSheet;$('#bAtlas').onclick=()=>{location.href=e?`atlas.html?${e.kind==='list'?'list='+e.L.i:'cand='+e.c.i}`:'atlas.html'};const bs=$('#bSpot');if(bs)bs.onclick=()=>window.openSpotlight&&openSpotlight(e.kind==='list'?{type:'list',id:e.L.i}:{type:'cand',id:e.c.i});$('#bMute').onclick=()=>{if(!x.e){toast('City-wide topic has no individual entity to hide');return}enabledWatches.delete(x.e.key);document.querySelectorAll(`[data-watch="${x.e.key}"]`).forEach(b=>{b.classList.remove('on');b.setAttribute('aria-pressed','false')});closeSheet();renderFeed();toast('Entity hidden from this local feed')};
-  if(draftable(x)){$('#tone').onclick=ev=>{const b=ev.target.closest('button');if(!b||b.dataset.t===tone)return;tone=b.dataset.t;$('#tone').querySelectorAll('button').forEach(z=>z.classList.toggle('on',z===b));stream(x,0)};
-    $('#bEdit').onclick=()=>{const d=$('#draft');const on=d.getAttribute('contenteditable')==='true';if(on){d.setAttribute('contenteditable','false');$('#bEdit span').textContent='Edit';toast('Edits kept in this draft')}else{streamTok++;if(!$('#gloss').classList.contains('on'))finishDraft(x);d.setAttribute('contenteditable','true');d.focus();$('#bEdit span').textContent='Done'}};
-    $('#bCopy').onclick=()=>{const txt=$('#draft').innerText.replace(/\s+$/,'');(navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>toast('Copied locally · review before using'),()=>toast('Clipboard unavailable · select the draft to copy'))};
-    stream(x,instant?-1:650)}
   renderFeed()}
-function closeSheet(){$('#shb').querySelectorAll('video').forEach(video=>video.pause());$('#sheet').classList.remove('on');$('#scrim').classList.remove('on');$('#app').classList.remove('behind');$('#sheet').style.transform='';streamTok++;cur=null}
+function closeSheet(){$('#shb').querySelectorAll('video').forEach(video=>video.pause());$('#sheet').classList.remove('on');$('#scrim').classList.remove('on');$('#app').classList.remove('behind');$('#sheet').style.transform='';cur=null}
 $('#scrim').onclick=closeSheet;
-addEventListener('keydown',ev=>{if(ev.key==='Escape'&&cur&&!(ev.target.closest&&ev.target.closest('[contenteditable=true]'))){ev.stopImmediatePropagation();closeSheet()}});
-function segs(s){return s.split(/(\[[^\]]+\])/).filter(Boolean).map(p=>p[0]==='['?{ph:p}:{t:p})}
-function finishDraft(x){const [cs,en]=drafts(x)[tone];const d=$('#draft');d.classList.remove('in');void d.offsetWidth;d.classList.add('in');d.innerHTML=segs(cs).map(s=>s.ph?`<span class="ph">${esc(s.ph)}</span>`:esc(s.t)).join('');showGloss(en)}
-function showGloss(en){const g=$('#gloss');g.innerHTML=`<b>English gloss · not for posting</b>${esc(en)}`;$('#bCopy').disabled=false;requestAnimationFrame(()=>g.classList.add('on'));document.querySelectorAll('.evr').forEach((r,k)=>setTimeout(()=>r.classList.add('lit'),k*160))}
-function stream(x,delay){
-  streamTok++;const draft=$('#draft');if(!draft)return;
-  draft.setAttribute('contenteditable','false');$('#bEdit span').textContent='Edit';finishDraft(x);
-}
+addEventListener('keydown',ev=>{if(ev.key==='Escape'&&cur){ev.stopImmediatePropagation();closeSheet()}});
 // drag the sheet down to dismiss
 (()=>{let y0=null,dy=0;const sh=$('#sheet');
   const down=ev=>{if(!ev.target.closest('#grab,#shh')||ev.target.closest('#shx'))return;y0=ev.clientY;dy=0;sh.classList.add('drag');ev.preventDefault()};
@@ -693,23 +586,23 @@ function stream(x,delay){
 let tT;function toast(m){const t=$('#toast');t.innerHTML=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12.5 4.5 4.5L20 6.5"/></svg>${esc(m)}`;t.classList.add('on');clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('on'),1900)}
 
 /* ================= lock screen + pushes ================= */
-const PUSH=REAL?FEED.filter(draftable).slice(0,2):[FEED.find(x=>x.type==='spike'&&at(x.age).d===0)||FEED.find(x=>x.type==='spike'),FEED.find(x=>x.type==='video')||FEED.find(x=>x.type==='post')].filter(Boolean);
+const PUSH=REAL?FEED.filter(x=>x.type!=='snap'&&x.a).slice(0,2):[FEED.find(x=>x.type==='spike'&&at(x.age).d===0)||FEED.find(x=>x.type==='spike'),FEED.find(x=>x.type==='video')||FEED.find(x=>x.type==='post')].filter(Boolean);
 function pushText(x){const e=x.e,a=x.a;switch(x.type){
   case 'spike':if(REAL)return [`${TY.spike.n} · ${e.name}`,body(x)];return [`${TY.spike.n} · ${e.me?'you':e.name}`,`${e.me?'Your':pron(e)[0].toUpperCase()+pron(e).slice(1)} ${platN(a)} ${kindN(a)} is at ${x.ratio.toFixed(1)}× ${pron(e)} median (${fmt(a.inter)} interactions).`];
   case 'video':case 'post':return [`${TY[x.type].n} · ${e.name}`,`${platN(a)}: “${a.cap.length>70?a.cap.slice(0,68)+'…':a.cap}”`];
   default:return [TY[x.type].n,body(x)]}}
-function lnHtml(x,cls='ln'){const [t,b]=pushText(x);return `<div class="${cls}" data-id="${x.id}"><span class="app-ico">${starSvg(22)}</span><div><div class="h"><span>${esc(t)}</span><em>${x.live?'now':rel(x.age).replace(' ago','')}</em></div><p>${esc(b)}</p><span class="pr">${starSvg(11)} ${kindLbl(x)} ready to review</span></div></div>`}
+function lnHtml(x,cls='ln'){const [t,b]=pushText(x);return `<div class="${cls}" data-id="${x.id}"><span class="app-ico">${starSvg(22)}</span><div><div class="h"><span>${esc(t)}</span><em>${x.live?'now':rel(x.age).replace(' ago','')}</em></div><p>${esc(b)}</p><span class="pr">${starSvg(11)} Open the source post</span></div></div>`}
 function buildLock(){
   $('#lock').innerHTML=`
    <div class="lk"><svg width="14" height="18" viewBox="0 0 14 18" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="8" width="12" height="9" rx="2.5" fill="currentColor" stroke="none"/><path d="M3.5 8V5.5a3.5 3.5 0 0 1 7 0V8"/></svg><div class="date">${esc(dateFmt.format(ASOF))} · ${REAL?'snapshot':'simulation'}</div><div class="clock">${timeFmt.format(ASOF)}</div></div>
    <div class="stack">${PUSH.map(x=>lnHtml(x)).join('')}</div>
    <div class="qb l"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M8 2.5h8v4l-2 3V21H10V9.5l-2-3Z"/></svg></div><div class="qb r"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3.5 8.5a2 2 0 0 1 2-2h2.5l1.5-2h5l1.5 2h2.5a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2Z"/><circle cx="12" cy="13" r="3.5"/></svg></div>
-   <div class="swipe">Tap a notification to open its proposed answer</div>`;
+   <div class="swipe">Tap a notification to open the post</div>`;
   $('#lock').querySelectorAll('.ln').forEach(n=>n.onclick=()=>{unlock();setTimeout(()=>openSheet(+n.dataset.id),380)})}
 let timers=[];const later=(f,ms)=>timers.push(setTimeout(f,ms));
 function unlock(){timers.forEach(clearTimeout);timers=[];$('#lock').classList.add('gone');renderFeed();}
 function island(x,ms=2600){const il=$('#island');il.querySelector('.il').innerHTML=`${starSvg(16)}<span>${TY[x.type].n}</span>`;il.querySelector('.ir').innerHTML=x.type==='spike'?x.ratio.toFixed(1)+'×':`<span style="color:${TY[x.type].g[0]}">${esc(x.e?x.e.short:P.name)}</span>`;il.classList.add('on');setTimeout(()=>il.classList.remove('on'),ms)}
-function banner(x,ms=4800){if(!x)return;const b=$('#banner');const [t,bd]=pushText(x);b.dataset.id=x.id;b.innerHTML=`<span class="app-ico" style="width:24px;display:grid;place-items:center;color:var(--label2)">${starSvg(22)}</span><div><div style="display:flex;justify-content:space-between;font-size:15px;font-weight:650"><span>${esc(t)}</span><em style="font-style:normal;font-size:13px;color:var(--label2);font-weight:500">${REAL?'Snapshot replay':'now'}</em></div><p style="font-size:14px;line-height:1.35;color:var(--label2);margin-top:1px">${esc(bd)}</p><span style="display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-size:12px;font-weight:600">${starSvg(11)} ${kindLbl(x)} ready to review</span></div>`;
+function banner(x,ms=4800){if(!x)return;const b=$('#banner');const [t,bd]=pushText(x);b.dataset.id=x.id;b.innerHTML=`<span class="app-ico" style="width:24px;display:grid;place-items:center;color:var(--label2)">${starSvg(22)}</span><div><div style="display:flex;justify-content:space-between;font-size:15px;font-weight:650"><span>${esc(t)}</span><em style="font-style:normal;font-size:13px;color:var(--label2);font-weight:500">${REAL?'Snapshot replay':'now'}</em></div><p style="font-size:14px;line-height:1.35;color:var(--label2);margin-top:1px">${esc(bd)}</p><span style="display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-size:12px;font-weight:600">${starSvg(11)} Open the source post</span></div>`;
   b.classList.add('on');clearTimeout(b._t);b._t=setTimeout(()=>b.classList.remove('on'),ms)}
 $('#banner').onclick=()=>{const b=$('#banner');b.classList.remove('on');openSheet(+b.dataset.id)};
 let liveIn=false;
@@ -726,15 +619,15 @@ function playDemo(){timers.forEach(clearTimeout);timers=[];closeSheet();liveIn=f
 const shield='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v5.5c0 4.6 3.1 8.2 7.5 9.5 4.4-1.3 7.5-4.9 7.5-9.5V6L12 3Z"/></svg>';
 const ruleRows=R=>R.map(([b,s,st,cls])=>`<div class="rr"><div><b>${b}</b><span>${s}</span></div>${typeof st==='number'?`<button class="tgl ${st?'on':''}" aria-label="${esc(b)}" aria-pressed="${st?'true':'false'}"></button>`:`<span class="tag ${cls||''}">${st}</span>`}</div>`).join('');
 if(REAL)$('#explain').innerHTML=`<div class="kicker">${starSvg(12)} Radar · snapshot replay</div><h1>A watchlist over the snapshot</h1><p>What the people and lists watched in ${esc(P.name)} published in the 48 hours before collection (${esc(SW.snapshot.long)}), with sources and dated metrics. Nothing here updates live. Focus: ${esc(YOU.name)}.</p>
- <div class="cta"><button class="pill primary" id="bTop">${starSvg(12,'currentColor')} Open a review draft</button><button class="pill" id="bReplay">Replay snapshot</button></div>
- <p class="method">${shield}<span><b>Method.</b> Posts from the 48 h before collection are replayed; outliers (≥ 3× the median of 8+ comparable posts) are a sample only. One follower snapshot is a baseline, not a change. Reach is attention, not support. Drafts quote their source and are never sent.</span></p>`;
+ <div class="cta"><button class="pill primary" id="bTop">${starSvg(12,'currentColor')} Open the top post</button><button class="pill" id="bReplay">Replay snapshot</button></div>
+ <p class="method">${shield}<span><b>Method.</b> Posts from the 48 h before collection are replayed; outliers (≥ 3× the median of 8+ comparable posts) are a sample only. One follower snapshot is a baseline, not a change. Reach is attention, not support. Every post opens its public source.</span></p>`;
 else $('#explain').innerHTML=`<div class="kicker">${starSvg(12)} Radar · simulation</div><h1>Observed public activity</h1>
- <p>Pick people and parties in the Atlas. Radar watches their public posts, videos and news, flags observable changes and drafts an answer for you to review.</p>
- <div class="cta"><button class="pill primary" id="bTop">${starSvg(12,'currentColor')} Open a proposed answer</button><button class="pill" id="bReplay">Replay push</button></div>
- <p class="method">${shield}<span><b>Method.</b> Alerts fire at ≥ 3× an entity’s own 30-day median. A first observation is a baseline, not a change. Engagement is attention, not support. Drafts cite their source, need human review and are never sent.</span></p>`;
+ <p>Pick people and parties in the Atlas. Radar watches their public posts, videos and news and flags observable changes, each with its source.</p>
+ <div class="cta"><button class="pill primary" id="bTop">${starSvg(12,'currentColor')} Open the top alert</button><button class="pill" id="bReplay">Replay push</button></div>
+ <p class="method">${shield}<span><b>Method.</b> Alerts fire at ≥ 3× an entity’s own 30-day median. A first observation is a baseline, not a change. Engagement is attention, not support. Every alert links to its source.</span></p>`;
 $('#bReplay').onclick=playDemo;
 $('#bTop').disabled=!PUSH.length;$('#bReplay').disabled=!FEED.length;
-$('#bTop').onclick=()=>{if(!PUSH.length){toast('No actionable source to draft from');return}if(!$('#lock').classList.contains('gone'))unlock();setTimeout(()=>openSheet(PUSH[0].id),$('#lock').classList.contains('gone')?0:380)};
+$('#bTop').onclick=()=>{if(!PUSH.length){toast('No observed posts for this watchlist in the snapshot');return}if(!$('#lock').classList.contains('gone'))unlock();setTimeout(()=>openSheet(PUSH[0].id),$('#lock').classList.contains('gone')?0:380)};
 const rows=WATCH.map(e=>{const n=e.created.length,role=e.me?`<span class="tag you">${REAL?'Focus':'You'}</span>`:e.kind==='list'?'<span class="tag">Party</span>':'<span class="tag">Rival</span>';
   return `<div class="wl-row">${av(e,42)}<div style="min-width:0"><div class="n">${esc(e.name)} ${role}</div>
   <div class="s"><span>${esc(e.kind==='list'?P.name+' · '+e.L.size+' candidates':e.list.name)}</span>${n?`${n} posts${e.median!=null?` · typical ${fmt(e.median)}`:''}`:'No retained posts in 30 days'}</div>${r22(e)}</div><button class="tgl on" data-watch="${e.key}" aria-label="Show ${esc(e.name)} in local feed" aria-pressed="true"></button></div>`}).join('');
@@ -777,12 +670,12 @@ drawBg();sweep();
 /* ================= boot ================= */
 const S=Q.get('state');
 if(S==='feed'){$('#lock').classList.add('gone');renderFeed()}
-else if(S==='sheet'){$('#lock').classList.add('gone');renderFeed();if(PUSH[0])openSheet(PUSH[0].id,Q.has('instant'))}
+else if(S==='sheet'){$('#lock').classList.add('gone');renderFeed();if(PUSH[0])openSheet(PUSH[0].id)}
 else if(S==='lock'){buildLock();renderFeed();$('#lock').querySelectorAll('.ln').forEach(n=>n.classList.add('in'))}
 else if(S==='banner'){$('#lock').classList.add('gone');renderFeed();banner(PUSH[0],60000)}
 else if(REAL){$('#lock').classList.add('gone');renderFeed()}
 else playDemo();
-if(Q.get('sheet')){$('#lock').classList.add('gone');openSheet(+Q.get('sheet'),Q.has('instant'))}
+if(Q.get('sheet')){$('#lock').classList.add('gone');openSheet(+Q.get('sheet'))}
 </script>
 <script src="brand/chrome.js"></script>
 <script src="app.js" data-screen="radar"></script>

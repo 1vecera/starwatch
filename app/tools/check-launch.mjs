@@ -78,6 +78,14 @@ await visit("/spotlight.html?cand=1614", { name: "deep-spotlight-cand", wait: 45
 await visit("/pulse.html?party=ods", { name: "deep-pulse-party", wait: 5000, run: p => p.evaluate(() => ({ ok: /mode=party/.test(location.search) && document.querySelectorAll("#dock .epill").length >= 2 })) });
 await visit("/radar.html?city=2", { name: "deep-radar-city", wait: 4500, run: p => p.evaluate(() => ({ ok: document.querySelector("#cityb").textContent.includes(SW.cities[2].name) })) });
 await visit("/radar.html?city=1&party=stan", { name: "deep-radar-party", wait: 4500, run: p => p.evaluate(() => ({ ok: /STAN|Starost/i.test(document.querySelector("#watch").textContent) })) });
+// Radar is purely observational: no reply drafts anywhere, including inside an opened item
+await visit("/radar.html?city=1", { name: "radar-no-drafts", wait: 4500, run: async p => {
+  const txt = async () => p.evaluate(() => document.body.innerText);
+  const before = await txt(); const al = await p.$(".al"); if (al) { await al.click(); await wait(1200); }
+  const after = await txt(); const els = await p.evaluate(() => document.querySelectorAll("#draft,#tone,#bEdit,#bCopy,.pa,.gloss").length);
+  const re = /\bdrafts?\b|proposed (answer|reply|statement|post idea)|review draft/i;
+  return { ok: !!al && !re.test(before) && !re.test(after) && !els, opened: !!al, draftElements: els };
+} });
 await browser.close();
 console.log(JSON.stringify({ pass: !errors.length, checked: results.length, failures: errors }, null, 1));
 process.exit(errors.length ? 1 : 0);
