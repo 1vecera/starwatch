@@ -267,7 +267,7 @@ const RANKS={reach:{b:'Reach',long:'reach',unit:'reach',phrase:'reach: views whe
   views:{b:'Views',long:'views',unit:'views',phrase:'reported views'},
   eng:{b:'Likes + comments',long:'likes + comments',unit:'likes + comments',phrase:'likes + comments'},
   posts:{b:'Posts',long:'posts',unit:'posts',phrase:'number of verified posts'}};
-const S={city:-1,list:-1,cand:-1,asset:-1,rank:RANKS[q.get('rank')]?q.get('rank'):'reach',win:999,plats:new Set(),topic:-1,bare:false};
+const S={city:-1,list:-1,cand:-1,asset:-1,rank:RANKS[q.get('rank')]?q.get('rank'):'reach',win:999,plats:new Set(),topic:-1,bare:!REAL};
 const U=()=>RANKS[S.rank];
 
 /* ---------- metric and filters ---------- */

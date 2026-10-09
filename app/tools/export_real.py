@@ -1130,6 +1130,22 @@ def export_portraits(raw: Record, records: list[Record], project: Path, director
     return counts
 
 
+def video_duration(path: Path) -> float | None:
+    try:
+        probe = subprocess.run(
+            ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "json", str(path)],
+            capture_output=True,
+            timeout=15,
+            check=True,
+        )
+        value = float(json.loads(probe.stdout)["format"]["duration"])
+        if math.isfinite(value) and value > 0:
+            return value
+    except (OSError, subprocess.SubprocessError, ValueError, KeyError):
+        pass
+    return None
+
+
 def retain_video(resource: Record, project: Path, media: Path) -> Record:
     """Copy hash-bound checkpoint media atomically without modifying producer files."""
     record = {"media_id": resource["media_id"], "asset_id": resource["asset_id"]}
@@ -1138,6 +1154,25 @@ def retain_video(resource: Record, project: Path, media: Path) -> Record:
     if not any(source.is_relative_to(root.resolve()) for root in allowed):
         return {**record, "status": "invalid_source_path"}
     filename = sha256(resource["media_id"].encode())[:24] + ".mp4"
+    existing = media / filename
+    try:
+        if existing.is_file() and existing.stat().st_size == resource["bytes"]:
+            digest = hashlib.sha256()
+            with existing.open("rb") as stream:
+                while chunk := stream.read(1024 * 1024):
+                    digest.update(chunk)
+            if digest.hexdigest() == resource["sha256"] and resource["content_type"] == "video/mp4":
+                return {
+                    **record,
+                    "status": "retained",
+                    "file": filename,
+                    "sha256": resource["sha256"],
+                    "bytes": resource["bytes"],
+                    "video_mime": "video/mp4",
+                    "duration_s": video_duration(existing),
+                }
+    except OSError:
+        pass
     fd, temporary = tempfile.mkstemp(prefix=".video-", dir=media)
     try:
         digest = hashlib.sha256()
@@ -1159,19 +1194,7 @@ def retain_video(resource: Record, project: Path, media: Path) -> Record:
             return {**record, "status": "video_bytes_changed"}
         destination = media / filename
         os.replace(temporary, destination)
-        duration = None
-        try:
-            probe = subprocess.run(
-                ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "json", str(destination)],
-                capture_output=True,
-                timeout=15,
-                check=True,
-            )
-            value = float(json.loads(probe.stdout)["format"]["duration"])
-            if math.isfinite(value) and value > 0:
-                duration = value
-        except (OSError, subprocess.SubprocessError, ValueError, KeyError):
-            pass
+        duration = video_duration(destination)
         return {
             **record,
             "status": "retained",
