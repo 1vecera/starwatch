@@ -20,13 +20,6 @@ kbd{font:500 11px var(--mono);color:var(--label2);padding:1px 5px;border-radius:
 .num{font-variant-numeric:normal}
 .ent .mv{font-variant-numeric:tabular-nums}
 
-/* ---------- provisional chrome (app.js replaces it) ---------- */
-#chrome{position:fixed;z-index:40;top:0;left:0;right:0;height:60px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 16px}
-#chrome .logo{justify-self:start;text-decoration:none;color:var(--label);gap:9px;font-size:15px;font-weight:700;border:0}
-#chrome .right{justify-self:end;display:flex;align-items:center;gap:8px}
-.badge-mock{display:none}
-.av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:650;background:var(--brand-soft);color:var(--brand)}
-#tabbar{display:none}
 
 /* ---------- hero + dock ---------- */
 .hero{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin:0 0 16px}
@@ -307,6 +300,8 @@ footer b{color:var(--label2);font-weight:600}
 .ph p{max-width:66ch}
 
 #fnote{max-width:68ch}
+.tnote{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:6px!important}.tnote span{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--label2)}.tnote i{width:8px;height:8px;border-radius:50%;background:var(--c)}.tnote b{color:var(--label);font-weight:650}
+.tnote2{font-size:12px!important;color:var(--label3)!important}
 
 #dock .seg,#top .seg{padding:3px}
 </style>
@@ -319,21 +314,7 @@ footer b{color:var(--label2);font-weight:600}
 </head>
 <body>
 
-<header id="chrome" class="glass">
-  <a class="logo pill" href="#" aria-label="Starwatch home">
-    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C12.9 7.6 16.4 11.1 24 12C16.4 12.9 12.9 16.4 12 24C11.1 16.4 7.6 12.9 0 12C7.6 11.1 11.1 7.6 12 0Z" fill="#FFD60A"/></svg>
-    <span>Starwatch</span>
-  </a>
-  <nav class="seg tabs" aria-label="Sections">
-    <button>Star Atlas</button><button>Spotlight</button><button class="on" aria-current="page">Pulse</button><button>Radar</button><button>Studio</button>
-  </nav>
-  <div class="right">
-    <button class="pill search" id="gsearch"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span>Search people, lists, posts</span><kbd>⌘K</kbd></button>
-    <span class="badge-mock">MOCK DATA</span>
-    <button class="av" aria-label="Account">DV</button>
-  </div>
-</header>
-<nav id="tabbar" class="seg glass" aria-label="Sections"><button>Atlas</button><button>Spotlight</button><button class="on">Pulse</button><button>Radar</button><button>Studio</button></nav>
+
 
 <main>
   <section class="hero">
@@ -350,7 +331,7 @@ footer b{color:var(--label2);font-weight:600}
     <section id="cum" class="panel"><div class="sk" style="height:470px"></div></section>
     <section id="tops" class="panel"><div class="sk" style="height:640px"></div></section>
   </div>
-  <section id="then" class="panel solo" aria-label="2022 election and observed attention now"><div class="sk" style="height:300px"></div></section>
+  <section id="then" class="panel solo" aria-label="2022 election result and observed attention at collection"><div class="sk" style="height:300px"></div></section>
   <section id="strip" aria-label="Entity metrics"><div class="sk" style="height:200px;margin:0"></div></section>
   <section id="top" class="panel solo"><div class="sk" style="height:820px"></div></section>
   <section id="best" class="panel solo"><div class="sk" style="height:470px"></div></section>
@@ -372,11 +353,15 @@ footer b{color:var(--label2);font-weight:600}
 <script src="data/issue-topics.js"></script>
 <script src="mock.js"></script>
 <script src="sw-real.js" data-min-assets="0"></script>
+<script src="sw-picker.js"></script>
 <script>
 "use strict";
 const {cities,lists,cands,assets,PLAT,TOP,dstr,css,thumb,TODAY}=SW;
 const fmt=v=>SW.fmt(Math.round(v));
-const DAYS=45, CITY=(()=>{const q=new URLSearchParams(location.search);const e=q.has('cand')?SW.cands[+q.get('cand')]:q.has('list')?SW.lists[+q.get('list')]:null;return e?e.city:0})();
+const URLQ=new URLSearchParams(location.search);
+const idsOf=(k,arr)=>(URLQ.get(k)||'').split(',').filter(x=>x!=='').map(Number).filter((v,i,a)=>Number.isInteger(v)&&v>=0&&arr[v]&&a.indexOf(v)===i).slice(0,4);
+const QLISTS=idsOf('lists',SW.lists),QCANDS=idsOf('cands',SW.cands),QPARTY=window.SWPicker?SWPicker.party(URLQ):null;
+const DAYS=45, CITY=(()=>{const q=URLQ;const e=QCANDS.length?SW.cands[QCANDS[0]]:QLISTS.length?SW.lists[QLISTS[0]]:q.has('cand')?SW.cands[+q.get('cand')]:q.has('list')?SW.lists[+q.get('list')]:q.has('city')?{city:+q.get('city')}:null;return e&&SW.cities[e.city]?e.city:0})();
 const METRICS=[['inter','Interactions'],['views','Views'],['likes','Likes'],['comments','Comments']];
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -412,8 +397,9 @@ function defaultsPerson(){
   return [lead,...others].map(c=>c.i)}
 const defaultsParty=()=>praha.lists.slice().sort((a,b)=>sumInter(partyIds(lists[b]))-sumInter(partyIds(lists[a]))).slice(0,4);
 const QL=(()=>{const q=new URLSearchParams(location.search);return !q.has('cand')&&q.has('list')&&SW.lists[+q.get('list')]?+q.get('list'):null})();
-const partySet=()=>{const d=defaultsParty();if(QL==null)return d;return [QL,...d.filter(i=>i!==QL)].slice(0,4)};
-const S={mode:QL!=null?'party':'person',sets:{person:defaultsPerson(),party:partySet()},metric:'inter',norm:false,view:'best',topic:null,media:false};
+const partySet=()=>{if(QPARTY&&QPARTY.lists.length>1)return QPARTY.lists.slice(0,4);if(QLISTS.length>1)return QLISTS;const d=defaultsParty();const first=QLISTS.length?QLISTS[0]:QL;if(first==null)return d;return [first,...d.filter(i=>i!==first)].slice(0,4)};
+const personSet=()=>QCANDS.length>1?QCANDS:defaultsPerson();
+const S={mode:QL!=null||QLISTS.length||QPARTY||URLQ.get('mode')==='party'?'party':'person',sets:{person:personSet(),party:partySet()},metric:'inter',norm:false,view:'best',topic:null,media:false};
 let E=[];
 const val=a=>a[S.metric];
 const nval=a=>{const f=ownerFol(a);return f?a[S.metric]/f*1000:0};
@@ -470,14 +456,21 @@ function renderDock(){
   $('#dock').innerHTML=`<div class="seg" id="modeSeg" role="tablist"><button data-m="person" class="${S.mode==='person'?'on':''}">People</button><button data-m="party" class="${S.mode==='party'?'on':''}">Parties</button></div>
   <span class="vr"></span>
   <div class="ents">${E.map(e=>`<span class="epill" style="--c:${e.col}">${avatar(e,'s26')}${esc(e.name)}<button class="x" data-rm="${e.id}" aria-label="Remove ${esc(e.name)}" ${E.length<=2?'disabled title="Compare at least two"':''}>×</button></span>`).join('')}
-  ${E.length<max?`<button class="pill add" id="addBtn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add ${S.mode==='person'?'person':'party'}<kbd>/</kbd></button>`:''}</div>
+  ${E.length<max?`<button class="pill add" id="addBtn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add ${S.mode==='person'?'person':'party or list'}<kbd>/</kbd></button>`:''}</div>
   <div class="seg" id="metSeg">${METRICS.map(([k,l])=>`<button data-k="${k}" class="${S.metric===k?'on':''}">${l}</button>`).join('')}</div>`;
 }
 $('#dock').addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;
   if(b.dataset.m&&b.dataset.m!==S.mode){S.mode=b.dataset.m;S.topic=null;render()}
   else if(b.dataset.k&&b.dataset.k!==S.metric){S.metric=b.dataset.k;render(true)}
   else if(b.dataset.rm!=null){const set=S.sets[S.mode];if(set.length>2){set.splice(set.indexOf(+b.dataset.rm),1);render()}}
-  else if(b.id==='addBtn')openPop()});
+  else if(b.id==='addBtn'){if(S.mode==='party'&&window.SWPicker)pickParty(b);else openPop()}});
+function pickParty(anchor){const set=S.sets.party;
+  SWPicker.open({anchor,title:'Add a party list to compare',city:CITY,exclude:new Set(set),onPick(p){
+    if(p.type==='list'){if(set.length<4&&!set.includes(p.list))set.push(p.list)}
+    else{const ls=p.lists.filter(i=>!set.includes(i));
+      // a national party: compare its lists side by side (across cities, most posts first)
+      if(p.lists.length>1){S.sets.party=p.lists.slice(0,4)}else if(ls.length&&set.length<4)set.push(ls[0])}
+    render()}})}
 
 /* ---------- search popover ---------- */
 const pop=$('#pop'),qi=$('#q');let kbI=0;
@@ -499,7 +492,7 @@ qi.addEventListener('keydown',ev=>{const bs=[...$('#res').querySelectorAll('butt
   else if(ev.key==='Enter'&&bs[kbI])bs[kbI].click();else if(ev.key==='Escape')closePop()});
 $('#res').addEventListener('click',ev=>{const b=ev.target.closest('[data-add]');if(!b)return;const set=S.sets[S.mode];if(set.length<4)set.push(+b.dataset.add);closePop();render()});
 document.addEventListener('pointerdown',ev=>{if(pop.classList.contains('on')&&!pop.contains(ev.target)&&!ev.target.closest('#addBtn'))closePop()});
-document.addEventListener('keydown',ev=>{if(ev.key==='/'&&document.activeElement!==qi){ev.preventDefault();openPop()}if(ev.key==='Escape')closePop()});
+document.addEventListener('keydown',ev=>{if(ev.key==='/'&&document.activeElement!==qi&&!(window.SWPicker&&SWPicker.isOpen())&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName)){ev.preventDefault();if(S.mode==='party'&&window.SWPicker){const b=$('#addBtn');if(b)pickParty(b)}else openPop()}if(ev.key==='Escape')closePop()});
 
 /* ---------- entity strip ---------- */
 /* one shared scale across rows; peak and latest day labelled in place (readable without hover) */
@@ -515,15 +508,12 @@ function renderStrip(){const el=$('#strip');const ML=mlab();const SMX=Math.max(1
     <div class="mv num" data-l="posts">${st.n}</div><div class="mv num${none?' na':''}" data-l="${ML}">${none?'—':fmt(st.tot)}</div><div class="mv num${none?' na':''}" data-l="median / post" data-s="median">${none?'—':fmt(st.med)}</div><div class="mv num${e.fol?'':' na'}" data-l="followers">${folTxt(e.fol)}</div>
     <div class="sp" title="Daily ${ML} by posting date, last ${DAYS} days, shared scale">${sparkSvg(daily(e),e.col,SMX)}</div></div>`}).join('')}
 
-/* ---------- then vs now: 2022 ballot, published expectation, observed attention (never combined) ---------- */
+/* ---------- then vs now: 2022 ballot and observed attention at collection (never combined) ---------- */
 const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const d1=d=>{const t=new Date(d);return isNaN(t)?null:t};
 const dshort=d=>{const p=String(d||'').split('/').map(d1);if(p.length===2&&p[0]&&p[1]){const[a,b]=p;return a.getFullYear()===b.getFullYear()?`${a.getDate()} ${MON[a.getMonth()]} – ${b.getDate()} ${MON[b.getMonth()]} ${b.getFullYear()}`:`${MON[a.getMonth()]} ${a.getFullYear()} – ${MON[b.getMonth()]} ${b.getFullYear()}`}
   const t=p[0];return t?`${t.getDate()} ${MON[t.getMonth()]} ${t.getFullYear()}`:esc(String(d||''))};
 const pctTxt=v=>(+v).toFixed(+v<10?1:1).replace(/\.0$/,'')+'%';
-const FK={poll:'poll',model:'model',betting:'betting market',ranking:'ranking'};
-function fcPick(arr){const f=(arr||[]).filter(x=>x&&x.value!=null&&isFinite(+x.value));const dt=x=>{const t=d1(String(x.date||'').split('/').pop());return t?+t:0};return f.sort((a,b)=>dt(b)-dt(a))[0]||null}
-function fcVal(f){const v=+f.value;return f.unit==='pct'?pctTxt(v):f.unit==='seats'?`${fmt(v)} seat${v===1?'':'s'}`:f.unit==='odds'?`odds ${v.toFixed(2).replace(/0$/,'')}`:`#${fmt(v)}`}
 function countUp(root){const els=[...root.querySelectorAll('[data-cu]')];if(!els.length)return;const t0=performance.now(),D=900;
   const go=t=>{const k=Math.min(1,(t-t0)/D),e=1-Math.pow(2,-10*k);els.forEach(el=>{const v=+el.dataset.cu,f=el.dataset.f;el.textContent=f==='pct'?pctTxt(v*(k<1?e:1)):fmt(v*(k<1?e:1))});if(k<1)requestAnimationFrame(go)};requestAnimationFrame(go)}
 function renderThen(){
@@ -531,36 +521,32 @@ function renderThen(){
   const rows=E.map(e=>{const st=stats(e),src=party?lists[e.id]:cands[e.id];
     const r=party?src.result2022:src.pref2022;
     const tv=r?(party?(r.pct!=null?+r.pct:null):(r.votes!=null?+r.votes:null)):null;
-    return{e,r,tv,f:fcPick(src.forecast),now:st.tot,n:st.nv}});
-  const anyThen=rows.some(x=>x.tv!=null),anyF=rows.some(x=>x.f);
-  if(!anyThen&&!anyF){box.hidden=true;box.innerHTML='';return}
+    return{e,r,tv,now:st.tot,n:st.nv}});
+  const anyThen=rows.some(x=>x.tv!=null);
+  if(!anyThen){box.hidden=true;box.innerHTML='';return}
   box.hidden=false;
   const tmax=Math.max(1e-9,...rows.map(x=>x.tv||0)),nmax=Math.max(1,...rows.map(x=>x.now));
-  const fmaxU={};rows.forEach(x=>{if(x.f&&(x.f.unit==='pct'||x.f.unit==='seats'))fmaxU[x.f.unit]=Math.max(fmaxU[x.f.unit]||0,+x.f.value)});
   const thenUnit=party?'list share':'preference votes';
   // computed insight: who leads on each measure, stated as different measures
   const by=k=>rows.filter(x=>x[k]!=null&&x[k]>0).sort((a,b)=>b[k]-a[k]);
   const T=by('tv'),N=by('now');let txt='';
   if(T[0]&&N[0]){
     const tl=party?`${pctTxt(T[0].tv)} of the vote${T[0].r.seats!=null?` and ${T[0].r.seats} seat${T[0].r.seats===1?'':'s'}`:''}`:`${fmt(T[0].tv)} preference votes`;
-    txt=T[0].e===N[0].e?`${who(T[0].e)} leads on both: the largest 2022 ${party?'result':'preference vote'} (<b>${tl}</b>) and the most observed ${ML} now (<b>${fmt(N[0].now)}</b>).`
-      :`${who(T[0].e)} had the strongest 2022 ${party?'result':'personal vote'} (<b>${tl}</b>), but ${who(N[0].e)} draws the most observed ${ML} now (<b>${fmt(N[0].now)}</b>).`;
+    txt=T[0].e===N[0].e?`${who(T[0].e)} leads on both: the largest 2022 ${party?'result':'preference vote'} (<b>${tl}</b>) and the most observed ${ML} in this snapshot (<b>${fmt(N[0].now)}</b>).`
+      :`${who(T[0].e)} had the strongest 2022 ${party?'result':'personal vote'} (<b>${tl}</b>), but ${who(N[0].e)} drew the most observed ${ML} in this snapshot (<b>${fmt(N[0].now)}</b>).`;
     if(!party){const el=rows.filter(x=>x.r&&x.r.elected);if(el.length)txt+=` ${el.length} of ${rows.length} won a seat in 2022.`}
     txt+=' Ballots and attention are different measures; neither predicts the other here.';
   }else if(T[0])txt=`Only ${T.map(x=>who(x.e)).join(', ')} ${T.length>1?'have':'has'} a matched 2022 result in this comparison.`;
-  else txt='No matched 2022 results for this comparison; published expectations are shown where they exist.';
-  const fcCell=(x,k)=>{const f=x.f;if(!f)return `<div class="tn-m"><span class="tn-na">No published forecast</span></div>`;
-    const bar=fmaxU[f.unit]?`<div class="tn-t now" style="--c:${x.e.alpha(.45)}"><i style="width:${Math.max(2,+f.value/fmaxU[f.unit]*100)}%;--d:${700+k*60}ms"></i></div>`:'';
-    return `<div class="tn-m"><div class="tn-v"><span class="num" style="color:var(--label)">${fcVal(f)}</span><span>${esc(FK[f.kind]||f.kind||'forecast')} · ${f.url?`<a class="src" href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.publisher||'source')} ↗</a>`:esc(f.publisher||'')} · ${dshort(f.date)}</span></div>${bar}</div>`};
+
   const thenCell=(x,k)=>{if(x.tv==null)return `<div class="tn-m"><span class="tn-na">No 2022 result matched</span></div>`;
     const r=x.r,sub=party?[r.votes!=null?`${fmt(+r.votes)} votes`:'',r.seats!=null?`${r.seats} seat${r.seats===1?'':'s'}`:''].filter(Boolean).join(' · ')
       :[r.rank_in_list!=null?`#${r.rank_in_list} on ${r.list_name_2022?esc(r.list_name_2022):'2022 list'}`:'',r.elected?'<span class="el">elected</span>':r.elected===false?'not elected':''].filter(Boolean).join(' · ');
     const lnk=r.source_url?` <a class="src" href="${esc(r.source_url)}" target="_blank" rel="noopener" title="Official 2022 result">↗</a>`:'';
     return `<div class="tn-m"><div class="tn-v"><span class="num" data-cu="${x.tv}" data-f="${party?'pct':''}">0</span><span>${sub}${lnk}</span></div><div class="tn-t then" style="--c:${x.e.col}"><i style="width:${Math.max(2,x.tv/tmax*100)}%;--d:${k*60}ms"></i></div></div>`};
   const nowCell=(x,k)=>`<div class="tn-m"><div class="tn-v"><span class="num" data-cu="${x.now}">0</span><span>${x.n} post${x.n===1?'':'s'}</span></div><div class="tn-t now" style="--c:${x.e.col}"><i style="width:${Math.max(x.now?2:0,x.now/nmax*100)}%;--d:${350+k*60}ms"></i></div></div>`;
-  const ms=[anyThen&&['then','2022 election',thenUnit,'Ballots',thenCell],['now','Now',`observed ${ML}, own posts`,'Attention',nowCell],anyF&&['f','Expected','latest published forecast','Forecast',fcCell]].filter(Boolean);
-  const lede=[anyThen?`2022 municipal ${party?'result':'preference votes'}`:'',`observed ${ML} on own posts, last ${DAYS} days`,anyF?'published expectations':''].filter(Boolean);
-  box.innerHTML=`<header class="ph"><div><h2>Then and now</h2><p>${lede.join(' · ')} · separate scales, never combined</p></div></header>${ai(txt,anyThen?'observed posts and official 2022 results':'observed posts and published forecasts')}
+  const ms=[['then','2022 election',thenUnit,'Ballots',thenCell],['now','At collection',`observed ${ML}, own posts`,'Attention',nowCell]];
+  const lede=[`2022 municipal ${party?'result':'preference votes'}`,`observed ${ML} on own posts in the ${DAYS} days before collection`];
+  box.innerHTML=`<header class="ph"><div><h2>2022 result and attention at collection</h2><p>${lede.join(' · ')} · separate scales, never combined</p></div></header>${ai(txt,'observed posts and official 2022 results')}
   <div class="tn" style="--tc:minmax(0,1.4fr) repeat(${ms.length},minmax(0,2fr));--m:${ms.length}">
     <div class="tn-h en0">${party?'Party list':'Candidate'}</div>
     ${ms.map(m=>`<div class="tn-h ms"><div>${m[1]}<small>${m[2]}</small></div><i>${m[3]}</i></div>`).join('')}
@@ -696,7 +682,7 @@ function renderTop(){
   box.innerHTML=`<header class="ph"><div><h2>Top-performing posts, side by side</h2><p>${h2h?`Each entity's best post on one topic`:`Each entity's five best posts in the window`} · ranked by ${S.norm?mlab()+' per 1k followers of the posting account':mlab()}</p></div>
     <div class="ctl"><div class="seg" id="viewSeg"${topicLess()?' hidden':''}><button data-v="best" class="${!h2h?'on':''}">Best overall</button><button data-v="h2h" class="${h2h?'on':''}">Head-to-head on topic</button></div>
     <span class="sw${S.norm?' on':''}" id="normSw" role="switch" aria-checked="${S.norm}" tabindex="0"><i></i>Per 1k followers</span><span class="sw sm${S.media?' on':''}" id="mediaSw" role="switch" aria-checked="${S.media}" tabindex="0" title="Posts whose image or video was not retained at collection"><i></i>Posts without media</span></div></header>
-    ${h2h?`<div class="topics" id="topicChips">${tc.map(t=>`<button class="chip${t.ti===S.topic?' on':''}" data-t="${t.ti}">${topicName(t.ti)} <b>${t.n}</b></button>`).join('')}</div>`:''}
+    ${h2h?`<div class="topics" id="topicChips">${tc.filter(t=>t.n>0||t.ti===S.topic).sort((a,b)=>b.n-a.n).map(t=>`<button class="chip${t.ti===S.topic?' on':''}" data-t="${t.ti}" aria-pressed="${t.ti===S.topic}" title="${t.n} labelled posts in this comparison">${topicName(t.ti)} <b>${t.n}</b></button>`).join('')}</div><p class="tnote2" style="margin-top:8px">Counts are posts in this comparison with that machine label; labels come from the post text and may be wrong.</p>`:''}
     ${ai(txt)}
     <div class="cols" style="--n:${E.length}">${R.map((x,k)=>{const e=x.e;const tot=x.r.reduce((s,a)=>s+val(a),0);
       return `<div class="col rise" style="animation-delay:${k*40}ms"><div class="colh" style="--c:${e.col}">${avatar(e,'s26')}<b>${esc(e.name)}</b><span>${e.fol?folTxt(e.fol)+' followers':''}</span></div>
@@ -772,7 +758,8 @@ function chartTopics(){
   if(unl.length)txt+=` ${unl.map(x=>who(x.e)).join(', ')} ${unl.length>1?'have':'has'} no topic-labelled posts yet.`;
   const none=M.every(x=>x.sh.every(v=>!v));
   if(none)txt=`No topic labels are applied to these posts yet${SW.topicsPending?': labels are pending review':''}, so no topic shares are shown.`;
-  box.innerHTML=`<header class="ph"><div><h2>Topic mix</h2><p>Share of each entity's ${mlab()} by topic · multi-topic posts split evenly${SW.topicsPending?' · labels pending review':''} · click a bubble for head-to-head</p></div></header>${ai(txt)}<div class="plot"></div>`;
+  const nAll=E.reduce((s2,e)=>s2+e.ids.length,0),nLab=E.reduce((s2,e)=>s2+e.ids.filter(i=>assets[i].topics.length).length,0);
+  box.innerHTML=`<header class="ph"><div><h2>Topic mix</h2><p>Share of each entity's ${mlab()} by topic · multi-topic posts split evenly · click a bubble to see those posts side by side</p><p class="tnote">${E.map(e=>`<span style="--c:${e.col}"><i></i>${esc(e.short)} <b>${e.ids.filter(i=>assets[i].topics.length).length}</b> of ${e.ids.length} labelled</span>`).join('')}</p><p class="tnote2">Topics are machine-labelled from the post text and may be wrong; ${fmt(nLab)} of ${fmt(nAll)} posts here carry a label.</p></div></header>${ai(txt)}<div class="plot"></div>`;
   if(none)return;
   const el=box.querySelector('.plot'),W=el.clientWidth,mob=W<520,rh=mob?32:36,c=ec('tops',44+rh*order.length);
   const lw=mob?96:132,cw=(W-lw-16)/E.length,rmax=Math.min(cw*.62,rh*.98),smax=Math.max(.01,...M.flatMap(x=>x.sh));
@@ -797,10 +784,14 @@ function topicLayout(){const t=$('#tops'),off=topicLess();if(t)t.hidden=off;cons
 function charts(){topicLayout();chartCum();chartBest();chartCad();chartTopics()}
 function render(){
   E=S.sets[S.mode].map(id=>ent(S.mode,id));colorize(E);
-  $('#eyebrow').textContent=`Pulse · ${S.mode==='person'?'candidates':'party lists'} in ${cities[CITY].name}`;
+  // lists from several towns: say which town, so two "ODS" lists stay distinguishable
+  if(S.mode==='party'&&new Set(E.map(e=>lists[e.id].city)).size>1)E.forEach(e=>{const cn=cities[lists[e.id].city].name;e.name=`${e.name} · ${cn}`;e.short=`${e.short} · ${cn}`;e.lab=`${lists[e.id].short} · ${cn}`});
+  const ec=[...new Set(E.map(e=>(S.mode==='person'?cands[e.id]:lists[e.id]).city))];
+  $('#eyebrow').textContent=`Pulse · ${S.mode==='person'?'candidates':'party lists'} ${ec.length===1?'in '+cities[ec[0]].name:'across '+ec.map(c=>cities[c].name).join(', ')}`;
+  {const u=new URLSearchParams();u.set('mode',S.mode);u.set(S.mode==='person'?'cands':'lists',S.sets[S.mode].join(','));const d=URLQ.get('data');if(d)u.set('data',d);history.replaceState(null,'','?'+u.toString())}
   $('#title').innerHTML=S.mode==='person'?`${esc(E[0].name)} <em>vs ${E.length-1} rival${E.length>2?'s':''}</em>`:`${esc(E[0].name)} <em>vs ${E.length-1} list${E.length>2?'s':''}</em>`;
   const ex=SW.source.exported_at?new Date(SW.source.exported_at):null;
-  $('#hmeta').innerHTML=`Window: <b>${dstr(DAYS-1)} – ${dstr(0)} ${TODAY.getFullYear()}</b>, by posting date<br>Source: <b>${esc(SW.source.label)}</b>${ex&&!isNaN(ex)?` · observed ${ex.getDate()} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][ex.getMonth()]} ${ex.getFullYear()}`:''}`;
+  $('#hmeta').innerHTML=`Window: <b>${dstr(DAYS-1)} – ${dstr(0)} ${TODAY.getFullYear()}</b>, by posting date<br>Source: <b>${REAL?'snapshot, public posts collected '+esc(SW.snapshot.short):esc(SW.source.label)}</b>`;
   $('#fnote').innerHTML=`<b>Read with care.</b> Interactions = ${INTER_DEF} on public posts; Instagram does not expose shares, so none are shown for Instagram posts. Views exist for video only. Engagement is attention, not support and not reach.<br>Follower counts are one dated snapshot of the posting account; per-1k figures inherit its error, and show — where no snapshot exists. Own accounts only, mentions excluded.`;
   $('#fsrc').textContent=`${SW.source.label}${SW.source.checkpoint?' · '+SW.source.checkpoint:''}`;
   renderDock();renderStrip();renderThen();topicLayout();renderTop();chartMix();
