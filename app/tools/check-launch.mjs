@@ -78,6 +78,15 @@ await visit("/spotlight.html?cand=1614", { name: "deep-spotlight-cand", wait: 45
 await visit("/pulse.html?party=ods", { name: "deep-pulse-party", wait: 5000, run: p => p.evaluate(() => ({ ok: /mode=party/.test(location.search) && document.querySelectorAll("#dock .epill").length >= 2 })) });
 await visit("/radar.html?city=2", { name: "deep-radar-city", wait: 4500, run: p => p.evaluate(() => ({ ok: document.querySelector("#cityb").textContent.includes(SW.cities[2].name) })) });
 await visit("/radar.html?city=1&party=stan", { name: "deep-radar-party", wait: 4500, run: p => p.evaluate(() => ({ ok: /STAN|Starost/i.test(document.querySelector("#watch").textContent) })) });
+// Atlas country view on phones: all ten city labels visible, inside the screen and not overlapping
+for (const w of [360, 390, 430]) for (const q of ["", "?party=ods"]) {
+  await visit("/atlas.html" + q, { name: `atlas-labels-${w}${q ? "-ods" : ""}`, viewport: { width: w, height: 844 }, wait: 4500, run: p => p.evaluate(() => {
+    const W = innerWidth, bs = [...document.querySelectorAll("#marks .cm")], R = bs.filter(b => !b.classList.contains("nl")).map(b => b.querySelector("span").getBoundingClientRect());
+    let ov = 0; R.forEach((a, i) => R.forEach((c, j) => { if (i < j && a.left < c.right && a.right > c.left && a.top < c.bottom && a.bottom > c.top) ov++ }));
+    const clipped = R.filter(r => r.left < 0 || r.right > W).length;
+    return { ok: bs.length === 10 && R.length === 10 && !ov && !clipped, visible: R.length, overlaps: ov, clipped };
+  }) });
+}
 // Radar is purely observational: no reply drafts anywhere, including inside an opened item
 await visit("/radar.html?city=1", { name: "radar-no-drafts", wait: 4500, run: async p => {
   const txt = async () => p.evaluate(() => document.body.innerText);
