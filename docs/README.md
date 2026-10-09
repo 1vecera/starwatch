@@ -19,6 +19,7 @@ Starwatch shows what candidates in the ten largest Czech cities publish in publi
 | [Learnings](learnings.md) | Practical lessons on scraping, identity, cost control, agent orchestration, design and hosting |
 | [Data sources](data-sources.md) | Every source, what it contributes, when it was observed and its terms |
 | [Programmes and articles](collection/programs-and-articles.md) | How party programmes and news articles were found and matched for the launch |
+| [Topic labels](collection/topic-labels.md) | How machine topic labels were added for unreviewed posts, and how well they agree with the reviewed sample |
 
 ## Responsibility
 
