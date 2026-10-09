@@ -3,7 +3,8 @@
 stats.js is one of the few data files the edge serves without sign-in, so the public About page
 reads its coverage tables from here and never from real.js. Two optional sources:
   - the pinned production checkpoint manifest (collection totals), when it exists on this machine;
-  - web/data/real.js (the exported snapshot), for per-platform and per-city coverage under "public".
+  - web/data/real.js (the exported snapshot), for per-platform and per-city coverage under "public";
+  - web/data/topic-labels.js (optional machine topic labels), for reviewed vs machine topic counts.
 Only aggregate counts are written: no names of people, no post text, no media paths.
 
 Usage: uv run --offline python tools/export_stats.py [--real web/data/real.js] [--out web/data/stats.js]
@@ -58,7 +59,61 @@ def load_raw(path: pathlib.Path) -> dict | None:
     return raw if isinstance(raw, dict) and raw.get("assets") is not None else None
 
 
-def public_coverage(raw: dict) -> dict:
+NICE = {"culture_sport": "Culture and sport", "economy_work": "Economy and work", "health_social": "Health and social care",
+        "election_process": "Election process", "public_finance": "Public finance", "public_space": "Public space"}
+
+
+def topic_counts(raw: dict, machine: dict | None) -> tuple[dict, list]:
+    """Posts per topic over reviewed labels plus machine labels for posts the reviewed sample left unlabelled."""
+    known = {t["id"]: t for t in raw.get("topics", [])}
+    labels = (machine or {}).get("labels") or {}
+    per: dict[str, int] = {}
+    reviewed = machined = 0
+    for a in raw.get("assets", []):
+        own = [t for t in (a.get("topics") or []) if t in known]
+        if a.get("topic_status") == "admitted" and own:
+            reviewed += 1
+            tids = own
+        else:
+            m = labels.get(a.get("id")) or {}
+            tids = [t for t in (m.get("topics") or []) if t in known]
+            if not tids:
+                continue
+            machined += 1
+        for t in set(tids):
+            per[t] = per.get(t, 0) + 1
+    topics = [{"id": t, "label": NICE.get(known[t]["label"], str(known[t]["label"]).replace("_", " ").capitalize()), "posts": n}
+              for t, n in sorted(per.items(), key=lambda kv: -kv[1])]
+    return {"topic_reviewed_posts": reviewed, "topic_machine_posts": machined, "topic_labelled_posts": reviewed + machined}, topics
+
+
+def logo_credits(raw: dict) -> list:
+    """One credit line per party logo used in the app (source page and licence from the export)."""
+    seen: dict[str, dict] = {}
+    for x in raw.get("lists", []):
+        for g in x.get("logos") or []:
+            if g.get("party") and g["party"] not in seen:
+                seen[g["party"]] = {"party": g["party"], "source_url": g.get("source_url"), "license": g.get("license")}
+    return sorted(seen.values(), key=lambda g: g["party"])
+
+
+def load_raw_obj(path: pathlib.Path) -> dict | None:
+    """Parse an optional `window.X = {...};` file; None when absent or a null stub."""
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        return None
+    start, end = text.find("{"), text.rfind("}")
+    if start < 0 or end < start:
+        return None
+    try:
+        obj = json.loads(text[start:end + 1])
+    except ValueError:
+        return None
+    return obj if isinstance(obj, dict) else None
+
+
+def public_coverage(raw: dict, machine: dict | None = None) -> dict:
     """Aggregate coverage per platform and per city, computed from the exported snapshot."""
     lists, cands, accounts, assets = raw.get("lists", []), raw.get("cands", []), raw.get("accounts", []), raw.get("assets", [])
     city_of = {x["id"]: x.get("city_id") for x in lists + cands}
@@ -88,7 +143,7 @@ def public_coverage(raw: dict) -> dict:
     published = sorted(a["published_at"] for a in assets if a.get("published_at"))
     observed = sorted(a["observed_at"] for a in assets if a.get("observed_at"))
     src = raw.get("source") or {}
-    return {
+    out = {
         "snapshot": {"collected": COLLECTED, "checkpoint_id": src.get("checkpoint_id"), "exported_at": src.get("exported_at"),
                      "published_from": published[0] if published else None, "published_to": published[-1] if published else None,
                      "observed_from": observed[0] if observed else None, "observed_to": observed[-1] if observed else None},
@@ -97,25 +152,31 @@ def public_coverage(raw: dict) -> dict:
                    "cities": len(raw.get("cities", [])), "playable_videos": sum(1 for a in assets if a.get("video")),
                    "video_posts": sum(1 for a in assets if str(a.get("type") or "").lower() in VIDEO_TYPES),
                    "posts_with_image": sum(1 for a in assets if a.get("image")),
-                   "topic_labelled_posts": sum(1 for a in assets if a.get("topics")),
                    "topics": len(raw.get("topics", [])),
                    "lists_with_2022_result": sum(1 for x in lists if x.get("result2022")),
                    "candidates_with_2022_votes": sum(1 for x in cands if x.get("pref2022"))},
         "platforms": platforms,
         "cities": cities,
+        "logo_credits": logo_credits(raw),
     }
+    counts, topics = topic_counts(raw, machine)
+    out["totals"].update(counts)
+    out["topics"] = topics
+    return out
 
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--real", type=pathlib.Path, default=APP / "web" / "data" / "real.js")
+    ap.add_argument("--labels", type=pathlib.Path, default=APP / "web" / "data" / "topic-labels.js")
     ap.add_argument("--out", type=pathlib.Path, default=APP / "web" / "data" / "stats.js")
     args = ap.parse_args()
     stats = manifest_totals()
     stats["exported_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
     raw = load_raw(args.real)
     if raw is not None:
-        stats["public"] = public_coverage(raw)
+        machine = load_raw_obj(args.labels)
+        stats["public"] = public_coverage(raw, machine)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     if args.out.is_symlink():  # never write through a link into another checkout
         args.out.unlink()
