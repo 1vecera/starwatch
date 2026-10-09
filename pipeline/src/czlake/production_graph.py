@@ -25,7 +25,7 @@ import duckdb
 import pyarrow as pa
 
 SCHEMA_VERSION = "starwatch-production-graph/1.1.0"
-DEFAULT_ROOT = Path("/home/vecera/code/agents007-hackathon")
+DEFAULT_ROOT = Path(os.environ.get("CZLAKE_PROJECT") or Path(__file__).resolve().parents[3])
 DEFAULT_REVIEWS = (
     "data/evidence/top10_profile_review.json",
     "data/evidence/top10_organization_profile_review.json",

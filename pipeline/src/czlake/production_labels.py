@@ -1,6 +1,7 @@
 """Source-bound classification packets and independent-review promotion gates."""
 from __future__ import annotations
 
+import os
 import argparse
 import copy
 import hashlib
@@ -538,7 +539,7 @@ def freeze_classification_bundle(legacy_registry: Path, native_registry: Path,
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("command", choices=["cached-cards", "validate", "review"])
-    parser.add_argument("--project", type=Path, default=Path("/home/vecera/code/agents007-hackathon"))
+    parser.add_argument("--project", type=Path, default=Path(os.environ.get("CZLAKE_PROJECT") or Path(__file__).resolve().parents[3]))
     parser.add_argument("--cards", type=Path)
     parser.add_argument("--labels", type=Path)
     parser.add_argument("--review", type=Path)

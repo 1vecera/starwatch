@@ -29,7 +29,7 @@ from pathlib import Path
 from lxml import html
 
 BASE = Path(__file__).resolve().parent
-ROOT = Path(os.environ.get('CZLAKE_PROJECT', '/home/vecera/code/agents007-hackathon'))
+ROOT = Path(os.environ.get("CZLAKE_PROJECT") or Path(__file__).resolve().parents[3])
 MAX_GETS = 100
 MAX_BYTES = 4_000_000
 TIMEOUT = 10

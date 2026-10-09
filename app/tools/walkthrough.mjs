@@ -2,12 +2,12 @@
 // Spotlight → Pulse → Radar (replay sheet) → By the numbers → About, at desktop and phone sizes.
 // Usage: node tools/walkthrough.mjs [baseUrl] [outDir]   (server from ./run.sh must be running)
 // PLAYWRIGHT_CORE may point at any playwright-core/index.mjs; CHROME at a Chrome binary.
-const pw = await import(process.env.PLAYWRIGHT_CORE || "/home/vecera/code/daniel-ai-skills/tools/json-render-report/node_modules/playwright-core/index.mjs");
+const pw = await import(process.env.PLAYWRIGHT_CORE || "playwright-core");
 import fs from "node:fs/promises";
 const base = (process.argv[2] || "http://127.0.0.1:5173").replace(/\/$/, "");
 const out = process.argv[3] || "walkthrough-shots";
 await fs.mkdir(out, { recursive: true });
-const browser = await pw.chromium.launch({ executablePath: process.env.CHROME || `${process.env.HOME}/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome`, headless: true,
+const browser = await pw.chromium.launch({ executablePath: process.env.CHROME || undefined, headless: true,
   args: ["--no-sandbox", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
 const errors = [], steps = [];
 const wait = ms => new Promise(r => setTimeout(r, ms));

@@ -5,12 +5,11 @@
 // Usage: node tools/check-launch.mjs [baseUrl] [outDir]   (server: uv run --offline python tools/serve.py)
 // PLAYWRIGHT_CORE may point at any playwright-core/index.mjs; CHROME at a Chrome or Chromium binary.
 import fs from "node:fs/promises";
-import os from "node:os";
-const pw = await import(process.env.PLAYWRIGHT_CORE || "/home/vecera/code/daniel-ai-skills/tools/json-render-report/node_modules/playwright-core/index.mjs");
+const pw = await import(process.env.PLAYWRIGHT_CORE || "playwright-core");
 const base = (process.argv[2] || "http://127.0.0.1:5173").replace(/\/$/, "");
 const out = process.argv[3] || "launch-checks";
 await fs.mkdir(out, { recursive: true });
-const chrome = process.env.CHROME || `${os.homedir()}/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome`;
+const chrome = process.env.CHROME || undefined; // default: the browser bundled with playwright-core
 const browser = await pw.chromium.launch({ executablePath: chrome, headless: true, args: ["--no-sandbox", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"] });
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const results = [], errors = [];

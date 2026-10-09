@@ -5,6 +5,7 @@ Run: uv run python -m czlake.build.prioritize --project /path/to/project
 
 from __future__ import annotations
 
+import os
 import argparse
 import csv
 import hashlib
@@ -550,7 +551,7 @@ def prepare(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--project", type=Path, default=Path("/home/vecera/code/agents007-hackathon"))
+    parser.add_argument("--project", type=Path, default=Path(os.environ.get("CZLAKE_PROJECT") or Path(__file__).resolve().parents[4]))
     parser.add_argument("--as-of", default="2026-10-09T00:45:00+02:00")
     parser.add_argument(
         "--reviewed-evidence",

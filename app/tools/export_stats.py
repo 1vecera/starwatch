@@ -15,10 +15,12 @@ from __future__ import annotations
 import argparse
 import datetime
 import json
+import os
 import pathlib
 
 APP = pathlib.Path(__file__).resolve().parent.parent
-MANIFEST_ROOT = pathlib.Path("/home/vecera/code/agents007-hackathon/tmp/production/read")
+# The production read manifest lives in the local project home (CZLAKE_PROJECT), not in Git.
+MANIFEST_ROOT = pathlib.Path(os.environ.get("CZLAKE_PROJECT") or APP.parent) / "tmp/production/read"
 PLATFORMS = [("instagram", "Instagram"), ("facebook", "Facebook"), ("tiktok", "TikTok"), ("youtube", "YouTube"),
              ("x", "X"), ("news", "News"), ("web", "Web")]
 COLLECTED = "8–9 October 2026"

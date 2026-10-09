@@ -15,7 +15,7 @@ The app's exporter (`../app/tools/export_real.py`) reads a checkpoint and writes
 
 ## Local use
 
-Use Python 3.12 or newer and the locked environment with `uv sync`. Point commands at the project home containing the existing official registry, relevance selection and source lake. Run these commands from this directory.
+Use Python 3.12 or newer and the locked environment with `uv sync`. Point commands at the project home containing the existing official registry, relevance selection and source lake. Run these commands from this directory. `CZLAKE_PROJECT` names that project home; without it, every command and test defaults to the root of this checkout, where `data/` and `tmp/` are ignored by Git.
 
 ```bash
 export CZLAKE_PROJECT=/absolute/path/to/project

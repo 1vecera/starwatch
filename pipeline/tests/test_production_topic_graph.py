@@ -1,6 +1,7 @@
 """Topic navigation checks for admitted provenance, counting and attribution."""
 from __future__ import annotations
 
+import os
 import ast
 import hashlib
 import importlib.util
@@ -13,7 +14,7 @@ from pathlib import Path
 import duckdb
 
 HERE = Path(__file__).resolve().parent
-ROOT = Path('/home/vecera/code/agents007-hackathon')
+ROOT = Path(os.environ.get("CZLAKE_PROJECT") or Path(__file__).resolve().parents[2])
 PRODUCTION = HERE.parent if (HERE.parent / 'src/czlake/production_graph.py').is_file() else ROOT / '.claude/worktrees/production'
 
 

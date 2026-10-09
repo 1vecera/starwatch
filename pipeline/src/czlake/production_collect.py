@@ -818,7 +818,7 @@ class ProductionCollector:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--root", type=Path, default=Path("/home/vecera/code/agents007-hackathon/data/production"))
+    parser.add_argument("--root", type=Path, default=Path(os.environ.get("CZLAKE_PROJECT") or Path(__file__).resolve().parents[3]) / "data/production")
     commands = parser.add_subparsers(dest="command", required=True)
     init = commands.add_parser("init")
     init.add_argument("--authorization", type=Path, required=True)

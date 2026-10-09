@@ -18,7 +18,8 @@ from urllib.parse import parse_qs, quote, unquote, urlencode, urlsplit
 import duckdb
 
 VERSION = "starwatch-production-api/1.5.0"
-DEFAULT_ROOT = Path("/home/vecera/code/agents007-hackathon/tmp/production/read")
+PROJECT_ROOT = Path(os.environ.get("CZLAKE_PROJECT") or Path(__file__).resolve().parents[3])
+DEFAULT_ROOT = PROJECT_ROOT / "tmp/production/read"
 REVIEWED = "('admitted','independently_reviewed')"
 ACCOUNT_ADMISSION = "(SELECT * FROM verified_accounts QUALIFY row_number() OVER(PARTITION BY account_id,entity_id ORDER BY reviewed_at DESC NULLS LAST,evidence_url NULLS LAST)=1)"
 BASE_TABLES = {"area", "entity", "account", "account_observation", "account_relation", "asset", "asset_observation", "asset_relation", "metric", "claim", "topic", "claim_topic", "verified_accounts", "verified_assets"}
@@ -460,7 +461,6 @@ def web_detail(cp, record_id):
     return web_envelope(cp, {"checkpoint": cp.identity(), "item": item, "gaps": cp.gaps()}, "web-assets")
 
 
-PROJECT_ROOT = Path("/home/vecera/code/agents007-hackathon")
 DEFAULT_PHOTO_ROOTS = tuple(PROJECT_ROOT / "tmp/production/native" / f"identity_{city}" / "portraits/images" for city in ("brno", "budejovice", "hradec", "liberec", "olomouc", "ostrava", "pardubice", "plzen", "praha", "usti")) + (PROJECT_ROOT / "tmp/production/native/portrait_engine/avatar_intake/downloads/images", PROJECT_ROOT / "tmp/production/native/portrait_engine/avatar_intake/fb_downloads/images", PROJECT_ROOT / "tmp/production/native/portrait_engine/avatar_intake/increment-p041/downloads/images")
 DEFAULT_PHOTO_ROOTS += (PROJECT_ROOT / "tmp/production/native/portraits_resume/downloads/images",)
 IMAGE_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"}

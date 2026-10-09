@@ -2,7 +2,7 @@
 from pathlib import Path
 import os
 
-PROJECT = Path(os.environ.get("CZLAKE_PROJECT", "/home/vecera/code/agents007-hackathon"))
+PROJECT = Path(os.environ.get("CZLAKE_PROJECT") or Path(__file__).resolve().parents[3])
 DATA = PROJECT / "data"
 LAKE = DATA / "lake"
 RAW = LAKE / "raw"
