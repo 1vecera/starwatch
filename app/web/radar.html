@@ -342,7 +342,8 @@ const reachText=a=>{const r=reachOf(a);return r==null?'':`${fmt(r)} ${reachKindO
 const sourceLink=(url,label='Open public source')=>{try{const u=new URL(url);if(!['http:','https:'].includes(u.protocol))return '';return `<a class="source-link" href="${esc(u.href)}" target="_blank" rel="noopener noreferrer">${esc(label)} ↗</a>`}catch(e){return ''}};
 const pending=a=>a&&((a.topicStatus&&a.topicStatus!=='admitted')||a.topics.some(t=>TOP[t][3]&&TOP[t][3]!=='admitted'));
 const topicLabel=a=>!a.topics.length?'No topic assigned':a.topics.map(t=>TOP[t][0]).join(' · ');
-const topicNote=a=>!a.topics.length?'No topic label':a.topics.some(t=>TOP[t][4]==='issue')?'Issue reviewed from the caption':'Machine label from the post text · may be wrong';
+const topicNote=a=>{if(!a.topics.length)return 'No topic label';const m=SW.topicMeta(a,a.topics[0]);return m.issue?'Issue reviewed from the caption':m.machine?`Machine label${m.evidence?' · “'+m.evidence+'”':''} · can be wrong`:'Reviewed label'};
+const mlab=(a,t)=>{const m=SW.topicMeta(a,t);return m.machine?`<span class="sw-mlab" title="Machine label${m.evidence?` · “${esc(m.evidence)}”`:''}">machine</span>`:''};
 const claimNote=c=>c.status==='admitted'?'Admitted excerpt':c.status==='reviewed_pending_promotion'?'Pending promotion':c.status?'Pending review':'Review status not supplied';
 const sourceQuote=a=>a&&(a.claims.find(c=>c.quote)?.quote||rawAssets.get(a.id)?.text||(a.cap==='(no caption)'?'':a.cap)||'').trim();
 const draftable=x=>x.type!=='snap'&&(!REAL||!!sourceQuote(x.a));
@@ -558,7 +559,7 @@ function card(x){const a=x.a,e=x.e,tier=tierOf.get(x)||'';
   const who=e?`${av(e,20)}<span class="nm">${esc(e.name)}</span><em>${role}</em>`:`<span class="nm">${esc(P.name)}</span><em>all lists</em>`;
   const meta=[];if(x.type==='spike')meta.push(`<b>${x.ratio.toFixed(1)}× ${REAL?'sample median':'median'}</b>`);if(x.type==='topic')meta.push(`<b>${x.ratio.toFixed(1)}× usual share</b>`);
   if(rt&&tier!=='lead')meta.push(`<b>${rt}</b>`);if(a)meta.push(esc(platN(a)));
-  if(REAL&&a&&a.topics.length){meta.push(esc(TOP[a.topics[0]][0]));if(pending(a))meta.push(esc(topicNote(a)))}
+  if(REAL&&a&&a.topics.length)meta.push(esc(TOP[a.topics[0]][0])+mlab(a,a.topics[0]));
   meta.push(kindLbl(x)?`<span class="act">${starSvg(10)} ${kindLbl(x)}</span>`:`<span class="act base">${x.type==='snap'?'Dated count · no change inferred':'Source text unavailable · inspect only'}</span>`);
   return `<button class="al${tier?' '+tier:''}${a&&!hasPreview(x)?' nothumb':''}${unread.has(x.id)?' unread':''}${x===ARRIVING?' arrive':''}" data-id="${x.id}">${lead}<span class="al-b"><span class="top"><span class="ty${x.type==='snap'?' base':''}">${TY[x.type].n}</span><span class="tm">${rel(x.age)}</span></span>
     <span class="who">${who}</span><span class="bd">${esc(body(x))}</span><span class="ft">${meta.join('<i>·</i>')}</span></span></button>`}

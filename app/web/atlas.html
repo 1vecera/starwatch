@@ -278,7 +278,8 @@ const RANKS={reach:{b:'Reach',long:'reach',unit:'reach',phrase:'reach: views whe
 const S={city:-1,list:-1,cand:-1,asset:-1,rank:RANKS[q.get('rank')]?q.get('rank'):'reach',win:999,plats:new Set(),topic:-1,bare:!REAL,party:null,pset:null};
 function setParty(g){S.party=g?g.key:null;S.pset=g?new Set(g.lists):null}
 const U=()=>RANKS[S.rank];
-const TOPIC_NOTE='Topics are machine-labelled from the post text and may be wrong; most posts carry no label.';
+const TOPIC_NOTE=SW.TOPIC_NOTE||'Topic labels may be wrong.';
+const mlab=(a,t)=>{const m=SW.topicMeta?SW.topicMeta(a,t):{};return m.machine?`<span class="sw-mlab" title="Machine label${m.evidence?` · “${esc(m.evidence)}”`:''}">machine</span>`:''};
 
 /* ---------- metric and filters ---------- */
 const eng=a=>(a.na&&a.na.likes?0:a.likes)+(a.na&&a.na.comments?0:a.comments);
@@ -499,7 +500,7 @@ function renderSide(){
   const cr=[['Czechia',()=>showPicker(true),S.city<0]];
   if(S.city>=0)cr.push([cities[S.city].name,()=>{S.list=S.cand=S.asset=-1;update()},S.list<0&&S.cand<0&&S.asset<0]);
   const L=S.list>=0?lists[S.list]:S.cand>=0?lists[cands[S.cand].list]:S.asset>=0?lists[assets[S.asset].list]:null;
-  if(L)cr.push([L.short||L.name,()=>{S.list=L.i;S.cand=S.asset=-1;update()},S.list===L.i&&S.cand<0&&S.asset<0]);
+  if(L)cr.push([L.name,()=>{S.list=L.i;S.cand=S.asset=-1;update()},S.list===L.i&&S.cand<0&&S.asset<0]);
   const C=S.cand>=0?cands[S.cand]:S.asset>=0&&assets[S.asset].owner>=0?cands[assets[S.asset].owner]:null;
   if(C)cr.push([C.name,()=>{S.cand=C.i;S.list=-1;S.asset=-1;update()},S.cand===C.i&&S.asset<0]);
   if(S.asset>=0)cr.push(['Post',()=>{},true]);
@@ -516,13 +517,13 @@ function renderSide(){
     $('#partyOn').innerHTML=g?`<div class="pon">${SWPicker.logo(g,32)}<span class="t"><b>${esc(g.label)}</b>${city?(inCity.length?`${inCity.length} list${inCity.length>1?'s':''} in ${esc(cities[S.city].name)}`:`No list in ${esc(cities[S.city].name)}`):`${g.lists.length} lists in ${g.cities.length} cit${g.cities.length>1?'ies':'y'}`} · only its posts are shown</span><button class="x" data-party-x aria-label="Show all parties" title="Show all parties"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7"/></svg></button></div>`:''}
   else $('#partyS').hidden=true;
   // topics: machine labels, counted over what the other filters show; the lens keeps only labelled posts
-  const pool=city?cities[S.city].assets:assets.map(a=>a.i);const tc=new Array(TOP.length).fill(0);let nPool=0,nLab=0;
-  pool.forEach(i=>{const a=assets[i];if(a.age<=S.win&&(S.plats.size===0||S.plats.has(a.plat))&&(S.bare||hasMedia(a))&&(!S.pset||S.pset.has(a.list))){nPool++;if(a.topics.length)nLab++;a.topics.forEach(t=>tc[t]++)}});
+  const pool=city?cities[S.city].assets:assets.map(a=>a.i);const tc=new Array(TOP.length).fill(0);let nPool=0,nLab=0,nMach=0;
+  pool.forEach(i=>{const a=assets[i];if(a.age<=S.win&&(S.plats.size===0||S.plats.has(a.plat))&&(S.bare||hasMedia(a))&&(!S.pset||S.pset.has(a.list))){nPool++;if(a.topics.length){nLab++;if(a.topicStatus==='machine')nMach++}a.topics.forEach(t=>tc[t]++)}});
   const order=TOP.map((t,i)=>i).filter(i=>tc[i]>0).sort((a,b)=>(TOP[b][4]==='issue')-(TOP[a][4]==='issue')||tc[b]-tc[a]);if(S.topic>=0&&!order.includes(S.topic))order.push(S.topic);
   $('#topicS').hidden=!order.length;
   $('#topicU').textContent=nLab?`${fmtN(nLab)} of ${fmtN(nPool)} posts labelled`:'';
   $('#topics').innerHTML=`<button class="tchip ${S.topic<0?'on':''}" data-t="-1" aria-pressed="${S.topic<0}">All posts<em>${fmtN(nPool)}</em></button>`+order.map(i=>`<button class="tchip ${S.topic===i?'on':''}${TOP[i][4]==='issue'?' iss':''}" data-t="${i}" aria-pressed="${S.topic===i}" title="${fmtN(tc[i])} posts labelled ${esc(TOP[i][0])}${TOP[i][4]==='issue'?' (named local issue, reviewed from captions)':''}">${esc(TOP[i][0])}<em>${fmtN(tc[i])}</em></button>`).join('');
-  $('#topicN').textContent=TOPIC_NOTE;
+  $('#topicN').textContent=TOPIC_NOTE+(nMach?` Here: ${fmtN(nLab-nMach)} reviewed, ${fmtN(nMach)} machine.`:'');
   if(!city){const rows=cities.map((c,i)=>({c,i,p:cityVal(c)})).sort((a,b)=>b.p-a.p);const pm=Math.max(1,...rows.map(r=>r.p));
     $('#clist').innerHTML=rows.map(({c,i,p})=>`<button class="crow" data-c="${i}"><b>${esc(c.name)}</b><span>${p>0?`<i style="width:${Math.max(2,Math.round(40*p/pm))}px"></i>${mv(p)}`:'—'}</span></button>`).join('');return}
   const c=cities[S.city];const cc=cityCands(c);
@@ -582,7 +583,7 @@ function inspAsset(a){const L=lists[a.list],P=PLAT[a.plat];const by=a.owner>=0?c
   <div class="k">Provenance</div>
   ${kv([...(acct?[['Account',`${esc(P.n)} @${esc(acct.handle||'')}`]]:[]),...(a.url?[['Source',`<a href="${esc(a.url)}" target="_blank" rel="noopener">${esc(host||'link')} ↗</a>`]]:[]),...(obs?[['Observed',obs]]:[]),['Dataset',esc(SW.source.label||'—')]])}
   ${a.mention!=null?`<div class="k">Mentions</div><div class="plist"><button data-k="${a.mention}">${avatar(cands[a.mention],col(lists[cands[a.mention].list]))}<b>${esc(cands[a.mention].name)}</b><span>${esc(lists[cands[a.mention].list].short)}</span></button></div>`:''}
-  ${a.topics.length?`<div class="k">Topics</div><div style="display:flex;gap:6px;flex-wrap:wrap">${a.topics.map(t=>`<button class="chip" data-t="${t}">${esc(TOP[t][0])}</button>`).join('')}</div>`:''}
+  ${a.topics.length?`<div class="k"><span>Topics</span><span class="x">${a.topicStatus==='machine'?'machine labels':a.topicStatus==='admitted'?'reviewed sample':''}</span></div><div style="display:flex;gap:6px;flex-wrap:wrap">${a.topics.map(t=>`<button class="chip" data-t="${t}">${esc(TOP[t][0])}${mlab(a,t)}</button>`).join('')}</div>${a.topicStatus==='machine'?`<div class="note">${a.topics.map(t=>{const m=SW.topicMeta(a,t);return m.evidence?`${esc(m.label)}: “${esc(m.evidence)}”`:''}).filter(Boolean).join(' · ')}</div>`:''}`:''}
   ${a.issueEvidence&&a.issueEvidence.length?`<div class="k">Why this issue matches</div>${a.issueEvidence.map(e=>`<div class="clm"><b>${esc(e.label)}</b><br>„${esc(e.quote)}“</div>`).join('')}<div class="note">Topic membership reviewed from this caption. The quoted statement is not independently verified; issue coverage is partial.</div>`:''}
   ${a.claims&&a.claims.length?`<div class="k">Quoted statements · ${a.claims.length}</div>${a.claims.slice(0,3).map(c=>`<div class="clm">„${esc(c.quote||c.text)}“</div>`).join('')}<div class="note">Statements quoted from the post, not verified facts.</div>`:''}
   <div class="acts">${a.url?`<a class="pill primary" href="${esc(a.url)}" target="_blank" rel="noopener">Open source ↗</a>`:''}<button class="pill" data-spot="asset:${a.i}">Open in Spotlight</button></div>`]}

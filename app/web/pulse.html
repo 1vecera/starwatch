@@ -412,6 +412,7 @@ const ranked=(e,filt,any)=>e.ids.map(i=>assets[i]).filter(a=>valid(a)&&(any||S.m
 const nice=v=>{if(v<=0)return 1;const p=Math.pow(10,Math.floor(Math.log10(v)));const n=v/p;return(n<=1?1:n<=2?2:n<=5?5:10)*p};
 const axis=(mx,n=4)=>{const st=nice(Math.max(1,mx)/n);const top=Math.ceil(Math.max(1,mx)/st)*st;return{top,step:st,n:Math.round(top/st)}};
 const topicName=t=>TOP[t][0];
+const mlab=(a,t)=>{const m=SW.topicMeta?SW.topicMeta(a,t):{};return m.machine?`<span class="sw-mlab" title="Machine label${m.evidence?` · “${esc(m.evidence)}”`:''}">machine</span>`:''};
 const REAL=SW.source.kind==='real';
 const NOTOPIC=!assets.some(a=>a.topics&&a.topics.length);
 if(NOTOPIC){const t=document.getElementById('tops');if(t)t.remove();document.querySelector('.r1').style.gridTemplateColumns='minmax(0,1fr)'}
@@ -653,11 +654,11 @@ function heroCard(a,e,k,rank,max,win){const sc=score(a);
       ${win?`<span class="lead">Leads on ${esc(topicName(S.topic))}</span>`:''}
       <div class="bar"><i style="width:${Math.max(2,sc/max*100)}%"></i></div>
       <p class="cap">${esc(a.cap)}</p>
-      <div class="cm">${a.topics.map(t=>`<span class="chip">${topicName(t)}</span>`).join('')}<span>${dstr(a.age)} ${TODAY.getFullYear()}</span>${e.kind==='party'?`<span class="by">· ${esc(a.owner>=0?cands[a.owner].name:'party account')}</span>`:''}${srcA(a)}</div>
+      <div class="cm">${a.topics.map(t=>`<span class="chip">${topicName(t)}${mlab(a,t)}</span>`).join('')}<span>${dstr(a.age)} ${TODAY.getFullYear()}</span>${e.kind==='party'?`<span class="by">· ${esc(a.owner>=0?cands[a.owner].name:'party account')}</span>`:''}${srcA(a)}</div>
       <div class="mini" style="grid-template-columns:repeat(${a.na&&a.na.shares?3:4},1fr)">${[['views','views'],['likes','likes'],['comments','comments']].concat(a.na&&a.na.shares?[]:[['shares','shares']]).map(([k2,l])=>{const v=mval(a,k2);return `<div class="${S.metric===k2?'on':''}${v==='—'?' na':''}"><b>${v}</b>${l}</div>`}).join('')}</div></div></article>`}
 function rowCard(a,e,k,rank,max){const sc=score(a);
   return `<div class="rowc" data-a="${a.i}" style="--c:${e.col}"><div class="th">${media(a,false)}<span class="rk">#${rank}</span></div>
-    <div><div class="t">${esc(a.cap)}</div><div class="s">${fmtName(a)} · ${dstr(a.age)}${a.topics.length?' · '+topicName(a.topics[0]):''}${a.url?' · ':''}${srcA(a,'Source ↗')}</div></div>
+    <div><div class="t">${esc(a.cap)}</div><div class="s">${fmtName(a)} · ${dstr(a.age)}${a.topics.length?' · '+topicName(a.topics[0])+mlab(a,a.topics[0]):''}${a.url?' · ':''}${srcA(a,'Source ↗')}</div></div>
     <div class="v"><span class="num">${S.norm?n1k(a):fmt(sc)}</span><small>${S.norm?'/ 1k':mlab()}</small><div class="vb"><i style="width:${Math.max(3,sc/max*100)}%"></i></div></div></div>`}
 function renderTop(){
   const box=$('#top');const tc=topicCounts();
@@ -683,7 +684,7 @@ function renderTop(){
   box.innerHTML=`<header class="ph"><div><h2>Top-performing posts, side by side</h2><p>${h2h?`Each entity's best post on one topic`:`Each entity's five best posts in the window`} · ranked by ${S.norm?mlab()+' per 1k followers of the posting account':mlab()}</p></div>
     <div class="ctl"><div class="seg" id="viewSeg"${topicLess()?' hidden':''}><button data-v="best" class="${!h2h?'on':''}">Best overall</button><button data-v="h2h" class="${h2h?'on':''}">Head-to-head on topic</button></div>
     <span class="sw${S.norm?' on':''}" id="normSw" role="switch" aria-checked="${S.norm}" tabindex="0"><i></i>Per 1k followers</span><span class="sw sm${S.media?' on':''}" id="mediaSw" role="switch" aria-checked="${S.media}" tabindex="0" title="Posts whose image or video was not retained at collection"><i></i>Posts without media</span></div></header>
-    ${h2h?`<div class="topics" id="topicChips">${tc.filter(t=>t.n>0||t.ti===S.topic).sort((a,b)=>b.n-a.n).map(t=>`<button class="chip${t.ti===S.topic?' on':''}" data-t="${t.ti}" aria-pressed="${t.ti===S.topic}" title="${t.n} labelled posts in this comparison">${topicName(t.ti)} <b>${t.n}</b></button>`).join('')}</div><p class="tnote2" style="margin-top:8px">Counts are posts in this comparison with that machine label; labels come from the post text and may be wrong.</p>`:''}
+    ${h2h?`<div class="topics" id="topicChips">${tc.filter(t=>t.n>0||t.ti===S.topic).sort((a,b)=>b.n-a.n).map(t=>`<button class="chip${t.ti===S.topic?' on':''}" data-t="${t.ti}" aria-pressed="${t.ti===S.topic}" title="${t.n} labelled posts in this comparison">${topicName(t.ti)} <b>${t.n}</b></button>`).join('')}</div><p class="tnote2" style="margin-top:8px">Counts are posts in this comparison with that label. ${esc(SW.TOPIC_NOTE)}</p>`:''}
     ${ai(txt)}
     <div class="cols" style="--n:${E.length}">${R.map((x,k)=>{const e=x.e;const tot=x.r.reduce((s,a)=>s+val(a),0);
       return `<div class="col rise" style="animation-delay:${k*40}ms"><div class="colh" style="--c:${e.col}">${avatar(e,'s26')}<b>${esc(e.name)}</b><span>${e.fol?folTxt(e.fol)+' followers':''}</span></div>
@@ -760,7 +761,7 @@ function chartTopics(){
   const none=M.every(x=>x.sh.every(v=>!v));
   if(none)txt=`No topic labels are applied to these posts yet${SW.topicsPending?': labels are pending review':''}, so no topic shares are shown.`;
   const nAll=E.reduce((s2,e)=>s2+e.ids.length,0),nLab=E.reduce((s2,e)=>s2+e.ids.filter(i=>assets[i].topics.length).length,0);
-  box.innerHTML=`<header class="ph"><div><h2>Topic mix</h2><p>Share of each entity's ${mlab()} by topic · multi-topic posts split evenly · click a bubble to see those posts side by side</p><p class="tnote">${E.map(e=>`<span style="--c:${e.col}"><i></i>${esc(e.short)} <b>${e.ids.filter(i=>assets[i].topics.length).length}</b> of ${e.ids.length} labelled</span>`).join('')}</p><p class="tnote2">Topics are machine-labelled from the post text and may be wrong; ${fmt(nLab)} of ${fmt(nAll)} posts here carry a label.</p></div></header>${ai(txt)}<div class="plot"></div>`;
+  box.innerHTML=`<header class="ph"><div><h2>Topic mix</h2><p>Share of each entity's ${mlab()} by topic · multi-topic posts split evenly · click a bubble to see those posts side by side</p><p class="tnote">${E.map(e=>`<span style="--c:${e.col}"><i></i>${esc(e.short)} <b>${e.ids.filter(i=>assets[i].topics.length).length}</b> of ${e.ids.length} labelled</span>`).join('')}</p><p class="tnote2">${esc(SW.TOPIC_NOTE)} ${fmt(nLab)} of ${fmt(nAll)} posts here carry a label${(m=>m?`, ${fmt(m)} of them machine labels`:'')(E.reduce((s2,e)=>s2+e.ids.filter(i=>assets[i].topicStatus==='machine').length,0))}.</p></div></header>${ai(txt)}<div class="plot"></div>`;
   if(none)return;
   const el=box.querySelector('.plot'),W=el.clientWidth,mob=W<520,rh=mob?32:36,c=ec('tops',44+rh*order.length);
   const lw=mob?96:132,cw=(W-lw-16)/E.length,rmax=Math.min(cw*.62,rh*.98),smax=Math.max(.01,...M.flatMap(x=>x.sh));
