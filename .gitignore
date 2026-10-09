@@ -16,3 +16,5 @@
 **/*.sqlite3
 **/*.parquet
 .DS_Store
+**/.wrangler/
+*.log

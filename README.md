@@ -1,77 +1,117 @@
-# Starwatch
+<p align="center">
+  <a href="https://starwatch.agenticanalytics.cz"><img src="app/web/img/og.png" alt="Starwatch: who's being heard, not just who's talking" width="760"></a>
+</p>
 
-**Find the issue. Follow the evidence.**
+<h1 align="center">Starwatch</h1>
 
-Starwatch is a visual workspace for exploring public political activity across ten Czech cities. Start on a map, find a person or party/list, inspect posts and videos, follow quoted statements to their sources, and compare observed activity with its dates and coverage gaps.
+<p align="center"><strong>Who's being heard. Not just who's talking.</strong></p>
 
-Built by Daniel Večeřa, team DANDAPANDA, for the Agents 0.0.7 hackathon in Prague on 8–9 October 2026, Social Media Deep Research track.
+<p align="center">
+  <a href="https://starwatch.agenticanalytics.cz"><img alt="Open Starwatch" src="https://img.shields.io/badge/Open_Starwatch-starwatch.agenticanalytics.cz-0E6E6B"></a>
+  <a href="https://www.linkedin.com/in/1vecera/"><img alt="Daniel Večeřa on LinkedIn" src="https://img.shields.io/badge/LinkedIn-Daniel_Ve%C4%8De%C5%99a-0A66C2"></a>
+  <a href="https://x.com/1vecera"><img alt="Daniel Večeřa on X" src="https://img.shields.io/badge/X-%401vecera-0F172A"></a>
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-0F172A"></a>
+</p>
 
-## Run the interface
+Starwatch maps what candidates in the 2026 Czech municipal elections publish on social media and how much attention it gets. It covers the city-council races in the ten largest Czech cities: Praha, Brno, Ostrava, Plzeň, Liberec, Olomouc, České Budějovice, Hradec Králové, Pardubice and Ústí nad Labem, with 5,405 registered candidacies on 127 lists. Every post is attributed only after the account's owner was checked independently, and every post links back to the original.
 
-Install Python 3.12+ and [uv](https://docs.astral.sh/uv/), then run:
+**Live: [starwatch.agenticanalytics.cz](https://starwatch.agenticanalytics.cz).** The welcome page is public; sign in with any GitHub, Google or Facebook account to open the app.
 
-```sh
-./run.sh
-```
+> **A snapshot, not live monitoring.** The app shows public posts collected on 8–9 October 2026, just before the vote: over 12,000 posts from more than 100 verified candidate and party accounts on Instagram, Facebook, TikTok and X. Engagement is a dated observation of attention, not a measure of support. Following the Czech pre-election ban on publishing polls, Starwatch shows no polls, forecasts or betting odds.
 
-Open **http://127.0.0.1:5173/**. The public checkout starts with the explicitly labelled simulated universe. It requires no API credentials and launches no paid collection. The optional online map uses OpenFreeMap; a local geographic fallback is included.
-
-The hackathon's collected research database, source media, recordings, credentials and private project notes are not distributed in this repository. The recorded demonstration uses the separately retained local evidence snapshot. To connect your own authorized checkpoint, see [the export contract](app/tools/RAW_FORMAT.md) and [pipeline setup](pipeline/README.md); `app/tools/export_real.py --project /path/to/project` accepts an explicit project root.
+Built by [Daniel Večeřa](#author) in one night at [Agents 0.0.7](https://agents007.ai) in Prague (8–9 October 2026) as team DANDAPANDA in the Social Media Deep Research track, then cleaned up for public release. The tag [`hackathon-freeze`](https://github.com/1vecera/starwatch/tree/hackathon-freeze) marks the state that was judged.
 
 ## Screens
 
-| Screen | Purpose |
+| Screen | What it shows |
 | --- | --- |
-| Star Atlas | Explore Czechia, a city, parties/lists, people and their source assets. |
-| Spotlight | Inspect one entity, its posts, quoted statements, observed metrics and source links. |
-| Pulse | Compare entities with separate measures and visible observation windows. |
-| Radar | Inspect a watchlist and observed baseline/replay activity. |
-| Studio | Organize cited evidence, edit a local draft and preview it; nothing is published. |
-| By the numbers | Inspect available coverage by platform, city and list. |
+| **Star Atlas** | A map of Czechia. Pick a city and fly into its streets; each list becomes an island of its posts, sized by reach. Rank by reach, views, likes and comments, or number of posts. |
+| **Spotlight** | One candidate or list: portrait or logo, 2022 results where they match, best posts with video playback, quoted statements, topics and links to the sources. |
+| **Pulse** | People or lists side by side. 2022 ballots and observed attention stay separate measures, each with its observation window, never merged into one score. |
+| **Radar** | A watchlist over the city map: who posted what and how it landed in the snapshot window. |
+| **By the numbers** | What the snapshot contains by platform, city and list, and what was not collected. |
+| **About** | Method, sources, limitations and who built it. |
+
+## How it works
+
+```mermaid
+flowchart LR
+  R["Official registry<br/>2026 candidacies, 2022 results"] --> P
+  A["Apify Actors<br/>public posts, profiles, media"] --> P
+  P["pipeline/<br/>ownership review, capped collection,<br/>DuckDB evidence graph"] --> E["app/tools/export_real.py<br/>snapshot + media"]
+  E --> W["app/web<br/>static HTML, CSS, JS"]
+  W --> H["AWS S3 + CloudFront<br/>behind Cloudflare sign-in"]
+```
+
+1. **Universe.** The official registry of 2026 candidacies and the 2022 results for the ten cities come from Czech Statistical Office open data.
+2. **Collection.** [Apify](https://apify.com) Actors find candidate and list accounts and collect their public posts, profile details and media. Every run has a hard cost cap and is recorded in a ledger. The lists' published programs and press mentions are gathered separately.
+3. **Evidence graph.** [`pipeline/`](pipeline/) attributes a post only when the account owner was confirmed by an independent public anchor, keeps uncertain matches as unknown, and writes immutable DuckDB checkpoints with dated metrics, reviewed topic labels and quoted statements.
+4. **Export.** [`app/tools/export_real.py`](app/tools/export_real.py) turns one checkpoint into the snapshot file and retained media that the screens load.
+5. **Static app.** [`app/web`](app/web/) is plain HTML, CSS and JavaScript with MapLibre and ECharts. There is no build step.
+6. **Hosting.** The site is a private S3 bucket behind CloudFront, fronted by Cloudflare. A Cloudflare Worker handles GitHub, Google and Facebook sign-in, and a CloudFront Function lets visitors without a session reach only the public welcome pages. The collected snapshot never enters Git.
+
+The full write-up is in [docs/architecture.md](docs/architecture.md) and [docs/methodology.md](docs/methodology.md).
+
+## Quick start
+
+You need Python 3.12 or newer and [uv](https://docs.astral.sh/uv/).
+
+```sh
+git clone https://github.com/1vecera/starwatch.git
+cd starwatch
+./run.sh
+```
+
+Open <http://127.0.0.1:5173/>. A fresh checkout runs the **simulated universe**: generated candidates, lists, posts and metrics at the real per-city scale, labelled "Simulated" on every screen. It needs no credentials and starts no paid collection. The base map loads from OpenFreeMap when online; a bundled outline of Czechia is the offline fallback.
+
+To collect your own data, set `APIFY_TOKEN` in your environment and follow [the Apify recipes](docs/apify-recipes.md) and the [pipeline guide](pipeline/README.md). The exporter's input format is described in [app/tools/RAW_FORMAT.md](app/tools/RAW_FORMAT.md).
+
+### Tests
+
+```sh
+(cd pipeline && uv sync && uv run --with pytest pytest)
+(cd app && uv run --with pytest pytest tools/test_serve.py)
+```
+
+Both suites use local fixtures only. The archived components keep their own tests; see [archive/README.md](archive/README.md).
 
 ## Repository map
 
-| Directory | Contents |
+| Path | Contents |
 | --- | --- |
-| [app](app/) | Current static HTML/CSS/JavaScript app, MapLibre/ECharts, branded assets, checkpoint exporter and local video-range server. |
-| [pipeline](pipeline/) | Python/DuckDB evidence graph, public-source ingestion, account-ownership checks, deterministic research selection, bounded collection accounting, classification validation and read API. |
-| [collector](collector/) | Earlier FastAPI/SQLite research engine, SSE progress, Apify adapters, transcription and evidence-linked research steps. |
-| [workspace](workspace/) | Local project workspace with Markdown overview, Kanban, decisions, architecture feedback, activity and agent CLI. |
-| [archive](archive/) | Earlier source snapshots and visual prototypes, retained for completeness. They are historical, not the current entry point. |
+| [`app/`](app/) | The static app, the snapshot exporter and a small local server with HTTP range support for video. |
+| [`pipeline/`](pipeline/) | The evidence pipeline (`czlake`): official data, account discovery and ownership review, capped Apify collection, media retention, topic labels, DuckDB checkpoints and a read-only local API. |
+| [`deploy/`](deploy/) | The Cloudflare sign-in Worker and the CloudFront gate. |
+| [`docs/`](docs/) | The story, method, architecture, Apify recipes, learnings and the privacy and ethics notes. |
+| [`recipes/`](recipes/) | Reusable Apify Actor inputs described in the recipes guide. |
+| [`archive/`](archive/) | Earlier hackathon code: the first research engine, prototypes and the project control room. Not needed to run Starwatch. |
 
-Each Python component has its own `pyproject.toml` and lockfile. The workspace's React/XYFlow frontend includes source and its compiled local bundle. The archive excludes retained research fixtures; those prototypes may require local inputs.
+## Documentation
 
-## Evidence and limitations
+- [docs/README.md](docs/README.md): index of the documentation
+- [docs/story.md](docs/story.md): how Starwatch was built in one night, and what changed for the public release
+- [docs/apify-recipes.md](docs/apify-recipes.md): the Apify Actors, inputs, caps and costs used for collection
+- [docs/learnings.md](docs/learnings.md): what worked, what did not, and what to do differently
+- [docs/methodology.md](docs/methodology.md): universe, attribution rules, metrics and their limits
+- [docs/architecture.md](docs/architecture.md): pipeline, export, static app and hosting
+- [docs/privacy-and-ethics.md](docs/privacy-and-ethics.md): what is collected, what is not, and why
+- [docs/collection/programs-and-articles.md](docs/collection/programs-and-articles.md): how list programs and press mentions were found
 
-The local demo snapshot checked on 9 October contained 10,697 attributed public posts from 88 independently anchored accounts, alongside the 5,405 valid registered candidacies and 127 lists in the ten-city universe. These are different populations: registry inclusion does not mean an account or post was found. Instagram and Facebook have observed posts; other platforms and historical coverage remain incomplete.
+## Principles
 
-Metrics are dated observations, not measurements of electoral support. A source statement is not independently verified truth. Account ownership, asset authorship, mention, depicted person and quoted speaker remain separate evidence questions. Unknown values and missing coverage are retained. Municipal candidate vote totals may include whole-list allocation and must not be read as preference-only votes.
+Starwatch covers public politicians and public sources only. It does not collect comments, commenters or follower lists, does not profile voters, does not infer sensitive traits, and does not score anyone's character or trustworthiness. Account ownership, authorship, mentions and quoted speakers are kept as separate questions, and unknowns stay unknown. Candidate vote totals from 2022 include whole-list allocation and are not preference-only votes. The app links to original posts; the collected snapshot is served only behind sign-in and is not part of this repository.
 
-Collection happened during the hackathon, but the app consumes exported snapshots. Scheduled continuous monitoring, complete histories and a full live goal-dependent research flow are not demonstrated by the current app. Studio uses local templates, and its drafts are never sent. The sign-in screen is a prototype, not production authentication. The local servers bind to loopback and are not a hardened public deployment.
+Corrections and removal requests are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md). Security issues: see [SECURITY.md](SECURITY.md).
 
-## Validation
+## Author
 
-```sh
-cd app
-uv run --with pytest pytest tools/test_serve.py
+**Daniel Večeřa**, Prague.
 
-cd ../pipeline
-uv sync
-uv run --with pytest pytest
+- LinkedIn: [linkedin.com/in/1vecera](https://www.linkedin.com/in/1vecera/)
+- X: [@1vecera](https://x.com/1vecera)
 
-cd ../collector
-uv sync
-uv run pytest
+If Starwatch is useful to you, or you want something like it for another election, country or question, get in touch on LinkedIn or X.
 
-cd ../workspace
-uv sync
-uv run --with pytest pytest
-```
+## License
 
-The app's `tools/walkthrough.mjs` and `tools/check-atlas-c.mjs` are browser checks for the locally collected demonstration and need its data plus Playwright. They are not prerequisites for starting the public simulated interface.
-
-## Tools
-
-Apify Actors collect public sources; Python, DuckDB and PyIceberg organize evidence; ElevenLabs Scribe supports retained transcription in the research engine. The video soundtrack was generated with ElevenLabs Music. The app uses static JavaScript, MapLibre and ECharts; the separate workspace uses React and XYFlow. Credentials are supplied locally through environment variables, never through committed files.
-
-Third-party components retain their own notices and licenses. No additional license grant for the project source is declared in this submission.
+The code and documentation are released under the [MIT License](LICENSE). Third-party components keep their own licenses: MapLibre GL JS (BSD-3-Clause) and Apache ECharts (Apache-2.0) in [`app/web/vendor`](app/web/vendor/), the Czech boundaries from [siwekm/czech-geojson](https://github.com/siwekm/czech-geojson) (CC BY 4.0, derived from ČÚZK open data), and the self-hosted fonts in the archived prototypes (SIL Open Font License 1.1, notices beside the files). Posts, images and videos shown in the app belong to their authors and are not covered by this license.
