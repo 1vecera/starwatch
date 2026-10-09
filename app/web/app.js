@@ -23,7 +23,7 @@ st.textContent=`@view-transition{navigation:auto}.sw-chrome{view-transition-name
 @media (max-width:1440px){.sw-data .d-l{display:none}}
 @media (max-width:1100px){.sw-data .d-u{display:none}}
 @media (max-width:860px){.sw-data{margin-left:2px;padding:6px 10px 6px 8px}}
-@media (max-width:380px){.sw-data .d-w{display:none}}
+@media (max-width:340px){.sw-data .d-w{display:none}}
 .clm{margin:6px 0;padding:8px 12px;background:var(--sunken);border-radius:8px;font-size:13.5px;line-height:1.45;color:var(--label)}
 .cl-note{font-size:11px;color:var(--label3);margin-top:4px}`;
 document.head.appendChild(st);

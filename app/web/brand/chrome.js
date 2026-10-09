@@ -26,8 +26,8 @@ const EXTRA=[
  {k:'about',n:'About Starwatch',short:'About',href:'about.html',i:`<circle cx="11" cy="12.4" r="8.1"/><path d="M11 11.4v5"/>${DOT(11,8.4)}${SPK(star(18.6,5.4,3.3))}`}];
 /* the author, promoted on every screen, and the signed-in user's exits */
 const LINKS={linkedin:'https://www.linkedin.com/in/1vecera/',x:'https://x.com/1vecera',repo:'https://github.com/1vecera/starwatch',privacy:'/privacy',logout:'/auth/logout',about:'about.html'};
-const G_IN='<svg class="g" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.23 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>';
-const G_X='<svg class="g" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18.9 1.15h3.68l-8.04 9.19L24 22.85h-7.41l-5.8-7.58-6.64 7.58H.47l8.6-9.83L0 1.15h7.59l5.25 6.93zm-1.29 19.5h2.04L6.49 3.24H4.3z"/></svg>';
+const G_IN='<svg class="sw-g" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.23 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>';
+const G_X='<svg class="sw-g" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18.9 1.15h3.68l-8.04 9.19L24 22.85h-7.41l-5.8-7.58-6.64 7.58H.47l8.6-9.83L0 1.15h7.59l5.25 6.93zm-1.29 19.5h2.04L6.49 3.24H4.3z"/></svg>';
 const I_USER='<circle cx="12" cy="8.6" r="3.9"/><path d="M4.6 20.2c.9-3.6 3.9-5.7 7.4-5.7s6.5 2.1 7.4 5.7"/>';
 const I_OUT='<path d="M14 4.5h3.5a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H14"/><path d="M10 8l-4 4 4 4"/><path d="M6 12h9"/>';
 const I_EXT='<path d="M9 5H6.5A1.5 1.5 0 0 0 5 6.5v11A1.5 1.5 0 0 0 6.5 19h11a1.5 1.5 0 0 0 1.5-1.5V15"/><path d="M13 5h6v6"/><path d="M19 5l-8 8"/>';
@@ -76,8 +76,8 @@ function mount(host,opts){
   /* account menu: author, about, privacy, source, sign out */
   const acct=el.querySelector('.c-acct'),menu=el.querySelector('.c-menu');
   const menuOpen=()=>!menu.hidden;
-  function menuSet(on){menu.hidden=!on;acct.setAttribute('aria-expanded',on);if(on){const r=acct.getBoundingClientRect();menu.style.setProperty('--m-right',Math.max(8,innerWidth-r.right)+'px');requestAnimationFrame(()=>menu.classList.add('open'));const f=menu.querySelector('a');f&&f.focus({preventScroll:true})}else menu.classList.remove('open')}
-  acct.addEventListener('click',e=>{e.stopPropagation();menuSet(!menuOpen())});
+  function menuSet(on,kb){menu.hidden=!on;acct.setAttribute('aria-expanded',on);if(on){const r=acct.getBoundingClientRect();menu.style.setProperty('--m-right',Math.max(8,innerWidth-r.right)+'px');requestAnimationFrame(()=>menu.classList.add('open'));if(kb){const f=menu.querySelector('a');f&&f.focus({preventScroll:true})}}else menu.classList.remove('open')}
+  acct.addEventListener('click',e=>{e.stopPropagation();menuSet(!menuOpen(),e.detail===0)});
   document.addEventListener('pointerdown',e=>{if(menuOpen()&&!menu.contains(e.target)&&!acct.contains(e.target))menuSet(false)});
   menu.addEventListener('keydown',e=>{const it=[...menu.querySelectorAll('[role=menuitem]')],i=it.indexOf(document.activeElement);
     if(e.key==='ArrowDown'){e.preventDefault();it[(i+1)%it.length].focus()}else if(e.key==='ArrowUp'){e.preventDefault();it[(i-1+it.length)%it.length].focus()}});
