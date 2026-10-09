@@ -8,11 +8,11 @@ from types import SimpleNamespace
 from czlake import topic_machine as tm
 from czlake.production_labels import TOPICS
 
+FAKE_CUES = {"tramvaj": "transport", "byty": "housing", "škola": "education", "volte": "election_process"}
+
 
 class FakeMessages:
     """Answers like the model: a topic for each cue word found, quoting the cue as evidence."""
-
-    CUES = {"tramvaj": "transport", "byty": "housing", "škola": "education", "volte": "election_process"}
 
     def __init__(self, stop_reason="end_turn", answer=None):
         self.calls = []
@@ -26,7 +26,7 @@ class FakeMessages:
         for post in posts:
             words = post["text"].split()
             topics = [{"topic": topic, "evidence": " ".join(words[i:i + 2])}
-                      for i, word in enumerate(words) for cue, topic in self.CUES.items() if cue in word.lower()]
+                      for i, word in enumerate(words) for cue, topic in FAKE_CUES.items() if cue in word.lower()]
             items.append({"id": post["id"], "topics": topics})
         if self.answer is not None:
             items = self.answer(items)
@@ -143,6 +143,21 @@ class ClassifyTests(Scratch):
                             log=logs.append)
         self.assertEqual((len(messages.calls), stats["budget_stops"], stats["missing"]), (0, 1, 1))
         self.assertIn("budget", logs[0])
+
+    def test_a_failed_call_leaves_its_posts_for_the_next_run(self):
+        store = tm.Store(self.work, tm.MODELS["haiku"])
+
+        class Throttled(FakeMessages):
+            def create(self, **request):
+                raise RuntimeError("429 Too many requests")
+
+        stats = tm.classify([post("a", "Tramvaj")], store, client(Throttled()), budget=1.0, workers=1,
+                            log=lambda _: None)
+        self.assertEqual((stats["failed_batches"], stats["missing"]), (1, 1))
+        self.assertEqual(store.spent(), 0.0)
+        stats = tm.classify([post("a", "Tramvaj")], store, client(FakeMessages()), budget=1.0, workers=1,
+                            log=lambda _: None)
+        self.assertEqual(stats["answered"], 1)
 
     def test_truncated_answers_split_the_batch_and_missing_ids_are_retried_later(self):
         store = tm.Store(self.work, tm.MODELS["haiku"])

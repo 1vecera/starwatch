@@ -11,7 +11,9 @@ labels next to reviewed ones. Model answers are cached per asset ID and text has
 costs nothing, and every paid call is written to a spending ledger with a hard budget.
 
     uv run --with "anthropic[bedrock]>=1.11" python -m czlake.topic_machine \\
-        --snapshot ../app/web/data/real.js --work tmp/topics validate --model haiku
+        --snapshot ../app/web/data/real.js --work ../tmp/topics --model sonnet validate
+
+docs/collection/topic-labels.md describes the method, the validation and the limits.
 """
 from __future__ import annotations
 
@@ -521,6 +523,9 @@ def classify(posts: list[dict], store: Store, client=None, *, budget: float, siz
             except BudgetExceeded as error:
                 stats["budget_stops"] += 1
                 log(f"stopped: {error}")
+            except Exception as error:  # noqa: BLE001 - any API error; its posts stay unanswered for a rerun
+                stats["failed_batches"] += 1
+                log(f"batch failed, retry later: {type(error).__name__}")
             if number % 20 == 0:
                 log(f"{number}/{len(futures)} batches, {done}/{len(todo)} answered, ${store.spent():.2f} spent")
     stats["answered"] = done
@@ -606,8 +611,12 @@ def topic_id(label: str) -> str:
 def overlay(labels: dict[str, Label], *, models: dict[str, dict], validation: dict, coverage: dict,
             generated_at: str) -> dict:
     used = [m for m in models.values() if m["posts"]]
-    scope = "; ".join(f"{m['name']} read {m['posts']} posts published {m['published'][0]} to {m['published'][1]}"
-                      for m in used)
+    scope = "; ".join(f"{m['name']} labelled {m['posts']} posts published {m['published'][0]} to "
+                      f"{m['published'][1]}" for m in used)
+    if len(used) > 1:
+        split = max(m["published"][1] for m in used[1:])
+        scope += (f". Every post published after {split} was labelled by {used[0]['name']}; older posts that "
+                  "share a caption with a newer one reuse its answer")
     return {
         "generated_at": generated_at,
         "model": ", ".join(m["model"] for m in used),
