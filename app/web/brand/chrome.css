@@ -162,6 +162,7 @@
 }
 @media (max-width:480px){
   .c-logo .sw-word{display:none}.c-logo{padding:0 8px}
+  .sw-chrome>.c-seg{justify-self:stretch}
   .c-seg{position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));top:auto;height:62px;padding:5px;gap:2px;justify-content:space-between;background:rgba(255,255,255,.88)}
   .c-seg button,.c-seg button:not(.on){flex:1 1 0;width:auto;min-width:0;height:52px;flex-direction:column;justify-content:center;gap:3px;padding:0;border-radius:16px;font-size:11px;font-weight:550}
   .c-seg button:not(.on) .lbl{display:block}
