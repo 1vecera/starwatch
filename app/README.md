@@ -18,7 +18,7 @@ Made by [Daniel Večeřa](https://www.linkedin.com/in/1vecera/) ([X](https://x.c
 | **Star Atlas** | `atlas.html` | A map of Czechia with ten city markers sized by the chosen metric. A city opens its street map, with party islands of real posts sized by reach. Rank by reach, views, likes and comments, or posts. The side panel has a party or list finder, a party lens, topic chips with counts, platforms and time windows. The inspector shows posts with playback, 2022 results, the topic mix, and the program and news when present. |
 | **Spotlight** | `spotlight.html` | One person or list: best posts, 2022 result, a topic mix that filters the posts, program and promises, and news mentions. |
 | **Pulse** | `pulse.html` | Two to four people or lists side by side, in one city or across cities: cumulative attention, best posts, cadence, format mix, topic mix, and the 2022 result next to attention at collection. The two are never combined. |
-| **Radar** | `radar.html` | A watchlist for one city, replayed over the snapshot: what the watched people and lists published in the 48 hours before collection, with a city switch and the party finder. Review drafts quote their source and are never sent. |
+| **Radar** | `radar.html` | A watchlist for one city, replayed over the snapshot: what the watched people and lists published in the 48 hours before collection, how each post landed (reach, likes and comments, outliers against the account's own posts), and a link to every source. It has a city switch and the party finder. It is purely observational: it drafts nothing and suggests no replies. |
 | **By the numbers** | `data.html` | Posts available, playable videos, observed views, likes and comments, by platform, city and party. |
 | **About** | `about.html` | Public documentation: how to read each screen, data sources, snapshot coverage by platform and city, limitations, privacy, source code and the author. |
 
@@ -88,4 +88,4 @@ node tools/walkthrough.mjs http://127.0.0.1:5173    # screenshots of the main pa
 - Profile samples are recent and incomplete; follower counts are single snapshots, so no growth is claimed.
 - Ownership checks can miss or mis-assign accounts. "Not observed" is not the same as zero.
 - No polls, forecasts or betting odds are shown. Czech election law (§ 30(2) of Act 491/2001 Sb.) bans publishing poll results from 7 October until voting ends on 10 October 2026 at 14:00, and the exporter no longer carries forecast data.
-- Starwatch does not profile voters or commenters and stores no commenter records. Review drafts are never posted.
+- Starwatch does not profile voters or commenters, stores no commenter records, and writes no replies or messaging: every screen only shows what was published and how it landed.
