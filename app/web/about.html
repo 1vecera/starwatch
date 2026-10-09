@@ -254,7 +254,7 @@ summary::marker{color:var(--label3)}
     <div><dt>Likes and comments</dt><dd>Counts only. Starwatch never stores who liked or commented.</dd></div>
     <div><dt>Not observed</dt><dd>No verified account or no reported counter. Shown dashed or as a dash, never as zero.</dd></div>
     <div><dt>2022 results</dt><dd>Official ČSÚ results of the 2022 municipal elections, matched to 2026 lists and candidates where the match is unambiguous. History, not a forecast.</dd></div>
-    <div><dt>Topic labels</dt><dd>Machine-labelled from the post text, and they may be wrong. Only some posts carry one; see the coverage below.</dd></div>
+    <div><dt>Topic labels</dt><dd>Reviewed labels come from a checked sample; machine labels cover the rest, each backed by a quoted phrase, and can be wrong. Not every post carries one; see the coverage below.</dd></div>
   </dl>
 </section>
 
@@ -281,7 +281,7 @@ summary::marker{color:var(--label3)}
   </div>
   <div class="topics">
     <h3>Topic labels</h3>
-    <p id="t-line">Topic labels are machine-labelled from the post text and may be wrong.</p>
+    <p id="t-line">Topic labels sort posts into broad topics such as housing or transport. Reviewed labels come from a checked sample; machine labels cover the rest, each backed by a quoted phrase, and can be wrong.</p>
     <ul class="tl" id="t-list" aria-label="Topic labels with the number of posts that carry them"></ul>
   </div>
 </section>
@@ -295,7 +295,7 @@ summary::marker{color:var(--label3)}
     <li><h3>No polls or forecasts</h3><p>Czech election law (§ 30(2) of Act 491/2001 Sb.) bans publishing poll results from 7 October until voting ends on Saturday 10 October 2026 at 14:00. Starwatch shows no polls, forecasts or betting odds; 2022 results appear as history.</p></li>
     <li><h3>Identity checks</h3><p>Accounts were matched to registered candidates and lists with independent checks. They can still miss an account, or rarely attach one to a namesake. Spotted a mistake? Message Daniel on LinkedIn or X.</p></li>
     <li><h3>Missing platforms and history</h3><p>Only Instagram, Facebook, TikTok and X posts were collected; YouTube appears as accounts only, and news and web pages were not collected as posts. Each profile contributes its recent posts, not its full history, and most candidates have no verified account at all.</p></li>
-    <li><h3>Machine-made labels</h3><p>Topic labels and program summaries are written by machine and may be wrong. Quotes and links always point to the original wording.</p></li>
+    <li><h3>Machine-made labels</h3><p>Machine topic labels and program summaries are written by machine and can be wrong. Quotes and links always point to the original wording.</p></li>
   </ul>
 </section>
 
@@ -339,7 +339,7 @@ const T=P&&P.totals||{}, S=P&&P.snapshot||{};
 if(!P||!num(T.posts)){
   $('facts').textContent='Coverage figures are not available in this copy of Starwatch.';
   $('when').hidden=true;document.querySelector('.cov').hidden=true;
-  $('t-line').textContent='Topic labels are machine-labelled from the post text and may be wrong. Only some posts carry one.';
+  // the static sentence in #t-line stays as written
   $('t-list').hidden=true;
   return;
 }
@@ -387,9 +387,14 @@ if(rows.length){
 }else $('t-city').closest('.tw').hidden=true;
 
 // ---- topics ----
-const lab=num(T.topic_labelled_posts)?T.topic_labelled_posts:null;
-$('t-line').innerHTML='Topic labels are machine-labelled from the post text and may be wrong'+
-  (lab!=null?`; only <b>${fmt(lab)}</b> of <b>${fmt(T.posts)}</b> posts (${pct(lab,T.posts)}) carry one${num(T.topics)?` of the ${fmt(T.topics)} labels`:''}. A post can carry several.`:'. Only some posts carry one.');
+const SENT='Reviewed labels come from a checked sample; machine labels cover the rest, each backed by a quoted phrase, and can be wrong.';
+const all=num(T.topic_labelled_posts)?T.topic_labelled_posts:null;
+const rev=num(T.topic_reviewed_posts)?T.topic_reviewed_posts:all, mach=num(T.topic_machine_posts)&&T.topic_machine_posts>0?T.topic_machine_posts:0;
+const of=num(T.topics)?` (${fmt(T.topics)} topics in all)`:'';
+let cnt='';
+if(rev!=null&&mach)cnt=` In this snapshot <b>${fmt(rev)}</b> posts carry a reviewed label and <b>${fmt(mach)}</b> a machine label; together <b>${fmt(all!=null?all:rev+mach)}</b> of <b>${fmt(T.posts)}</b> posts (${pct(all!=null?all:rev+mach,T.posts)}) carry at least one${of}.`;
+else if(rev!=null)cnt=` In this snapshot <b>${fmt(rev)}</b> of <b>${fmt(T.posts)}</b> posts (${pct(rev,T.posts)}) carry a reviewed label${of}.`;
+$('t-line').innerHTML='Topic labels sort posts into broad topics such as housing or transport. '+SENT+cnt+(cnt?' A post can carry several.':'');
 const tops=Array.isArray(P.topics)?P.topics.filter(t=>t&&t.label&&t.posts):[];
 if(tops.length)$('t-list').innerHTML=tops.map(t=>`<li>${esc(t.label)}<span>${fmt(t.posts)}</span></li>`).join('');
 else $('t-list').hidden=true;
