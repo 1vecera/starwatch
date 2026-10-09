@@ -4,9 +4,10 @@ set -euo pipefail
 cd "$(dirname "$0")"
 mkdir -p web/data
 if [ -f tools/export_real.py ] && [ "${SKIP_EXPORT:-0}" != "1" ]; then
-  python3 tools/export_stats.py >/dev/null 2>&1 || true
   uv run --with duckdb python tools/export_real.py || echo "Real-data export failed; the app falls back to the simulated universe."
 fi
+# public aggregates for the About page (stdlib only; reads web/data/real.js when present)
+python3 tools/export_stats.py >/dev/null 2>&1 || true
 [ -f web/data/real.js ] || echo "window.SW_RAW=null;" > web/data/real.js
 [ -f web/data/issue-topics.js ] || echo "window.SW_ISSUES=null;" > web/data/issue-topics.js
 [ -f web/data/stats.js ] || echo "window.SW_STATS=null;" > web/data/stats.js
