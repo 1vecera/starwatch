@@ -1,0 +1,42 @@
+{
+  "queries": "\"Marek Zelenka\" \"Olomouc\" (instagram OR facebook)\n\"Irena Němcová\" \"Hradec Králové\" politik oficiální web",
+  "maxPagesPerQuery": 1,
+  "countryCode": "cz",
+  "searchLanguage": "cs",
+  "languageCode": "cs",
+  "mobileResults": false,
+  "includeUnfilteredResults": false,
+  "forceExactMatch": false,
+  "aiOverview": {
+    "scrapeFullAiOverview": false
+  },
+  "aiModeSearch": {
+    "enableAiMode": false
+  },
+  "geminiSearch": {
+    "enableGemini": false
+  },
+  "perplexitySearch": {
+    "enablePerplexity": false,
+    "returnImages": false,
+    "returnRelatedQuestions": false
+  },
+  "chatGptSearch": {
+    "enableChatGpt": false
+  },
+  "copilotSearch": {
+    "enableCopilot": false
+  },
+  "maximumLeadsEnrichmentRecords": 0,
+  "verifyLeadsEnrichmentEmails": false,
+  "linkProspecting": {
+    "brandName": ""
+  },
+  "websiteContentScraper": {
+    "enable": false
+  },
+  "focusOnPaidAds": false,
+  "saveHtml": false,
+  "saveHtmlToKeyValueStore": false,
+  "includeIcons": false
+}
