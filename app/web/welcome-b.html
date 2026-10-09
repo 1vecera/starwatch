@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Starwatch</title>
+<link rel="icon" href="brand/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0F172A; --ink3:#4F5E72; --paper:#F2F7F7; --night:#0C1413; --tile:#18211F; --teal:#0E6E6B;
+  --ease:cubic-bezier(.16,1,.3,1);
+  --font:'Schibsted Grotesk',-apple-system,'Segoe UI',system-ui,sans-serif;
+  --display:'Bricolage Grotesque','Schibsted Grotesk',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--night);overflow:hidden}
+body{font-family:var(--font);color:var(--ink);-webkit-font-smoothing:antialiased}
+body.idle,body.idle *{cursor:none}
+.stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;margin:-540px 0 0 -960px;overflow:hidden;background:var(--night)}
+
+/* background: a wall of genuine posts, each column drifting at its own speed (the one ambient loop) */
+.feed{position:absolute;inset:0;display:grid;grid-template-columns:repeat(8,1fr);gap:14px;padding:0 14px}
+.col{overflow:hidden;opacity:0;animation:in 1.6s var(--ease) forwards}
+.track{display:flex;flex-direction:column;gap:14px;will-change:transform;animation:drift linear infinite}
+.col:nth-child(even) .track{animation-name:drift-down}
+@keyframes drift{from{transform:translateY(0)}to{transform:translateY(calc(-50% - 7px))}}
+@keyframes drift-down{from{transform:translateY(calc(-50% - 7px))}to{transform:translateY(0)}}
+.tile{position:relative;aspect-ratio:4/5;border-radius:6px;overflow:hidden;background:var(--tile);flex:none}
+.tile img,.tile video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.tile b{position:absolute;left:8px;bottom:8px;background:var(--night);color:#fff;font:600 13px/1 var(--font);font-variant-numeric:lining-nums tabular-nums;padding:5px 7px 4px;border-radius:4px}
+
+/* foreground: one solid block, three things */
+.card{position:absolute;left:112px;top:50%;width:900px;transform:translateY(-50%);background:var(--paper);border-radius:14px;padding:64px 76px 52px;color:inherit;text-decoration:none;display:block;box-shadow:0 2px 4px rgb(0 0 0/.18),0 30px 70px -20px rgb(0 0 0/.55);opacity:0;animation:in .9s var(--ease) .1s forwards}
+.card:focus-visible{outline:3px solid var(--teal);outline-offset:4px}
+.brand{display:flex;align-items:center;gap:22px}
+.mark{width:84px;height:84px;overflow:visible}
+.mark g{animation:spin 1.6s var(--ease) .3s both}
+.mark path{fill:var(--teal);animation:join 1.6s var(--ease) .3s both}
+.mark path:nth-child(1){--dx:-26px;--dy:0}
+.mark path:nth-child(2){--dx:0;--dy:26px}
+.mark path:nth-child(3){--dx:26px;--dy:0}
+.mark path:nth-child(4){--dx:0;--dy:-26px}
+@keyframes join{from{opacity:0;transform:translate(var(--dx),var(--dy))}to{opacity:1;transform:none}}
+@keyframes spin{from{transform:rotate(-90deg)}to{transform:none}}
+.word{height:50px;width:auto;margin-top:4px}
+h1{font-family:var(--display);font-optical-sizing:auto;font-weight:720;font-size:92px;line-height:.98;letter-spacing:-.036em;margin-top:56px;text-wrap:balance}
+h1 span{color:var(--teal)}
+.credit{margin-top:44px;font-size:17px;color:var(--ink3);display:flex;justify-content:space-between;gap:24px}
+.credit kbd{font:600 14px/1 var(--font);border:1px solid rgba(15,23,42,.18);border-radius:5px;padding:4px 7px;color:var(--ink);background:#fff}
+.r{opacity:0;transform:translateY(16px);animation:rise 1s var(--ease) forwards}
+@keyframes rise{to{opacity:1;transform:none}}
+@keyframes in{to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.track{animation:none}.r,.col,.card,.mark g,.mark path{animation-duration:.01s;animation-delay:0s}}
+body{cursor:pointer}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="feed" id="feed" aria-label="The 48 most-viewed public posts by Czech politicians in the Starwatch data, with observed views"></div>
+  <a class="card" href="atlas.html" id="open" aria-label="Open Starwatch">
+    <div class="brand">
+      <svg class="mark" viewBox="-32 -32 64 64" aria-hidden="true"><g>
+        <path d="M-30,0L-10.06,8.55L-6.77,-1.31L-5.21,-0.79L-0.91,-5.09L-10.59,-8.32Z"/>
+        <path d="M0,30L8.55,10.06L-1.31,6.77L-0.79,5.21L-5.09,0.91L-8.32,10.59Z"/>
+        <path d="M30,0L10.06,-8.55L6.77,1.31L5.21,0.79L0.91,5.09L10.59,8.32Z"/>
+        <path d="M0,-30L-8.55,-10.06L1.31,-6.77L0.79,-5.21L5.09,-0.91L8.32,-10.59Z"/>
+      </g></svg>
+      <img class="word r" style="animation-delay:.9s" src="brand/wordmark.svg" alt="Starwatch">
+    </div>
+    <h1 class="r" style="animation-delay:1.3s">Who’s being heard. <span>Not just who’s talking.</span></h1>
+    <p class="credit r" style="animation-delay:1.8s"><span>Daniel Večeřa · DANDAPANDA · Agents 0.0.7, Prague</span><span><kbd>Enter</kbd></span></p>
+  </a>
+</div>
+<script>
+const TILES=[{"i":"media/21f8c2727978c72dd2ce6e03.jpg","v":1708389},{"i":"media/86441c3817122d16a76bcfed.jpg","v":1237271},{"i":"media/4d6ea7d4bbefc67e6a22eb49.jpg","v":771502},{"i":"media/76e2e84684964b63620ffce3.jpg","v":295463},{"i":"media/c26f83b45429d10b42134008.jpg","v":264134,"m":"media/8e9161f6795f3dc7bc3a2d16.mp4"},{"i":"media/f9662a8806d03c2dacc83837.jpg","v":231666},{"i":"media/be2962a1e92a9af64c4e1796.jpg","v":220611},{"i":"media/0cac4e16e0ade598be937d12.jpg","v":220003},{"i":"media/e52e6649dd2618ee2f9ca70b.jpg","v":213990},{"i":"media/5511331484fe4e0f7f810abd.jpg","v":199026},{"i":"media/29fe9b1d64c67380f71ada4d.jpg","v":196644},{"i":"media/fd8934402c9ba8c7c67277e6.jpg","v":185300},{"i":"media/6fe423d9a3215252da0f895b.jpg","v":173166},{"i":"media/0146c4a0e2d15c3efa9b87cf.jpg","v":162089},{"i":"media/10b4a951bc8d580a739c6d5c.jpg","v":124707},{"i":"media/3fc5bda0c787b8093ef8cf5c.jpg","v":112986},{"i":"media/4853ef8c6e0a85f02cbd632a.jpg","v":109875},{"i":"media/c0ad48a189e001fc13797f81.jpg","v":107939},{"i":"media/80824153a5827b63d7fb6c99.jpg","v":107005},{"i":"media/d8a04b8abd8943cb85aafddc.jpg","v":104965},{"i":"media/6dc0cb744f5e8ed38b802fa1.jpg","v":96200},{"i":"media/669c4eec6db3f611291e5ae1.jpg","v":93518,"m":"media/a06ca4d8e0ecf933374ef9b6.mp4"},{"i":"media/9d41ad95becdcf10dcf16007.jpg","v":93366},{"i":"media/aa9ab5584f77a1f144a2735c.jpg","v":81879},{"i":"media/997293b0d537e8383f885f2e.jpg","v":79294},{"i":"media/37d1145a31dd4278f99fe436.jpg","v":71837},{"i":"media/0fc9d0e996c90853b8c5ffbd.png","v":70300},{"i":"media/496f0fc8bb068e1c7d649168.jpg","v":67815},{"i":"media/7c949ad304789a33c72586e4.jpg","v":65847},{"i":"media/3f5dd3a5b518c3c6327fea1d.png","v":61700},{"i":"media/a64d0d1bad581c67536d3ac3.jpg","v":58232,"m":"media/c915d513be033271444cfd95.mp4"},{"i":"media/05ac90aeb419bcf5d31493b6.jpg","v":57884},{"i":"media/6136cbaa81550b091ce02ddd.jpg","v":56251},{"i":"media/49f1a8777887d708403c179e.jpg","v":55009},{"i":"media/62393656f8bd1ffd8e612136.jpg","v":54655,"m":"media/e82ffea80a63b79b8e032ad1.mp4"},{"i":"media/3e9a844e88c6803c25efeae8.jpg","v":50155},{"i":"media/6f4005c316cbe32e58363123.png","v":48900},{"i":"media/0c429b121ce268fbd117e8d0.png","v":48200},{"i":"media/95b753e4939de41f028d07c3.jpg","v":47389,"m":"media/c605dde931f8ed81b66107ea.mp4"},{"i":"media/042d46db1278a3c35c158a6b.jpg","v":46329},{"i":"media/7726cbd95c756a88cbcdaff0.jpg","v":43500},{"i":"media/9e413e72c3efb5b0137077fa.jpg","v":41219},{"i":"media/42baf49cc398ddcb2ae61b1c.jpg","v":40800},{"i":"media/c4f56ce74ff4db4e99461fc8.jpg","v":39660},{"i":"media/ed1df4d0963b8a1cfb12fae0.jpg","v":36485},{"i":"media/97d4e91186fdd12170a3f7fe.jpg","v":35900},{"i":"media/c96f5f1f2bebd2c2239eef02.jpg","v":35480},{"i":"media/7d959f9299f6d3001a18167b.jpg","v":31800}];
+(function(){
+  const feed=document.getElementById('feed'), N=8, cols=[...Array(N)].map(()=>[]);
+  TILES.forEach((t,i)=>cols[i%N].push(t));
+  const fmt=n=>n.toLocaleString('cs-CZ');
+  const speeds=[150,118,172,132,160,124,146,138], phase=[0,.37,.62,.18,.81,.44,.07,.55];
+  const tile=t=>`<figure class="tile"><img src="${t.i}" alt="" decoding="async">${t.m?`<video src="${t.m}" poster="${t.i}" muted autoplay loop playsinline preload="auto" aria-hidden="true"></video>`:''}<b>${fmt(t.v)}</b></figure>`;
+  cols.forEach((c,k)=>{
+    const html=c.map(tile).join('');
+    const col=document.createElement('div'); col.className='col'; col.style.animationDelay=(k*.08)+'s';
+    col.innerHTML=`<div class="track" style="animation-duration:${speeds[k]}s;animation-delay:-${(phase[k]*speeds[k]).toFixed(1)}s">${html}${html}</div>`;
+    feed.appendChild(col);
+  });
+  feed.querySelectorAll('video').forEach(v=>{v.muted=true;const p=v.play();if(p)p.catch(()=>{});});
+  feed.querySelectorAll('img').forEach(img=>img.addEventListener('error',()=>img.closest('.tile').remove()));
+  const stage=document.getElementById('stage');
+  const fit=()=>{stage.style.transform=`scale(${Math.min(innerWidth/1920,innerHeight/1080)})`};
+  addEventListener('resize',fit); fit();
+  addEventListener('click',e=>{e.preventDefault();swGo();});  /* a click anywhere opens the map */
+  addEventListener('keydown',e=>{
+    if(e.key==='Enter'||e.key==='ArrowRight'){e.preventDefault();swGo();}
+    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{});}
+  });
+  let t; const wake=()=>{document.body.classList.remove('idle');clearTimeout(t);t=setTimeout(()=>document.body.classList.add('idle'),2000)};
+  addEventListener('mousemove',wake); wake();
+})();
+</script>
+<script src="fx/welcome-go.js"></script>
+</body>
+</html>
