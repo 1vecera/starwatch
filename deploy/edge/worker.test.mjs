@@ -131,6 +131,9 @@ test('gate: Cloudflare-only, public welcome, signed-in app', async () => {
   assert.equal(anon.statusCode, 302);
   assert.equal(anon.headers.location.value, '/login?return=' + encodeURIComponent('/spotlight.html?who=kv2026:1'));
   assert.equal(g('/data/real.js').statusCode, 401);
+  assert.equal(g('/data/stats.js').uri, '/data/stats.js');
+  assert.equal(g('/nav.js').uri, '/nav.js');
+  assert.equal(g('/welcome/../data/real.js').statusCode, 401);
   assert.equal(g('/media/a.mp4').statusCode, 401);
   const session = await mintSession(KEY, 604800);
   const ok = g('/data/real.js', { session });

@@ -7,7 +7,7 @@ var SESSION_KEY = '__SESSION_KEY__';
 var ORIGIN_KEY = '__ORIGIN_KEY__';
 var LEGACY_ORIGIN_KEY = '__LEGACY_ORIGIN_KEY__';
 var TTL = 604800;
-var PUBLIC = /^\/(index\.html|welcome\.html|about\.html|robots\.txt|og\.png|favicon\.svg|manifest\.webmanifest|ds\.css|(welcome|brand|fx|img|fonts)\/.+)$/;
+var PUBLIC = /^\/(index\.html|welcome\.html|about\.html|robots\.txt|og\.png|favicon\.svg|manifest\.webmanifest|ds\.css|nav\.js|data\/stats\.js|(welcome|brand|fx|img|fonts)\/[^\/].*)$/;
 
 function same(a, b) {
     if (!a || !b) return false;
@@ -54,7 +54,8 @@ function handler(event) {
     }
     if (!same(value, ORIGIN_KEY)) return deny(403);
     if (request.uri === '/') { request.uri = '/index.html'; return request; }
-    if (PUBLIC.test(request.uri) || signedIn(request)) return request;
+    var plain = !/(\.\.|\/\/|%|\\)/.test(request.uri);
+    if ((plain && PUBLIC.test(request.uri)) || signedIn(request)) return request;
     var page = /\.html$/.test(request.uri);
     return page ? deny(302, '/login?return=' + encodeURIComponent(request.uri + query(request.querystring))) : deny(401);
 }
