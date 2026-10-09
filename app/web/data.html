@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Starwatch · By the numbers</title>
+<link rel="icon" type="image/svg+xml" href="brand/favicon.svg">
+<link rel="stylesheet" href="ds.css">
+<link rel="stylesheet" href="brand/chrome.css">
+<script src="nav.js"></script>
+<style>
+/* By the numbers · Atlas C: only the posts available in Starwatch, told as an editorial ledger.
+   One teal accent = available posts; darker teal = playable video. Colour on party rows = WHO posted. */
+:root{--gut:32px;--maxw:1440px;--xo:cubic-bezier(.25,1,.5,1);--teal-deep:#0A4F4D;
+  --pane:rgba(255,255,255,.76);--pane-line:rgba(15,23,42,.08);
+  --pane-shadow:0 1px 1px rgba(15,23,42,.04),0 22px 48px -30px rgba(15,23,42,.32)}
+html{scroll-behavior:smooth}
+body{background:url(img/bg-topo.svg) center/cover fixed,url(img/bg-grid.svg) 0 0/192px repeat,var(--space);min-height:100%;overflow-x:hidden}
+main{position:relative;max-width:var(--maxw);margin:0 auto;padding:96px var(--gut) 64px}
+.pane{position:relative;background:var(--pane);-webkit-backdrop-filter:blur(14px) saturate(1.1);backdrop-filter:blur(14px) saturate(1.1);border:1px solid var(--pane-line);border-radius:20px;box-shadow:var(--pane-shadow);padding:28px 32px;min-width:0}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.pane{background:rgba(255,255,255,.95)}}
+.n{font-family:var(--display);font-optical-sizing:auto;font-variant-numeric:tabular-nums lining-nums;font-feature-settings:"tnum" 1,"lnum" 1;letter-spacing:-.035em;line-height:.9;color:var(--label);white-space:nowrap}
+.num{font-variant-numeric:tabular-nums}
+main b.num{font-family:var(--font);font-weight:600;letter-spacing:0}
+.kick{font:500 12px/1.4 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--label3)}
+.kick.lc{text-transform:none;letter-spacing:.02em}
+h2{font-size:22px;font-weight:650;letter-spacing:-.02em;line-height:1.15}
+.sec{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:22px}
+.sec .kick{text-align:right}
+.note{margin-top:22px;padding-top:14px;border-top:1px solid var(--hairline);font-size:12.5px;line-height:1.5;color:var(--label2)}
+.note span{display:block;max-width:64ch}
+.note b{color:var(--label);font-weight:600}
+.tr{height:10px;border-radius:5px;background:rgba(15,23,42,.07);overflow:hidden}
+.tr i{display:block;height:100%;background:var(--brand);border-radius:5px;transform-origin:left;transform:scaleX(0);transition:transform 1.2s var(--xo) .15s}
+.go .tr i{transform:scaleX(1)}
+
+/* reveal: one orchestrated stagger for the whole view */
+.rv{opacity:0;transform:translateY(14px)}
+.go .rv{animation:rv .7s var(--xo) both;animation-delay:calc(var(--i,0)*70ms)}
+@keyframes rv{to{opacity:1;transform:none}}
+
+/* ---------- lead ---------- */
+.lead{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:0 56px;padding:36px 40px 36px}
+.lead .eyebrow{grid-column:1/-1;display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px;margin-bottom:14px}
+.lead .big{font-size:clamp(96px,16vw,248px);font-weight:750;margin-left:-.045em;color:var(--label)}
+.lead h1{margin-top:18px;font-size:clamp(21px,2vw,29px);font-weight:650;letter-spacing:-.02em;line-height:1.3;max-width:30ch}
+.lead h1 em{font-style:normal;color:var(--label2);font-weight:500}
+.lead .side{align-self:end;display:flex;flex-direction:column;padding-bottom:6px}
+.stat{display:grid;grid-template-columns:auto 1fr;align-items:baseline;gap:4px 20px;padding:20px 0;border-top:1px solid var(--hairline)}
+.stat:first-child{border-top:0;padding-top:0}
+.stat .n{font-size:clamp(46px,4.8vw,72px);font-weight:650}
+.stat .n.teal{color:var(--brand)}
+.stat .l{font-size:14.5px;font-weight:600;line-height:1.3}
+.stat .l small{display:block;font-weight:400;font-size:12.5px;line-height:1.45;color:#334155;margin-top:3px}
+.stat .l small b{color:var(--label);font-weight:600}
+
+.g{display:grid;gap:20px;margin-top:20px}
+.g2{grid-template-columns:minmax(0,2.1fr) minmax(0,1fr)}
+
+/* attention: three readings in one ledger, not three cards */
+.att{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr)}
+.att>div{padding:4px 24px 4px 0;min-width:0}
+.att>div+div{padding-left:24px;border-left:1px solid var(--hairline)}
+.att .n{font-size:clamp(32px,2.9vw,46px);font-weight:650}
+.att .n.lg{font-size:clamp(36px,3.3vw,54px)}
+.att .l{margin-top:10px;font-size:14px;font-weight:600}
+.att .l small{display:block;font-weight:400;font-size:12.5px;color:var(--label2);margin-top:3px;line-height:1.45}
+.att .l small b{color:var(--label);font-weight:600}
+
+/* platforms */
+.pf{padding:14px 0;border-top:1px solid var(--hairline)}
+.pf:first-child{border-top:0;padding-top:0}
+.pfh{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:10px}
+.pfh b{font-size:15px;font-weight:650}
+.pfh .n{font-size:44px;font-weight:650}
+.pf small{display:block;margin-top:7px;font-size:12px;color:var(--label3)}
+
+/* by city: small multiples on one scale */
+.cities{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));border-top:1px solid var(--hairline)}
+.city{padding:16px 12px 4px;min-width:0}
+.city+.city{border-left:1px solid var(--hairline)}
+.city h3{font-size:14px;font-weight:650;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.city .cv{font-family:var(--display);font-variant-numeric:tabular-nums;font-size:30px;font-weight:650;letter-spacing:-.03em;margin-top:10px;line-height:1}
+.city .cl{font-size:11.5px;color:var(--label3);margin-top:3px}
+.city .col{height:96px;margin:14px 0 12px;display:flex;align-items:flex-end;background:linear-gradient(var(--hairline),var(--hairline)) bottom/100% 1px no-repeat}
+.city .col .p{position:relative;display:flex;align-items:flex-end;width:44%;max-width:40px;background:var(--brand);border-radius:3px 3px 0 0;overflow:hidden;transform-origin:bottom;transform:scaleY(0);transition:transform 1.1s var(--xo) .2s}
+.city .col .p i{display:block;width:100%;background:var(--teal-deep)}
+.go .city .col .p{transform:scaleY(1)}
+.city dl{display:grid;grid-template-columns:1fr auto;gap:3px 6px;font-size:12px;color:var(--label2)}
+.city dd{text-align:right;font-variant-numeric:tabular-nums;font-weight:600;color:var(--label)}
+.ckey{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:16px;font-size:12px;color:var(--label2)}
+.ckey span{display:inline-flex;align-items:center;gap:7px}
+.sw{flex:none;width:12px;height:12px;border-radius:3px;background:var(--brand)}
+.sw.v{background:var(--teal-deep)}
+
+/* by party or list: ranked rows */
+.parties{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 48px;grid-auto-flow:column;grid-template-rows:repeat(7,auto)}
+.pr{display:grid;grid-template-columns:22px minmax(0,150px) minmax(0,1fr) 64px 58px;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--hairline)}
+.pr .rk{font:500 11px var(--mono);color:var(--label3);text-align:right}
+.pr b{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pr b .dot{flex:none}
+.pr .pv{font-family:var(--display);font-variant-numeric:tabular-nums;font-size:20px;font-weight:650;letter-spacing:-.02em;text-align:right}
+.pr small{font-size:11.5px;color:var(--label3);text-align:right;white-space:nowrap}
+.pr.more b{color:var(--label2);font-weight:500}
+.pr.more .pv{color:var(--label2)}
+.pr.more .tr{visibility:hidden}
+
+.foot{margin:22px auto 0;max-width:62ch;text-align:center;font-size:12.5px;line-height:1.55;color:var(--label2)}
+
+@media (max-width:1180px){
+  .cities{grid-template-columns:repeat(5,minmax(0,1fr))}
+  .city:nth-child(6){border-left:0}
+  .city:nth-child(n+6){border-top:1px solid var(--hairline)}
+  .parties{grid-template-columns:1fr;grid-auto-flow:row;grid-template-rows:none}
+}
+@media (max-width:980px){
+  :root{--gut:16px}
+  main{padding-top:84px}
+  .lead{grid-template-columns:1fr;padding:26px 22px 24px}
+  .lead .side{margin-top:28px}
+  .g2{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  main{padding:76px var(--gut) 112px}
+  .att .n,.att .n.lg{font-size:44px}
+  .city .col{height:64px}
+  .pane{padding:22px 18px;border-radius:16px}
+  .lead{padding:22px 18px}
+  .lead .eyebrow{flex-direction:column}
+  .lead .big{font-size:clamp(88px,27vw,140px)}
+  .sec{flex-direction:column;gap:6px}
+  .sec .kick{text-align:left}
+  .att{grid-template-columns:1fr}
+  .att>div{padding:16px 0}
+  .att>div:first-child{padding-top:0}
+  .att>div+div{padding-left:0;border-left:0;border-top:1px solid var(--hairline)}
+  .cities{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .city:nth-child(n){border-left:0;border-top:1px solid var(--hairline)}
+  .city:nth-child(2n){border-left:1px solid var(--hairline)}
+  .city:nth-child(-n+2){border-top:0}
+  .pr{grid-template-columns:18px minmax(0,1fr) 56px;grid-template-areas:"rk nm pv" ". tr tr";gap:6px 10px}
+  .pr .rk{grid-area:rk}.pr b{grid-area:nm}.pr .pv{grid-area:pv}.pr .tr{grid-area:tr}.pr small{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .rv{opacity:1;transform:none}
+  .go .rv{animation:none}
+  .tr i,.city .col .p{transition:none}
+}
+</style>
+<script src="fx/meta.js"></script>
+<link rel="stylesheet" href="fx/motion.css">
+<script src="fx/motion.js"></script>
+</head>
+<body>
+<main id="m" aria-labelledby="h1">
+
+<section class="pane lead rv" style="--i:0">
+  <div class="eyebrow">
+    <span class="kick">By the numbers</span>
+    <span class="kick lc" id="exp">Live production data</span>
+  </div>
+  <div>
+    <div class="n big" id="posts">10,697</div>
+    <h1 id="h1">posts available in Starwatch, <em>each from a candidate’s or list’s own verified account, across <span class="num" id="ncity">10</span> cities and <span class="num" id="nparty">27</span> parties and lists.</em></h1>
+  </div>
+  <div class="side">
+    <div class="stat"><div class="n teal" id="vids">2,178</div><div class="l">videos you can play<small>Retained footage that plays inside Starwatch, <b class="num" id="hours">26.4</b> hours in all.</small></div></div>
+    <div class="stat"><div class="n" id="imgs">4,122</div><div class="l">posts with an image<small>The original post image, retained so every card shows what was published.</small></div></div>
+  </div>
+</section>
+
+<div class="g g2">
+  <section class="pane rv" style="--i:1" aria-labelledby="h-att">
+    <div class="sec"><h2 id="h-att">Attention on these posts</h2><span class="kick">observed at collection</span></div>
+    <div class="att">
+      <div><div class="n lg" id="views">0</div><div class="l">views<small>On the <b class="num" id="nviews">3,913</b> posts whose platform shows a view count.</small></div></div>
+      <div><div class="n" id="likes">0</div><div class="l">likes<small>Summed over all available posts.</small></div></div>
+      <div><div class="n" id="comments">0</div><div class="l">comments<small>Counts only. No commenter is stored.</small></div></div>
+    </div>
+    <p class="note"><span><b>Observed on verified posts, not reach.</b> Platform counters read once, overnight. A view is not a unique person, and engagement does not measure support.</span></p>
+  </section>
+
+  <section class="pane rv" style="--i:2" aria-labelledby="h-pl">
+    <div class="sec"><h2 id="h-pl">By platform</h2><span class="kick">posts available</span></div>
+    <div class="plats" id="plats"></div>
+  </section>
+</div>
+
+<section class="pane g rv" style="--i:3" aria-labelledby="h-city">
+  <div class="sec"><h2 id="h-city">By city</h2><span class="kick">one scale for every city</span></div>
+  <div class="cities" id="cities" aria-label="Posts available per city"></div>
+  <div class="ckey"><span><span class="sw"></span>posts available</span><span><span class="sw v"></span>of which playable video</span></div>
+</section>
+
+<section class="pane g rv" style="--i:4" aria-labelledby="h-party">
+  <div class="sec"><h2 id="h-party">By party or list</h2><span class="kick" id="pk">posts available</span></div>
+  <div class="parties" id="parties"></div>
+  <p class="note" id="pnote"><span>Lists are grouped by their ballot short name across cities, so a party standing in several cities counts once.</span></p>
+</section>
+
+<p class="foot rv" style="--i:5">Posts from public accounts whose ownership by a registered candidate or list was verified, collected overnight on 8–9 October 2026 with Apify Actors. Recent posts per profile, so history is incomplete.</p>
+
+</main>
+
+<script src="data/stats.js"></script>
+<script src="data/real.js"></script>
+<script src="data/issue-topics.js"></script>
+<script src="mock.js"></script>
+<script src="sw-real.js" data-min-assets="0"></script>
+<script>
+(function(){
+"use strict";
+const S=window.SW_STATS||{}, R=window.SW_RAW||null, SW=window.SW||{};
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fmt=(v,d=0)=>Number(v).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+const short=v=>v>=1e6?fmt(v/1e6,1)+'M':v>=1e4?fmt(v/1e3,0)+'K':v>=1e3?fmt(v/1e3,1)+'K':fmt(v);
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $=id=>document.getElementById(id);
+
+// Only the posts available in Starwatch: the verified posts of the app export (independent of the sim/real toggle).
+const A=R&&R.assets?R.assets:[];
+const lists=R?R.lists:[], cityRows=R?R.cities:[];
+const own={},listOf={},L={};lists.forEach(l=>{L[l.id]=l;own[l.id]=l.city_id;listOf[l.id]=l.id});
+(R?R.cands:[]).forEach(c=>{own[c.id]=c.city_id;listOf[c.id]=c.list_id});
+const col={};(SW.lists||[]).forEach(l=>{if(l.id!=null&&l.col)col[l.id]=l.col});
+
+let views=0,nv=0,likes=0,comments=0,imgs=0,vids=0,dur=0;
+const city={};cityRows.forEach(c=>city[c.id]={name:c.name,posts:0,vids:0,views:0,likes:0});
+const party={},plat={};
+A.forEach(a=>{
+  if(a.views!=null){views+=a.views;nv++}likes+=a.likes||0;comments+=a.comments||0;
+  if(a.image)imgs++;if(a.video){vids++;dur+=a.duration_s||0}
+  const c=city[own[a.owner_entity_id]];if(c){c.posts++;c.views+=a.views||0;c.likes+=a.likes||0;if(a.video)c.vids++}
+  const l=L[listOf[a.owner_entity_id]];if(l){const k=l.short||l.name;const P=party[k]||(party[k]={name:k,full:l.name,posts:0,cities:new Set(),col:col[l.id]});P.posts++;P.cities.add(l.city_id);if(!P.col&&col[l.id])P.col=col[l.id]}
+  plat[a.platform]=(plat[a.platform]||0)+1;
+});
+// when the app export lags the manifest, the headline falls back to the manifest's verified count
+const nPosts=A.length||S.verified_posts||0;
+const cities=Object.values(city).filter(c=>c.posts).sort((a,b)=>b.posts-a.posts);
+const parties=Object.values(party).sort((a,b)=>b.posts-a.posts);
+
+// ---- by city: small multiples on one shared scale ----
+const mP=Math.max(1,...cities.map(c=>c.posts));
+$('cities').innerHTML=cities.map(c=>`<div class="city"><h3>${esc(c.name)}</h3>
+  <div class="cv" data-n="${c.posts}">${fmt(c.posts)}</div><div class="cl">posts</div>
+  <div class="col" role="img" aria-label="${esc(c.name)}: ${fmt(c.posts)} posts, ${fmt(c.vids)} playable videos"><span class="p" style="height:${Math.max(1.5,c.posts/mP*100)}%"><i style="height:${c.posts?c.vids/c.posts*100:0}%"></i></span></div>
+  <dl><dt>videos</dt><dd>${fmt(c.vids)}</dd><dt>views</dt><dd>${short(c.views)}</dd><dt>likes</dt><dd>${short(c.likes)}</dd></dl></div>`).join('');
+
+// ---- by party or list: ranked, top 12 ----
+const TOPN=12, mx=Math.max(1,...parties.map(p=>p.posts)), rest=parties.slice(TOPN);
+$('parties').innerHTML=parties.slice(0,TOPN).map((p,i)=>`<div class="pr" title="${esc(p.full)}"><span class="rk">${i+1}</span><b>${esc(p.name)}</b><div class="tr"><i style="width:${p.posts/mx*100}%"></i></div><span class="pv" data-n="${p.posts}">${fmt(p.posts)}</span><small>${p.cities.size} ${p.cities.size===1?'city':'cities'}</small></div>`).join('')
+  +(rest.length?`<div class="pr more"><span class="rk"></span><b>${rest.length} more lists</b><div class="tr"></div><span class="pv">${fmt(rest.reduce((s,p)=>s+p.posts,0))}</span><small></small></div>`:'');
+
+// ---- by platform: only platforms with available posts ----
+const PN={instagram:'Instagram',facebook:'Facebook',tiktok:'TikTok',youtube:'YouTube',x:'X',news:'News',web:'Web'};
+const pl=Object.entries(plat).sort((a,b)=>b[1]-a[1]);
+$('plats').innerHTML=pl.map(([k,n])=>`<div class="pf"><div class="pfh"><b>${PN[k]||esc(k)}</b><span class="n" data-n="${n}">${fmt(n)}</span></div><div class="tr"><i style="width:${n/nPosts*100}%"></i></div><small>${fmt(n/nPosts*100,1)}% of posts available</small></div>`).join('');
+
+// ---- headline and supporting figures ----
+$('nviews').textContent=fmt(nv);$('ncity').textContent=fmt(cities.length);$('nparty').textContent=fmt(parties.length);
+const ex=(R&&R.source&&R.source.exported_at)||S.exported_at;
+if(ex)$('exp').textContent='KV2026 municipal elections · live data exported '+new Date(ex).toLocaleString('en-GB',{timeZone:'Europe/Prague',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})+' Prague';
+
+// ---- count-up: tabular numerals, text only, exponential ease-out ----
+const targets=[[$('posts'),nPosts,0],[$('vids'),vids,0],[$('imgs'),imgs,0],[$('hours'),dur/3600,1],[$('views'),views,0],[$('likes'),likes,0],[$('comments'),comments,0]];
+document.querySelectorAll('[data-n]').forEach(el=>targets.push([el,+el.dataset.n,0]));
+targets.forEach(([el,v,d])=>el.textContent=fmt(v,d));
+const run=()=>{
+  document.body.classList.add('go');
+  if(reduce)return;
+  const t0=performance.now(), D=1900;
+  const step=t=>{const p=Math.min(1,(t-t0)/D), e=p===1?1:1-Math.pow(2,-10*p);
+    targets.forEach(([el,v,d])=>{el.textContent=fmt(d?v*e:Math.round(v*e),d)});
+    if(p<1)requestAnimationFrame(step)};
+  step(t0);requestAnimationFrame(step);
+};
+(document.fonts&&document.fonts.ready?Promise.race([document.fonts.ready,new Promise(r=>setTimeout(r,900))]):Promise.resolve()).then(()=>requestAnimationFrame(run));
+})();
+</script>
+<script src="brand/chrome.js"></script><script src="app.js" data-screen="data"></script>
+</body>
+</html>

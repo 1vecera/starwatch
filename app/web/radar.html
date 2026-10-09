@@ -1,0 +1,766 @@
+<!doctype html>
+<html lang="en">
+<!-- Radar uses verified retained observations in real mode; simulation remains a labelled interaction demo.
+     Rules never infer collection deltas, topic trends or follower growth from a single checkpoint. -->
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Starwatch Radar</title>
+<link rel="stylesheet" href="ds.css">
+<style>
+:root{--phone-w:430px;--phone-h:calc(100dvh - 96px);--t-post:var(--label2);--t-video:var(--label2);--t-spike:var(--label);--t-news:var(--label2);--t-topic:var(--label);--t-snap:var(--label2)}
+html,body{overflow:hidden;background:var(--space)}
+/* desktop frame: watchlist | phone feed | evidence rules */
+#stage{position:fixed;inset:0;display:grid;grid-template-columns:1fr auto 1fr;align-items:start;gap:20px;padding:78px 24px 18px}
+.side{width:300px;max-height:var(--phone-h);overflow:auto;scrollbar-width:none}.side::-webkit-scrollbar{display:none}
+.side.l{justify-self:end}.side.r{justify-self:start}
+.card{padding:20px 20px 18px}
+.kicker{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--label2)}
+.side h1{font-size:22px;font-weight:650;letter-spacing:-.025em;line-height:1.2;margin:10px 0 8px}
+.side h2{font-size:15px;font-weight:650;letter-spacing:-.01em}
+.side p{font-size:12.5px;line-height:1.55;color:var(--label2)}
+.cta{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}.cta .pill{height:32px;font-size:12.5px}
+.bounds{margin-top:18px;padding-top:14px;border-top:1px solid var(--hairline)}
+.bounds .t{display:flex;gap:7px;align-items:center;font-size:12px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--label2)}
+.bounds ul{list-style:none;margin-top:8px;display:grid;gap:6px}
+.bounds li{position:relative;padding-left:12px;font-size:12px;color:var(--label2);line-height:1.45}.bounds li::before{content:"";position:absolute;left:0;top:7px;width:4px;height:1px;background:var(--label3)}
+.wl-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:6px}
+.wl-h .t-sub{font-size:12px;color:var(--label2)}
+.wl-row{display:grid;grid-template-columns:32px minmax(0,1fr) auto;gap:10px;align-items:center;padding:11px 0}.wl-row+.wl-row{border-top:1px solid var(--hairline)}
+.wl-row .n{font-size:13px;font-weight:600;display:flex;gap:6px;align-items:center;flex-wrap:wrap;letter-spacing:-.005em}
+.wl-row .s{font-size:12px;color:var(--label2);margin-top:2px;line-height:1.4;font-variant-numeric:tabular-nums}
+.wl-row .s span{display:block;color:var(--label2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tag{font-size:11px;font-weight:600;padding:1px 6px;border-radius:4px;background:var(--sunken);color:var(--label2);white-space:nowrap}
+.tag.you{background:var(--brand-soft);color:var(--brand)}.tag.wait{background:transparent;border:1px dashed var(--hairline-strong);color:var(--label2)}.tag.ok{background:var(--brand-soft);color:var(--brand)}
+.tgl{width:30px;height:18px;border-radius:10px;background:#CBD5E1;position:relative;flex:none;transition:background .15s}.tgl::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--surface);transition:transform .15s}
+.tgl.on{background:var(--brand)}.tgl.on::after{transform:translateX(12px)}
+.wl-note{font-size:12px;color:var(--label2);line-height:1.45;margin-top:10px;padding-top:12px;border-top:1px solid var(--hairline)}
+.rules{margin-top:18px;padding-top:14px;border-top:1px solid var(--hairline)}
+.rules .rh{font-size:12px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--label2);margin-bottom:4px}
+.rules .rr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:start;padding:9px 0}.rules .rr+.rr{border-top:1px solid var(--hairline)}
+.rules .rr b{font-size:12.5px;font-weight:600;display:block}.rules .rr span{font-size:12px;color:var(--label2);display:block;margin-top:2px;line-height:1.4}
+.rules .rr .tag{margin-top:1px}
+.add{margin-top:12px;width:100%;justify-content:center;border-style:dashed;color:var(--label2)}
+/* phone */
+.phone-wrap{position:relative;justify-self:center}
+.phone{position:relative;width:var(--phone-w);height:var(--phone-h);border:1px solid var(--hairline-strong);border-radius:14px;background:var(--surface);overflow:hidden;box-shadow:var(--shadow)}
+.screen{position:relative;width:100%;height:100%;overflow:hidden;background:var(--surface);isolation:isolate}
+.sbar,.island,.homeind{display:none}.app{position:absolute;inset:0;overflow:hidden;background:var(--surface)}.app.behind{transform:none;filter:none}
+.scroll{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;padding:14px 0 32px}
+.nav{display:flex;align-items:center;gap:6px;padding:0 16px}
+.loc{display:flex;align-items:center;gap:6px;height:28px;padding:0 9px;border:1px solid var(--hairline);border-radius:6px;font-size:12px;font-weight:600}
+.cbtn{width:28px;height:28px;border-radius:6px;display:grid;place-items:center;color:var(--label2);flex:none}.cbtn:hover{background:var(--sunken);color:var(--label)}.cbtn svg{width:16px;height:16px}
+.ttl{display:flex;align-items:baseline;justify-content:space-between;padding:14px 16px 0;gap:12px}.ttl h1{font-size:26px;font-weight:650;letter-spacing:-.03em;line-height:1.1}
+.summary-count{font-size:12px;color:var(--label2);font-variant-numeric:tabular-nums}
+.live{display:flex;align-items:center;gap:6px;padding:5px 16px 0;font-size:12px;color:var(--label2);flex-wrap:wrap;line-height:1.5}.live i{width:6px;height:6px;border-radius:50%;background:var(--brand)}
+.chips{display:flex;gap:6px;padding:14px 16px 0;overflow-x:auto;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}
+.wchip{flex:none;display:flex;align-items:center;gap:6px;height:30px;padding:0 10px 0 3px;border-radius:15px;background:var(--surface);border:1px solid var(--hairline);font-size:12px;font-weight:500;color:var(--label)}
+.wchip:hover{border-color:var(--hairline-strong)}.wchip.on{background:var(--brand-soft);border-color:var(--brand);color:var(--brand)}
+.wchip.add{padding:0 10px;border-style:dashed;color:var(--label2);width:auto;margin:0}
+.av{flex:none;display:grid;place-items:center;border-radius:50%;font-weight:600;color:var(--label2);background:var(--sunken);letter-spacing:0}.av.sq{border-radius:6px}.av.focus{color:var(--brand);background:var(--brand-soft);box-shadow:inset 0 0 0 1px var(--brand)}
+.fseg .seg,.platform-filter .seg{padding:3px}.fseg{padding:12px 16px 0}.fseg .seg{display:flex;width:100%}.fseg button{flex:1;height:28px;padding:0 9px}
+.platform-filter{display:flex;align-items:center;gap:10px;margin:10px 16px 0}.platform-filter label{flex:none;font-size:12px;color:var(--label2)}
+.platform-filter select{flex:1;min-width:0;height:28px;background:var(--surface);color:var(--label);border:1px solid var(--hairline);border-radius:6px;padding:0 6px;font:500 12px var(--font)}
+.coverage-note{margin:12px 16px 0;padding:9px 11px;border-radius:6px;background:var(--sunken);font-size:12px;line-height:1.5;color:var(--label2)}.coverage-note strong{color:var(--label);font-weight:600}
+.grp{display:flex;align-items:baseline;gap:8px;margin-top:16px;padding:7px 16px;background:var(--sunken);border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)}
+.grp h2{font:600 13px var(--font);letter-spacing:0}.grp .d{font-size:12px;color:var(--label2)}.grp .n{margin-left:auto;font-size:12px;color:var(--label2);font-variant-numeric:tabular-nums}
+.feed{display:block}
+.al{position:relative;display:grid;grid-template-columns:56px minmax(0,1fr);gap:12px;width:100%;padding:12px 16px;background:var(--surface);text-align:left;cursor:pointer}
+.al+.al{border-top:1px solid var(--hairline)}
+.al:hover{background:#F8FAFC}.al:focus-visible{outline:2px solid var(--brand);outline-offset:-2px}
+.al.unread::before{content:"";position:absolute;left:6px;top:20px;width:5px;height:5px;border-radius:50%;background:var(--brand)}
+.al .th{position:relative;width:56px;height:56px;border-radius:6px;overflow:hidden;background:var(--sunken);display:block}
+.al .th img{width:100%;height:100%;object-fit:cover;display:block}
+.al .th.vid::after{content:"";position:absolute;right:4px;bottom:4px;width:16px;height:16px;border-radius:50%;background:rgba(15,23,42,.72) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M6 4.6v6.8l5.4-3.4z' fill='white'/%3E%3C/svg%3E") center/12px no-repeat}
+.al .th.icon{display:grid;place-items:center;color:var(--label2);background:var(--sunken)}.al .th.icon svg{width:22px;height:22px}
+.al-b{display:block;min-width:0}
+.al .top{display:flex;align-items:center;gap:6px;min-width:0}
+.al .ty{flex:none;font-size:11px;font-weight:600;color:var(--brand);background:var(--brand-soft);padding:1px 6px;border-radius:4px}
+.al .ty.base{color:var(--label2);background:transparent;border:1px dashed var(--hairline-strong);padding:1px 4px}
+.al .tm{margin-left:auto;flex:none;font-size:11px;color:var(--label2);white-space:nowrap;font-variant-numeric:tabular-nums}
+.al .who{display:block;font-size:13px;font-weight:650;margin-top:5px;letter-spacing:-.005em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.al .who em{font-style:normal;font-weight:500;color:var(--label2);font-size:12px;margin-left:4px}
+.al .bd{font-size:12.5px;line-height:1.45;color:var(--label2);margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.al .ft{display:flex;align-items:center;gap:5px;margin-top:6px;flex-wrap:wrap;font-size:11px;color:var(--label2);line-height:1.4}.al .ft i{font-style:normal;color:var(--hairline-strong)}.al .ft b{color:var(--label);font-weight:650}
+.al .ft .act{display:inline-flex;align-items:center;gap:4px;color:var(--brand);font-weight:600}.al .ft .act.base{color:var(--label2);font-weight:500}
+.hint{display:inline-flex;align-items:center;gap:4px;font-size:11px}
+.preview-empty{display:grid;place-items:center;height:100%;min-height:46px;color:var(--label2);background:var(--sunken);font-size:11px;text-align:center;padding:5px;border:1px dashed var(--hairline-strong);border-radius:inherit}
+.endnote{font-size:12px;color:var(--label2);padding:14px 16px 0;line-height:1.5;border-top:1px solid var(--hairline)}
+.source-link{display:inline-flex;align-items:center;gap:2px;color:var(--brand);font-size:12px;font-weight:550;line-height:1.5;text-decoration:none;margin-top:6px;overflow-wrap:anywhere}.source-link:hover{text-decoration:underline;text-underline-offset:3px}
+.evidence-label{display:inline-block;padding:2px 6px;margin:8px 5px 0 0;border-radius:4px;background:var(--sunken);color:var(--label2);font-size:11px;line-height:1.4}
+.claim-quote{padding:8px 0 0;margin-top:8px;border-top:1px solid var(--hairline);font-size:12px;line-height:1.5;color:var(--label2);overflow-wrap:anywhere}
+.tabs{display:none!important}
+/* local fixes for shared chrome on this screen (suggested upstream for app.js / chrome.css) */
+.sw-data{font-size:11px!important}.sw-data i{box-shadow:none!important;animation:none!important}.sw-kbd{font-size:11px!important}
+.al .th img,.al .th video{position:relative;z-index:1;transition:opacity .35s cubic-bezier(.25,1,.5,1)}video.ld{opacity:0}.al .th.vid::after{z-index:2}.reach-pill{z-index:2}.al .th.sk{border-radius:6px}.al.lead .th.sk{border-radius:8px}
+.al.rise{animation:rise .45s cubic-bezier(.25,1,.5,1) both}
+.bl-links{display:flex;flex-wrap:wrap;align-items:center;gap:3px;margin-top:5px;font-size:11px;color:var(--label2)}.bl-links a{display:inline-grid;place-items:center;min-width:20px;height:18px;padding:0 3px;border-radius:3px;background:var(--sunken);color:var(--brand);font:500 11px var(--mono);text-decoration:none}.bl-links a:hover{background:var(--brand-soft)}.bl-links a:first-of-type{margin-left:4px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.platform-filter .seg{flex:none}.platform-filter .seg button{height:22px;padding:0 9px;font-size:12px}
+.al.big{grid-template-columns:76px minmax(0,1fr)}.al.big .th{width:76px;height:76px}
+.al.lead{grid-template-columns:1fr;gap:10px;padding-top:14px}.al.lead .th{width:100%;height:auto;aspect-ratio:16/10;max-height:230px;border-radius:8px}
+.al.lead .th img,.al.lead .th video{object-fit:cover}.al.lead .th.vid::after{width:30px;height:30px;right:10px;bottom:10px;background-size:20px}
+.al.lead .bd{-webkit-line-clamp:3;font-size:13px;color:var(--label)}.al.lead .who{font-size:14px}
+.al.lead.unread::before{top:22px;left:6px}
+.reach-pill{position:absolute;left:10px;bottom:10px;padding:3px 7px;border-radius:4px;background:rgba(15,23,42,.78);color:#fff;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:0}
+.bare{display:block;width:calc(100% - 32px);margin:8px 16px 0;height:30px;border:1px dashed var(--hairline-strong);border-radius:6px;font-size:12px;color:var(--label2)}.bare:hover{color:var(--label);background:var(--sunken)}
+.av{position:relative;overflow:hidden}.av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:var(--surface)}.av.sq img{object-fit:contain;padding:2px}
+#stage::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:url(img/bg-topo.svg) center/cover no-repeat,url(img/bg-grid.svg) 0 0/192px repeat}
+#stage .side .glass.card{background:rgba(255,255,255,.9)!important}
+#stage .side .glass.card,#stage .phone{border:1px solid var(--hairline)!important;border-radius:16px;box-shadow:0 1px 2px rgba(15,23,42,.06),0 14px 36px -14px rgba(15,23,42,.20)!important}
+.scrim{position:absolute;inset:0;z-index:30;background:rgba(15,23,42,.06);opacity:0;pointer-events:none}.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:absolute;inset:0;z-index:35;background:var(--surface);transform:translateY(105%);display:flex;flex-direction:column;transition:transform .32s cubic-bezier(.25,1,.5,1)}.sheet.on{transform:none}.sheet.drag{transition:none}
+.sh-grab{flex:none;height:14px;display:grid;place-items:center;cursor:grab;touch-action:none}.sh-grab i{width:32px;height:3px;border-radius:3px;background:#CBD5E1}
+.sh-body{flex:1;overflow-y:auto;scrollbar-width:thin;padding:0 16px 24px}
+.sh-head{display:flex;align-items:center;gap:8px;touch-action:none;padding-top:2px}.sh-head .ico{display:none}
+.sh-head .meta{flex:1;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--label2);line-height:1.5}
+.sh-head .meta .ty{font-size:11px;font-weight:600;color:var(--brand);background:var(--brand-soft);padding:1px 6px;border-radius:4px}
+.sh-head .meta em{font-style:normal}
+.sh-title{font-family:var(--display);font-size:19px;font-weight:650;letter-spacing:-.02em;line-height:1.3;margin:12px 0 8px}
+.ent{display:inline-flex;align-items:center;gap:7px;max-width:100%;flex-wrap:wrap;font-size:12px;font-weight:600;line-height:1.4}.ent em{font-style:normal;font-weight:400;color:var(--label2);overflow-wrap:anywhere}
+.sec-l{font-size:12px;font-weight:650;letter-spacing:0;text-transform:none;color:var(--label2)}
+.box{margin-top:16px;padding-top:14px;border-top:1px solid var(--hairline)}
+.box h4{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:12px;font-weight:650;letter-spacing:0;text-transform:none;color:var(--label2);margin-bottom:10px;line-height:1.4}.box h4 em{font-style:normal;font-weight:500;letter-spacing:0;text-transform:none;font-size:12px}
+.media{display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;align-items:start}.media.has-player{display:block}
+.mthumb{width:100%;max-height:170px;border-radius:6px;overflow:hidden;background:var(--sunken)}.mthumb img{display:block;width:100%;height:100%;object-fit:cover}
+.asset-player{display:block;width:100%;max-height:300px;background:#0F172A;border-radius:8px;margin-bottom:12px}
+.playback-note{font-size:12px;color:var(--label2);line-height:1.5;margin-top:6px}
+.player-fallback{display:grid;gap:2px;padding:14px;border:1px dashed var(--hairline-strong);border-radius:8px;margin-bottom:12px;font-size:12px;color:var(--label2)}#shb [hidden]{display:none!important}
+.cap{font-size:13px;line-height:1.5;overflow-wrap:anywhere;color:var(--label)}.src{font-size:12px;color:var(--label2);margin-top:5px;line-height:1.45}
+.mgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin-top:12px;border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)}
+.mgrid>div{padding:8px 0 8px 10px}.mgrid>div+div{border-left:1px solid var(--hairline)}.mgrid>div:first-child{padding-left:0}
+.mgrid b{display:block;font-size:15px;font-weight:650;font-variant-numeric:tabular-nums;letter-spacing:-.01em}.mgrid span{font-size:11px;color:var(--label2)}
+.why .ratio{display:flex;align-items:baseline;gap:10px;margin-bottom:8px}.why .ratio b{font-size:26px;font-weight:650;letter-spacing:-.03em;font-variant-numeric:tabular-nums}.why .ratio span{font-size:12px;color:var(--label2);line-height:1.45}
+.why p{font-size:12px!important}
+.bars{display:grid;gap:7px}.bar{display:grid;grid-template-columns:90px 1fr 44px;gap:8px;align-items:center;font-size:12px;color:var(--label2)}.bar .tr{height:6px;background:var(--sunken);overflow:hidden;border-radius:1px}.bar .tr i{display:block;height:100%;background:var(--label2)!important}.bar b{text-align:right;color:var(--label);font-weight:600;font-variant-numeric:tabular-nums}
+.obs{display:flex;justify-content:space-between;gap:12px;margin-top:12px;border-top:1px solid var(--hairline);padding-top:10px}.obs div{flex:1;font-size:11px;color:var(--label2);line-height:1.5}.obs b{display:block;color:var(--label);font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}.obs div:last-child{text-align:right}
+.pa{margin-top:16px;padding:14px;border-radius:10px;background:var(--surface);border:1px solid var(--hairline-strong)}
+.pa-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.pa-h .k{font-size:14px;font-weight:650;display:flex;align-items:center;gap:7px;color:var(--label)}.pa-h .k svg{color:var(--brand)}
+.pa-h .dr{margin-left:auto;font-size:11px;font-weight:600;color:var(--label2);padding:2px 6px;border:1px dashed var(--hairline-strong);border-radius:4px}
+.pa-sub{font-size:12px;color:var(--label2);margin:6px 0 12px;line-height:1.5}.pa .seg{display:flex;width:100%}.pa .seg button{flex:1}
+.draft{margin-top:10px;min-height:96px;padding:12px 13px;border-radius:8px;background:var(--sunken);font-size:13px;line-height:1.6;color:var(--label);white-space:pre-wrap;overflow-wrap:anywhere}
+.draft[contenteditable=true]{outline:2px solid var(--brand);background:var(--surface)}.draft .ph{color:var(--brand);background:var(--brand-soft);border-radius:3px;padding:0 2px}
+.draft::before{content:"Czech draft";display:block;font:650 12px var(--font);letter-spacing:0;color:var(--label2);margin-bottom:4px}
+.thinking{display:flex;align-items:center;gap:7px;color:var(--label2);font-size:12px}.thinking i,.caret{display:none}.shimmer{color:var(--label2)}
+.gloss{margin-top:8px;padding:0 13px;font-size:12px;line-height:1.55;color:var(--label2);display:none}.gloss.on{display:block}.gloss b{display:block;font-size:12px;font-weight:650;letter-spacing:0;color:var(--label2);margin-bottom:3px}
+.ev{margin-top:14px;border-top:1px solid var(--hairline);padding-top:10px}.ev .l{font-size:12px;font-weight:650;letter-spacing:0;text-transform:none;color:var(--label2);margin-bottom:4px}
+.evr{display:grid;grid-template-columns:18px 1fr;gap:6px;align-items:start;padding:5px 0;font-size:12px;line-height:1.5;color:var(--label2);overflow-wrap:anywhere}.evr .n{font:500 11px var(--mono);color:var(--brand);padding-top:2px}.evr b{color:var(--label);font-weight:600}.evr .source-link{font-size:12px;margin-top:0}
+.acts{display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:7px;margin-top:12px}.acts .pill{min-width:0;height:34px;justify-content:center;font-size:12.5px;padding:0 11px;gap:6px}.acts svg{width:14px;height:14px;flex:none}.pill:disabled{opacity:.45;cursor:default}
+.guard{display:flex;gap:8px;margin-top:12px;font-size:11px;line-height:1.5;color:var(--label2)}.guard svg,.none svg{flex:none;margin-top:1px}
+.none{display:flex;gap:10px;align-items:flex-start;font-size:12px;line-height:1.5;color:var(--label2)}.pa.empty{border-style:dashed;border-color:var(--hairline-strong)}
+.sh-foot{display:flex;gap:8px;margin-top:16px}.sh-foot .pill{flex:1;justify-content:center;height:34px;font-size:12.5px}
+.lock{position:absolute;inset:0;z-index:50;background:var(--space);overflow:hidden}.lock.gone{display:none}.lock .lk{position:absolute;top:36px;left:0;right:0;text-align:center}.lock .lk>svg,.lock .bigstar,.lock .lw,.lock .qb{display:none}.lock .date{font-size:13px;color:var(--label2)}.lock .clock{font-size:36px;font-weight:600;line-height:1.5;font-variant-numeric:tabular-nums}
+.lock .stack{position:absolute;left:14px;right:14px;top:150px;display:grid;gap:10px}.ln{display:grid;grid-template-columns:24px 1fr;gap:9px;padding:12px;border-radius:10px;background:var(--surface);border:1px solid var(--hairline);cursor:pointer}.ln .app-ico{color:var(--brand)}.ln .h{display:flex;justify-content:space-between;gap:8px;font-size:12px;font-weight:600}.ln .h em{font-style:normal;font-size:11px;color:var(--label2);font-weight:400}.ln p{font-size:12px;line-height:1.5;color:var(--label2);margin-top:4px}.ln .pr{display:inline-flex;gap:5px;margin-top:6px;font-size:11px;color:var(--brand);font-weight:600}.lock .swipe{position:absolute;bottom:30px;left:0;right:0;text-align:center;font-size:12px;color:var(--label2)}
+.banner{position:absolute;top:8px;left:8px;right:8px;z-index:65;display:grid;grid-template-columns:24px 1fr;gap:9px;padding:12px;border-radius:10px;background:var(--surface);border:1px solid var(--hairline-strong);box-shadow:0 6px 18px rgba(15,23,42,.08);transform:translateY(-140%);transition:transform .32s cubic-bezier(.25,1,.5,1);cursor:pointer}.banner.on{transform:none}
+.toast{position:absolute;left:50%;bottom:20px;z-index:90;transform:translateX(-50%);display:none;align-items:center;gap:7px;min-height:36px;max-width:calc(100% - 28px);width:max-content;padding:9px 12px;border-radius:6px;background:var(--label);color:#fff;font-size:12px;font-weight:500;line-height:1.4;pointer-events:none}.toast.on{display:flex}.toast svg{flex:none}
+@media(max-width:1240px){.side{width:264px}#stage{gap:16px}}
+@media(max-width:1080px){.side{display:none}#stage{grid-template-columns:1fr}}
+@media(max-width:860px){#chrome .mid,#chrome kbd{display:none}:root{--phone-h:calc(100dvh - 60px - 62px - 36px - env(safe-area-inset-bottom))}#stage{padding:78px 16px 80px}}
+@media(max-width:600px){#chrome{display:none}#stage{padding:60px 0 0;display:block}.phone-wrap{width:100vw;height:calc(100dvh - 60px - 62px - env(safe-area-inset-bottom));zoom:1!important}.phone{width:100%;height:100%;border-radius:0;border:0;box-shadow:none}.scroll{padding-top:12px}#stage .phone{border:0!important;border-radius:0;box-shadow:none!important}#stage::before{display:none}}
+</style>
+<link rel="icon" type="image/svg+xml" href="brand/favicon.svg">
+<link rel="stylesheet" href="brand/chrome.css">
+<link rel="stylesheet" href="theme-c.css">
+<style id="radar-w3">
+/* Wave 3: a quiet map of the focus city behind translucent floating panels. Fonts and colours from ds.css; no glow. */
+:root{--pane:var(--surface-float-strong);--pane-hi:var(--surface-float-strong);--pane-blur:var(--blur-float);--pane-edge:rgba(15,23,42,.08);
+  --pane-shadow:inset 0 1px 0 rgba(255,255,255,.75),var(--elev-2);--phone-h:calc(100dvh - 94px)}
+html,body{background:#EEF2F6}
+#bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;background:radial-gradient(120% 95% at 50% 42%,#F8FAFC 0%,#EEF2F6 62%,#E6EBF1 100%)}
+#bg svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+#bg .kraj{fill:none;stroke:rgba(15,23,42,.07);stroke-width:1;vector-effect:non-scaling-stroke}
+#bg .city{fill:rgba(14,110,107,.07);stroke:rgba(14,110,107,.45);stroke-width:1.3;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+#bg .ring{fill:none;stroke:rgba(15,23,42,.085);stroke-width:1;vector-effect:non-scaling-stroke}#bg .ring.d{stroke-dasharray:1 6;stroke-linecap:round}
+#bg .tick{stroke:rgba(15,23,42,.16);stroke-width:1;vector-effect:non-scaling-stroke}
+#bg .lbl{font:500 11px var(--mono);letter-spacing:0;fill:rgba(15,23,42,.42)}
+#bg .ctr{fill:var(--brand)}
+#bg .sweep{opacity:0;transform-box:view-box}#bg .sweep.go{animation:sweep 2.6s cubic-bezier(.3,.1,.2,1) both}
+@keyframes sweep{0%{opacity:0;transform:rotate(-30deg)}12%{opacity:1}80%{opacity:1}100%{opacity:0;transform:rotate(330deg)}}
+#bg .ping{fill:none;stroke:var(--brand);stroke-width:1.4;vector-effect:non-scaling-stroke;opacity:0;transform-box:view-box}#bg .ping.go{animation:ping 2.2s cubic-bezier(.2,.7,.2,1) both}
+@keyframes ping{0%{opacity:.55;transform:scale(.08)}100%{opacity:0;transform:scale(1)}}
+#stage{z-index:1;padding:76px 24px 18px}#stage::before{display:none}
+/* floating panels */
+#stage .side .glass.card,#stage .phone{background:var(--pane)!important;backdrop-filter:var(--pane-blur)!important;-webkit-backdrop-filter:var(--pane-blur)!important;border:1px solid var(--pane-edge)!important;border-radius:18px;box-shadow:var(--pane-shadow)!important}
+#stage .phone{background:rgba(255,255,255,.92)!important}
+.screen,.app{background:transparent}
+.side{position:relative;transition:opacity .3s var(--ease),transform .35s var(--ease)}
+.side.off .card{display:none}
+.reopen{display:none;align-items:center;gap:8px;height:36px;padding:0 14px 0 12px;border-radius:999px;background:var(--pane);backdrop-filter:var(--pane-blur);-webkit-backdrop-filter:var(--pane-blur);border:1px solid var(--pane-edge);box-shadow:var(--pane-shadow);font-size:12.5px;font-weight:600;color:var(--label)}
+.reopen:hover{background:var(--pane-hi)}.side.off .reopen{display:inline-flex;animation:rise .35s var(--ease) both}.side.l .reopen{float:right}
+.reopen .stack{display:flex}.reopen .stack .av{margin-left:-7px;box-shadow:0 0 0 2px #fff}.reopen .stack .av:first-child{margin-left:0}
+.hide{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;color:var(--label2);flex:none;transition:background .15s,color .15s}.hide:hover{background:rgba(15,23,42,.06);color:var(--label)}.hide svg{width:15px;height:15px}
+/* avatars: portraits and logos when the data has them, tasteful initials otherwise; party colour as a thin ring */
+.av{background:#E9EEF3;color:var(--label2);font-weight:650;letter-spacing:-.01em}
+.av.ring{box-shadow:0 0 0 1.5px #fff,0 0 0 3px var(--pc,transparent)}
+.av.sq{border-radius:8px;background:#fff}.av.sq.ring{box-shadow:inset 0 0 0 1px var(--hairline),0 0 0 0 transparent}
+.av.sq img{padding:3px}
+/* watchlist */
+.wl-h{align-items:center;margin-bottom:2px}.wl-h h2{font:650 17px var(--display);letter-spacing:-.015em}.wl-h .t-sub{margin-left:auto}
+.wl-row{grid-template-columns:auto minmax(0,1fr) auto;gap:12px;padding:12px 0}.wl-row>.av{min-width:42px}
+.wl-row .n{font-size:13.5px}.wl-row .s{margin-top:3px}
+.wl-row .r22{display:flex;flex-wrap:wrap;gap:4px 8px;margin-top:5px;font-size:12px;color:var(--label2)}.wl-row .r22 b{color:var(--label);font-weight:650;font-variant-numeric:tabular-nums}
+.wl-row .r22 .el{color:var(--brand);font-weight:600}
+.tag{background:rgba(15,23,42,.05)}
+.tgl{background:#CBD5E1}
+/* feed */
+.scroll{padding:16px 0 32px}
+.ttl{align-items:center;padding:4px 18px 0}.ttl h1{font:650 28px var(--display);letter-spacing:-.03em}
+.ttl .city{font-size:13px;color:var(--label2);font-weight:500;margin-left:2px}
+.ttl .cbtn{margin-left:2px}.ttl .seg.o{margin-left:auto;padding:2px;background:rgba(15,23,42,.045);border-color:transparent}.ttl .seg.o button{height:26px;padding:0 10px;font-size:12px}
+.live{padding:6px 18px 0;color:var(--label2)}.live i{animation:none}
+.cov{padding:2px 18px 0;font-size:12px;color:var(--label2);line-height:1.5}
+.chips{padding:14px 18px 2px}.wchip{height:32px;padding:0 11px 0 4px;border-radius:16px;background:rgba(255,255,255,.7);border-color:var(--pane-edge);transition:background .15s,border-color .15s,color .15s}
+.wchip:hover{background:#fff}.wchip.on{background:var(--brand-soft)}
+.ctl{display:flex;align-items:center;gap:8px;padding:10px 18px 0}.ctl .seg{background:rgba(15,23,42,.045);border-color:transparent}.ctl .seg button{height:26px;padding:0 10px;font-size:12px;display:inline-flex;align-items:center;gap:5px}.ctl .seg button em{font-style:normal;color:var(--label2);font-weight:500;font-variant-numeric:tabular-nums}
+.ctl{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-mask:linear-gradient(90deg,#000 calc(100% - 28px),transparent)}.ctl::-webkit-scrollbar{display:none}.ctl .seg{flex:none}.ctl .seg.o{margin-left:auto}
+.media{display:block}.mthumb{width:100%;max-height:320px;margin-bottom:12px;border-radius:12px}
+#shx{border-radius:50%;background:rgba(15,23,42,.05);width:30px;height:30px}#shx:hover{background:rgba(15,23,42,.1)}
+@media(min-width:1400px){.side{width:320px}}
+.grp{margin:0;padding:18px 18px 6px;background:transparent;border:0}.grp h2{font:650 13px var(--font);letter-spacing:0;text-transform:none;color:var(--label2)}.grp .d{font-size:12px;color:var(--label2)}
+.al{grid-template-columns:64px minmax(0,1fr);gap:13px;padding:13px 18px;background:transparent;transition:background .2s}
+.al+.al{border-top:1px solid rgba(15,23,42,.06)}.al:hover{background:rgba(255,255,255,.66)}
+.al .th{width:64px;height:64px;border-radius:9px;box-shadow:inset 0 0 0 1px rgba(15,23,42,.06)}
+.al.big{grid-template-columns:92px minmax(0,1fr)}.al.big .th{width:92px;height:92px;border-radius:10px}
+.al.lead{padding:14px 18px 16px}.al.lead .th{aspect-ratio:16/9;max-height:250px;border-radius:12px}
+.al.lead+.al.lead{border-top:0}
+.al .th img,.al .th video{transition:opacity .45s var(--ease),transform .6s var(--ease)}.al:hover .th img{transform:scale(1.03)}
+.al.unread::before{left:7px}
+.al .who{display:flex;align-items:center;gap:7px;margin-top:6px;min-width:0}.al .who .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.al .who em{margin-left:0;flex:none}
+.al .ty{background:rgba(14,110,107,.09)}
+.al .ft{margin-top:7px}
+.reach-pill{left:12px;bottom:12px;padding:4px 9px;border-radius:999px;background:rgba(15,23,42,.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font-size:12px}
+.al.arrive{animation:arrive 1.6s var(--ease) both}
+@keyframes arrive{0%{opacity:0;transform:translateY(-16px);background:var(--brand-soft)}22%{opacity:1;transform:none;background:var(--brand-soft)}100%{background:transparent}}
+.al.nothumb{grid-template-columns:minmax(0,1fr)}
+.bare{width:calc(100% - 36px);margin:10px 18px 0;border-style:solid;border-color:var(--pane-edge);background:rgba(255,255,255,.5);border-radius:9px}
+.endnote{margin:18px 18px 0;padding:12px 0 0;border-top:1px solid rgba(15,23,42,.07)}
+/* sheet: the proposed answer is the hero */
+.scrim{background:rgba(15,23,42,.16);transition:opacity .35s var(--ease)}
+.app{transition:transform .46s var(--ease),filter .46s var(--ease)}.app.behind{transform:scale(.965) translateY(4px);filter:saturate(.85);border-radius:16px}
+#scr #sheet{top:12px;border-radius:18px 18px 0 0;background:rgba(255,255,255,.94)!important;backdrop-filter:blur(22px) saturate(1.2)!important;-webkit-backdrop-filter:blur(22px) saturate(1.2)!important;border:0!important;box-shadow:0 -1px 0 rgba(15,23,42,.06),0 -24px 48px -28px rgba(15,23,42,.4)!important;transition:transform .5s cubic-bezier(.2,.9,.22,1)}
+.sh-grab{height:18px}.sh-grab i{width:36px;height:4px;background:#CBD5E1}
+.sh-body{padding:0 18px 28px}
+.sheet.on .sh-body>*{animation:rise .5s var(--ease) both}.sheet.on .sh-body>*:nth-child(2){animation-delay:50ms}.sheet.on .sh-body>*:nth-child(3){animation-delay:90ms}.sheet.on .sh-body>*:nth-child(4){animation-delay:130ms}.sheet.on .sh-body>*:nth-child(5){animation-delay:170ms}.sheet.on .sh-body>*:nth-child(n+6){animation-delay:210ms}
+.sh-title{font-size:21px;line-height:1.25;margin:10px 0 12px;text-wrap:balance}
+.ent{display:flex;gap:10px;flex-wrap:nowrap;align-items:center}.ent .who2{display:grid;min-width:0}.ent .who2 b{font-size:13.5px;font-weight:650}.ent .who2 em{font-size:12px}
+.box{margin-top:18px;padding-top:16px;border-top:1px solid rgba(15,23,42,.07)}
+.asset-player{border-radius:12px;max-height:320px}
+.mthumb{border-radius:10px}
+.pa{margin-top:20px;padding:16px;border-radius:16px;background:linear-gradient(180deg,rgba(227,241,240,.75) 0,rgba(255,255,255,.95) 120px);border:1px solid rgba(14,110,107,.22);box-shadow:0 12px 30px -22px rgba(14,110,107,.45)}
+.pa-h .k{font:650 16px var(--display);letter-spacing:-.01em}
+.pa-h .dr{background:rgba(255,255,255,.8)}
+.pa .seg{background:rgba(255,255,255,.7)}
+.draft{position:relative;margin-top:12px;padding:14px 16px 14px 18px;background:#fff;border:1px solid rgba(15,23,42,.08);border-radius:12px;font-size:13.5px;line-height:1.68;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+.draft.in{animation:draftIn .45s var(--ease) both}@keyframes draftIn{from{opacity:.15;transform:translateY(4px)}to{opacity:1;transform:none}}
+.draft[contenteditable=true]{outline:2px solid var(--brand);outline-offset:1px}
+.gloss{margin-top:10px;padding:0 4px 0 18px;transition:opacity .4s var(--ease)}.gloss b{letter-spacing:0}
+.ev{margin-top:16px}.evr{grid-template-columns:22px 1fr;gap:8px;padding:6px 0}
+.evr .n{display:grid;place-items:center;width:18px;height:18px;padding:0;border-radius:50%;background:var(--brand-soft);color:var(--brand);font-size:10.5px;transition:background .3s,color .3s}.evr.lit .n{background:var(--brand);color:#fff}
+.acts .pill{height:36px;border-radius:10px}
+.sh-foot .pill{height:36px;border-radius:10px}
+.banner{background:rgba(255,255,255,.9);backdrop-filter:var(--pane-blur);-webkit-backdrop-filter:var(--pane-blur);border-color:var(--pane-edge);border-radius:14px;box-shadow:var(--pane-shadow);transition:transform .45s cubic-bezier(.2,.9,.22,1)}
+.lock .ln{opacity:0;transform:translateY(-12px) scale(.98);transition:opacity .45s var(--ease),transform .55s cubic-bezier(.2,.9,.22,1)}.lock .ln.in{opacity:1;transform:none}
+.lock{background:rgba(246,248,250,.94);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}.lock .ln{background:rgba(255,255,255,.9);border-color:var(--pane-edge);border-radius:14px;box-shadow:var(--pane-shadow)}
+.toast{border-radius:999px;padding:9px 14px}
+@media(max-width:1080px){#stage{padding:76px 16px 18px}}
+@media(max-width:860px){#stage{padding:76px 16px 96px}:root{--phone-h:calc(100dvh - 76px - 96px)}}
+@media(max-width:600px){#stage{padding:64px 0 0}.phone-wrap{height:calc(100dvh - 64px - 84px - env(safe-area-inset-bottom))}#stage .phone{background:rgba(255,255,255,.92)!important;border-radius:18px 18px 0 0!important;border:0!important}.ttl h1{font-size:26px}.al.big{grid-template-columns:80px minmax(0,1fr)}.al.big .th{width:80px;height:80px}}
+@media (prefers-reduced-motion:reduce){#bg .sweep,#bg .ping{display:none}}
+@media(max-width:600px){.ctl{flex-wrap:nowrap}.ctl .seg button em{display:none}.ctl .seg button{padding:0 9px}.live .summary-count{display:none}}
+/* final pass: floating, not boxed. No panel borders, wider air between columns, one methodology line instead of a rules table. */
+#stage{gap:clamp(20px,3.4vw,56px)}
+#stage .side .glass.card,#stage .phone{border-color:transparent!important;box-shadow:0 1px 2px rgba(15,23,42,.04),0 28px 64px -34px rgba(15,23,42,.34)!important}
+.card{padding:22px 22px 20px}
+.wl-row+.wl-row{border-top:0}.wl-row{padding:10px 0}
+.wl-note{border-top:0;padding-top:4px;color:var(--label2)}
+.method{display:flex;gap:8px;margin-top:20px;font-size:12px;line-height:1.55;color:var(--label2)}.method svg{flex:none;margin-top:2px;color:var(--brand)}.method b{color:var(--label);font-weight:600}
+</style>
+<script src="nav.js"></script>
+<script src="fx/meta.js"></script>
+<link rel="stylesheet" href="fx/motion.css"><script src="fx/motion.js"></script>
+</head>
+<body>
+
+<div id="bg" aria-hidden="true"></div>
+
+<main id="stage">
+  <aside class="side l"><div class="glass card float" id="watch"></div></aside>
+  <div class="phone-wrap" id="pw">
+    <div class="phone"><div class="screen" id="scr">
+      <div class="app" id="app">
+        <div class="scroll" id="scroll"></div>
+        <nav class="tabs" id="tabs"></nav>
+      </div>
+      <div class="scrim" id="scrim"></div>
+      <section class="sheet" id="sheet" aria-modal="true"><div class="sh-grab" id="grab"><i></i></div><div class="sh-body" id="shb"></div></section>
+      <div class="banner" id="banner"></div>
+      <div class="lock" id="lock"></div>
+      <div class="sbar"><span id="clk">03:41</span><span class="ic">
+        <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx=".8"/><rect x="5" y="5.5" width="3" height="6.5" rx=".8"/><rect x="10" y="3" width="3" height="9" rx=".8"/><rect x="15" y="0" width="3" height="12" rx=".8"/></svg>
+        <span style="font-size:14px;font-weight:700">5G</span>
+        <svg width="27" height="13" viewBox="0 0 27 13"><rect x=".5" y=".5" width="23" height="12" rx="3.8" fill="none" stroke="rgba(255,255,255,.4)"/><rect x="2" y="2" width="17" height="9" rx="2.4" fill="currentColor"/><path d="M25 4.5v4c.8-.3 1.3-1.1 1.3-2s-.5-1.7-1.3-2Z" fill="rgba(255,255,255,.4)"/></svg></span></div>
+      <div class="island" id="island"><span class="il"></span><span class="ir"></span></div>
+      <div class="toast" id="toast"></div>
+      <div class="homeind"></div>
+    </div></div>
+  </div>
+  <aside class="side r"><div class="glass card float" id="explain"></div></aside>
+</main>
+
+<script src="data/real.js"></script>
+<script src="data/issue-topics.js"></script>
+<script src="geo/cz.js"></script>
+<script src="mock.js"></script>
+<script src="sw-real.js" data-min-assets="0"></script>
+<script>
+"use strict";
+const {cities,lists,cands,assets,PLAT,TOP,fmt,fmtN,css,thumb}=SW;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const Q=new URLSearchParams(location.search);
+const MOBILE=()=>innerWidth<=600;
+const REAL=SW.source&&SW.source.kind==='real';
+const rawAssets=new Map(((window.SW_RAW&&SW_RAW.assets)||[]).map(a=>[a.id,a]));
+const rawAccounts=(window.SW_RAW&&SW_RAW.accounts)||[];
+const known=(a,key)=>!REAL||!a.na||!a.na[key];
+const response=a=>known(a,'likes')&&known(a,'comments')?(REAL?a.likes+a.comments:a.inter):null;
+const responseLabel=REAL?'likes + comments':'interactions';
+const metricText=(a,key)=>known(a,key)?fmt(a[key]):'—';
+const reported=(a,key)=>known(a,key)&&Number.isFinite(a[key])&&!(key==='views'&&REAL&&!a.video&&!a.views);
+const METRICS=[['views','Views'],['likes','Likes'],['comments','Comments'],['shares','Shares']];
+const reachOf=a=>!a?null:a.reach!=null&&Number.isFinite(a.reach)?a.reach:reported(a,'views')?a.views:response(a);
+const reachKindOf=a=>a&&(a.reachKind||(reported(a,'views')?'views':'engagement'));
+const reachText=a=>{const r=reachOf(a);return r==null?'':`${fmt(r)} ${reachKindOf(a)==='views'?'views':REAL?'likes + comments':'interactions'}`};
+const sourceLink=(url,label='Open public source')=>{try{const u=new URL(url);if(!['http:','https:'].includes(u.protocol))return '';return `<a class="source-link" href="${esc(u.href)}" target="_blank" rel="noopener noreferrer">${esc(label)} ↗</a>`}catch(e){return ''}};
+const pending=a=>a&&((a.topicStatus&&a.topicStatus!=='admitted')||a.topics.some(t=>TOP[t][3]&&TOP[t][3]!=='admitted'));
+const topicLabel=a=>!a.topics.length?'No topic assigned':a.topics.map(t=>TOP[t][0]).join(' · ');
+const topicNote=a=>!a.topics.length?'No classification supplied':pending(a)?(a.topicStatus==='reviewed_pending_promotion'?'Reviewed · pending promotion':'Pending review'):(a.topicStatus==='admitted'||a.topics.every(t=>TOP[t][3]==='admitted'))?'Admitted classification':'Classification status not supplied';
+const claimNote=c=>c.status==='admitted'?'Admitted excerpt':c.status==='reviewed_pending_promotion'?'Pending promotion':c.status?'Pending review':'Review status not supplied';
+const sourceQuote=a=>a&&(a.claims.find(c=>c.quote)?.quote||rawAssets.get(a.id)?.text||(a.cap==='(no caption)'?'':a.cap)||'').trim();
+const draftable=x=>x.type!=='snap'&&(!REAL||!!sourceQuote(x.a));
+const LOADED=new Set();
+const preview=(a,compact=false)=>a.img?`<img src="${esc(a.img)}" alt="Preview from ${esc(platN(a))} source" decoding="async"${LOADED.has(a.img)?'':` class="ld" onload="this.classList.remove('ld');this.parentNode.classList.remove('sk');LOADED.add(this.getAttribute('src'))" onerror="this.parentNode.classList.remove('sk')"`}>`:mediaURL(a)?`<video class="sw-vthumb${LOADED.has(mediaURL(a))?'':' ld'}" src="${esc(mediaURL(a))}#t=0.5" preload="metadata" muted playsinline aria-hidden="true" onloadeddata="this.classList.remove('ld');this.parentNode.classList.remove('sk');LOADED.add(this.getAttribute('src').split('#')[0])" onerror="this.parentNode.classList.remove('sk')"></video>`:`<div class="preview-empty" aria-label="${REAL?'Preview unavailable':'Simulated item; no media supplied'}">${compact?(REAL?'—':'SIM'):(REAL?'Preview unavailable':'Simulation · no media')}</div>`;
+const mediaURL=a=>{
+  const raw=rawAssets.get(a.id)||{}, candidates=[a.vsrc,a.video,a.video_url,a.videoUrl,raw.video,raw.video_url,raw.video_path];
+  for(const value of candidates){const src=typeof value==='string'?value:typeof value?.url==='string'?value.url:null;if(!src)continue;
+    try{const url=new URL(src,location.href);if(['http:','https:','file:','blob:'].includes(url.protocol))return src}catch(e){}}
+  return null;
+};
+
+/* ================= watchlist in the richest evidence city ================= */
+const requested=(key,rows)=>{const value=Q.get(key),index=value==null||value.trim()===''?NaN:Number(value);return Number.isInteger(index)&&index>=0?rows[index]||null:null};
+const selectedCand=requested('cand',cands), selectedList=selectedCand?null:requested('list',lists);
+const P=cities[(selectedCand||selectedList)?.city]||cities[0];
+const byAssets=(a,b)=>b.assets.length-a.assets.length;
+const youC=selectedCand||P.cands.map(i=>cands[i]).sort(byAssets)[0];
+const focusList=selectedList?selectedList.i:youC.list;
+const rivC=[];{const used=new Set([focusList]);for(const c of P.cands.map(i=>cands[i]).sort(byAssets)){if(c===selectedCand||(!selectedList&&c===youC)||used.has(c.list)||(REAL&&!c.assets.length))continue;rivC.push(c);used.add(c.list);if(rivC.length===3)break}}
+const partyLists=REAL?P.lists.map(i=>lists[i]).filter(L=>L.assets.length&&L!==selectedList).sort(byAssets).slice(0,2):[lists[rivC[0].list]].filter(L=>L!==selectedList);
+const med=v=>{v=[...v].sort((a,b)=>a-b);return v.length?(v[(v.length-1)>>1]+v[v.length>>1])/2:null};
+const fem=c=>/á$/.test(c.name.split(' ')[1]||'');
+const retained=a=>a.age<=30&&(!REAL||(a.published_at&&Number.isFinite(Date.parse(a.published_at))&&Date.parse(a.published_at)<=+SW.TODAY));
+function entC(c,me){const L=lists[c.list];const created=c.assets.filter(i=>assets[i].rel==='created'&&retained(assets[i]));
+  return {key:'c'+c.i,kind:'cand',c,me,name:c.name,short:me?'You':c.name.split(' ')[0][0]+'. '+c.name.split(' ')[1],list:L,col:css(L.col),ini:c.name.split(' ').map(s=>s[0]).join(''),
+    created,median:med(created.map(i=>response(assets[i])).filter(v=>v!=null)),fol:c.fol,fem:fem(c)}}
+function entL(L,me=false){const created=L.assets.filter(i=>retained(assets[i]));
+  return {key:'l'+L.i,kind:'list',L,me,name:L.name,short:L.short||L.name,list:L,col:css(L.col),ini:L.short.slice(0,3),created,median:med(created.map(i=>response(assets[i])).filter(v=>v!=null)),fol:L.fol}}
+const YOU=selectedList?entL(selectedList,true):entC(youC,true), RIV=rivC.map(c=>entC(c,false)), PARTIES=partyLists.map(L=>entL(L)), PARTY=PARTIES[0];
+const focusId=YOU.kind==='cand'?YOU.c.id:YOU.L.id;
+if(REAL&&YOU.kind==='cand')YOU.short=YOU.name.split(' ').slice(-1)[0];
+const WATCH=[YOU,...RIV,...PARTIES];
+
+/* ================= time ================= */
+const NOW_LAG=REAL?0:11;
+const ASOF=new Date(SW.TODAY);
+const timeFmt=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Prague',hour:'2-digit',minute:'2-digit'});
+const dateFmt=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Prague',day:'numeric',month:'short'});
+const zoneFmt=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Prague',timeZoneName:'short'});
+const dayKey=d=>new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Prague',year:'numeric',month:'2-digit',day:'2-digit'}).format(d);
+const ageOf=s=>s&&Number.isFinite(Date.parse(s))?(ASOF-new Date(s))/864e5:null;
+const dateText=s=>s&&Number.isFinite(Date.parse(s))?dateFmt.format(new Date(s))+' '+timeFmt.format(new Date(s))+' '+zoneFmt.formatToParts(new Date(s)).find(p=>p.type==='timeZoneName').value:'Unknown date';
+function at(age){const date=new Date(ASOF-age*864e5),today=dayKey(ASOF),yesterday=dayKey(new Date(+ASOF-864e5));return {d:dayKey(date)===today?0:dayKey(date)===yesterday?1:2,hm:timeFmt.format(date),date}}
+function whenLong(age){if(age==null)return 'Unknown date';const t=at(age);return (t.d===0?'Today':t.d===1?'Yesterday':dateFmt.format(t.date))+' '+t.hm}
+function rel(age){if(age==null)return 'Undated';const m=Math.max(0,Math.round(age*1440)+NOW_LAG);if(m<2)return REAL?'just before export':'now';if(m<60)return m+'m before '+(REAL?'export':'now');if(m<1440)return Math.floor(m/60)+'h '+(REAL?'before export':'ago');return whenLong(age)}
+const lag=a=>((a.i*37)%26+6)/1440;
+const seen=a=>REAL?ageOf(a.observed_at):Math.max(0.0005,a.age-lag(a)), cross=a=>seen(a)*0.55;
+$('#clk').textContent=timeFmt.format(ASOF);
+
+/* ================= alert types ================= */
+const STAR='M12 1.5 17.5 8.5 13.3 8.5 10.7 11.1 8.5 8.5 8.5 6.5Z M22.5 12 15.5 17.5 15.5 13.3 12.9 10.7 15.5 8.5 17.5 8.5Z M12 22.5 6.5 15.5 10.7 15.5 13.3 12.9 15.5 15.5 15.5 17.5Z M1.5 12 8.5 6.5 8.5 10.7 11.1 13.3 8.5 15.5 6.5 15.5Z';
+const IC={
+ post:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3.5" width="16" height="17" rx="3.5"/><path d="M8 9h8M8 12.5h8M8 16h5"/></svg>',
+ video:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="4"/><path d="M10.2 9.2v5.6l4.8-2.8z" fill="currentColor"/></svg>',
+ spike:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18l5-5 3.5 3L20 7"/><path d="M14.5 7H20v5.5"/></svg>',
+ news:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4.5h11.5v13.5a2 2 0 0 0 2 2H6.5A2.5 2.5 0 0 1 4 17.5V5.5a1 1 0 0 1 1-1Z"/><path d="M16.5 9h2.5v9a2 2 0 0 1-2 2"/><path d="M7.5 8.5h5.5M7.5 12h5.5M7.5 15.5h3.5"/></svg>',
+ topic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9.5 3.5 7.5 20.5M16.5 3.5l-2 17M4.5 8.5h16M3.5 15.5h16"/></svg>',
+ snap:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3.5"/><path d="M2.8 19.5c.7-3.4 3.2-5.3 6.2-5.3s5.5 1.9 6.2 5.3"/><circle cx="17.5" cy="9.5" r="2.5"/><path d="M17 14.3c2.3.2 3.8 1.9 4.3 4.6"/></svg>'};
+const TY={
+ post:{n:'New post',g:['var(--label2)']},video:{n:'New video',g:['var(--label2)']},spike:{n:'Response spike',g:['var(--label2)']},
+ news:{n:'News mention',g:['var(--label2)']},topic:{n:'Topic surge',g:['var(--label2)']},snap:{n:'Follower snapshot',g:['var(--label2)']}};
+if(REAL){TY.post.n='Observed post';TY.video.n='Observed video';TY.spike.n='Sample outlier'}
+const ico=(t,cls='')=>`<span class="ico ${cls}">${IC[t]}</span>`;
+const starSvg=(s=14,c='currentColor')=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24"><path d="${STAR}" fill="${c}"/></svg>`;
+function av(e,sz=28){const sq=e.kind==='list',src=sq?(e.L.logos&&e.L.logos[0]&&e.L.logos[0].path):(e.c&&e.c.photo);
+  const w=sq&&src&&sz>=30?Math.round(sz*1.45):sz;
+  return `<span class="av ${sz>=24?'ring':''} ${sq?'sq':''}" style="--pc:${e.col};width:${w}px;height:${sz}px;font-size:${Math.max(11,Math.round(sz*.36))}px">${esc(e.ini.slice(0,sq&&sz>=30?3:2))}${src?`<img src="${esc(src)}" alt="" decoding="async" class="ld" onload="this.classList.remove('ld')" onerror="this.remove()">`:''}</span>`}
+const pct=v=>(+v).toLocaleString('en-GB',{maximumFractionDigits:1})+'\u202f%';
+function r22(e){if(e.kind==='list'){const r=e.L.result2022;if(!r||r.votes==null&&r.pct==null)return '';
+    return `<span class="r22">2022${r.pct!=null?` <b>${pct(r.pct)}</b>`:''}${r.votes!=null?` <span>${fmtN(r.votes)} votes</span>`:''}${r.seats!=null?` <span>${fmtN(r.seats)} seat${r.seats===1?'':'s'}</span>`:''}</span>`}
+  const r=e.c.pref2022;if(!r||r.votes==null)return '';
+  return `<span class="r22">2022 <b>${fmtN(r.votes)}</b> <span>preference votes</span>${r.rank_in_list!=null?` <span>#${r.rank_in_list} on list</span>`:''}${r.elected?' <span class="el">elected</span>':''}</span>`}
+const platN=a=>PLAT[a.plat].n, kindN=a=>a.video?'video':'post';
+const topicOf=a=>a.topics.length?a.topics[0]:null;
+
+/* ================= build alerts ================= */
+const ALERTS=[];let aid=0;
+function push(o){o.id=aid++;ALERTS.push(o);return o}
+let TS=null;
+if(REAL){
+  WATCH.forEach(e=>{
+    const recent=e.created.map(i=>assets[i]).filter(a=>a.published_at&&a.age>=0&&a.age<2);
+    recent.forEach(a=>{
+      const baseline=e.created.map(i=>assets[i]).filter(b=>b!==a&&b.plat===a.plat&&b.video===a.video&&response(b)!=null);
+      const median=med(baseline.map(response)),value=response(a);
+      if(baseline.length>=8&&median>0&&value!=null&&value>=3*median)push({type:'spike',e,a,age:a.age,ratio:value/median,baseline,median});
+    });
+    recent.filter(a=>!ALERTS.some(x=>x.a===a)).sort((a,b)=>a.age-b.age).slice(0,2)
+      .forEach(a=>push({type:a.video?'video':'post',e,a,age:a.age}));
+  });
+  const focusAccounts=rawAccounts.filter(a=>a.entity_id===focusId&&a.followers!=null&&ageOf(a.followers_observed_at)!=null&&ageOf(a.followers_observed_at)>=0);
+  focusAccounts.forEach(account=>push({type:'snap',e:YOU,a:null,account,age:ageOf(account.followers_observed_at)}));
+}else{
+// response spikes (≥3× the entity's own 30-day median), last 48 h
+WATCH.forEach(e=>e.created.forEach(i=>{const a=assets[i];if(a.age<2&&a.inter>=3*e.median)push({type:'spike',e,a,age:cross(a),ratio:a.inter/e.median})}));
+// news mentions about you
+(YOU.kind==='cand'?YOU.c.assets:[]).map(i=>assets[i]).filter(a=>a.rel==='about'&&a.age<2).forEach(a=>push({type:'news',e:YOU,a,age:seen(a)}));
+// new posts / videos by watched rivals and the watched party (two most recent each)
+[...RIV,...PARTIES].forEach(e=>{e.created.map(i=>assets[i]).filter(a=>a.age<2&&!ALERTS.some(x=>x.a===a)).sort((x,y)=>x.age-y.age).slice(0,2)
+  .forEach(a=>push({type:a.video?'video':'post',e,a,age:seen(a)}))});
+// topic surge: share of city-wide response in last 24 h vs 30-day share
+TS=(()=>{const d0=new Array(TOP.length).fill(0),d30=new Array(TOP.length).fill(0),days=TOP.map(()=>new Array(14).fill(0));
+  P.assets.forEach(i=>{const a=assets[i];if(a.age>30)return;a.topics.forEach(t=>{d30[t]+=a.inter;if(a.age<1)d0[t]+=a.inter;if(a.age<14)days[t][13-Math.floor(a.age)]+=a.inter})});
+  const s0=d0.reduce((x,y)=>x+y,0),s30=d30.reduce((x,y)=>x+y,0);
+  const r=TOP.map((_,t)=>({t,sh0:d0[t]/s0,sh30:d30[t]/s30,ratio:(d0[t]/s0)/(d30[t]/s30),last:d0[t],days:days[t]})).sort((x,y)=>y.ratio-x.ratio);
+  const rank=[...r].sort((x,y)=>d30[y.t]-d30[x.t]).findIndex(x=>x.t===r[0].t)+1;
+  const top=P.assets.map(i=>assets[i]).filter(a=>a.age<1&&a.topics.includes(r[0].t)&&a.rel==='created').sort((x,y)=>y.inter-x.inter)[0];
+  return {...r[0],rank,top}})();
+push({type:'topic',e:null,a:TS.top,age:1.05/24,ratio:TS.ratio,ts:TS});
+// follower snapshot: first observation, no change claimed
+push({type:'snap',e:RIV[2],a:null,age:2.6/24});
+}
+ALERTS.sort((x,y)=>x.age-y.age);
+// hold back the freshest party/rival post as the "live" alert that arrives while you watch
+const LIVE=REAL?null:ALERTS.find(x=>x.type==='post'||x.type==='video');
+if(LIVE){LIVE.age=-NOW_LAG/1440+0.3/1440; LIVE.live=true}
+const FEED=ALERTS.filter(x=>x!==LIVE);
+const unread=new Set(ALERTS.filter(x=>x.age<3.5/24).map(x=>x.id));
+
+/* ================= copy per alert ================= */
+const pron=e=>e.me?'your':(e.fem?'her':'his');
+function head(x){const a=x.a,e=x.e;switch(x.type){
+  case 'spike':if(REAL)return `${e.name}: ${x.ratio.toFixed(1)}× the retained sample median`;
+    return e.me?`Your ${platN(a)} ${kindN(a)} is at ${x.ratio.toFixed(1)}× your median`:`${e.name}'s ${platN(a)} ${kindN(a)} at ${x.ratio.toFixed(1)}× ${pron(e)} median`;
+  case 'news':return `${a.outlet} wrote about you`;
+  case 'video':case 'post':return `${e.name} published ${/^[aeiou]/i.test(platN(a))?'an':'a'} ${platN(a)} ${kindN(a)}`;
+  case 'topic':return `${TOP[x.ts.t][0]} is surging across ${P.name}`;
+  case 'snap':return `${REAL?'Dated':'First'} follower snapshot for ${e.name}`}}
+function body(x){const a=x.a,e=x.e;switch(x.type){
+  case 'spike':return REAL?`${fmt(response(a))} ${responseLabel} vs a median of ${fmt(x.median)} across ${x.baseline.length} retained ${platN(a)} ${kindN(a)}s. Incomplete history.`:`${fmt(a.inter)} interactions vs a median of ${fmt(e.median)} across ${e.created.length} ${e.me?'of your ':''}items in 30 days.`;
+  case 'news':return `“${a.cap}”`;
+  case 'video':case 'post':return `“${a.cap}”`;
+  case 'topic':return `${Math.round(x.ts.sh0*100)}% of city-wide response in 24 h vs ${Math.round(x.ts.sh30*100)}% over 30 days · top-10 topic #${x.ts.rank}.`;
+  case 'snap':return REAL?`${fmtN(x.account.followers)} followers · @${x.account.handle} · ${dateText(x.account.followers_observed_at)}. One retained snapshot; no growth claimed.`:`${fmtN(e.fol)} followers across tracked profiles. First observation, so no change is claimed.`}}
+function kindLbl(x){return !draftable(x)?null:REAL?'Review draft':x.type==='news'?'Proposed statement':x.type==='spike'&&x.e.me?'Proposed reply':'Proposed post idea'}
+
+/* ================= proposed answers (templated, grounded, placeholders = you fill) ================= */
+function draftKind(x){if(x.type==='news')return 'statement';if(x.type==='spike'&&x.e.me)return 'reply';if(x.type==='topic')return 'surge';return 'idea'}
+function drafts(x){
+  if(REAL){
+    const a=x.a,text=sourceQuote(a);
+    const quote=text.length>220?text.slice(0,217)+'…':text,date=dateText(a.published_at),name=x.e.name,url=a.url||'[odkaz na zdroj]';
+    return {label:'Prepared template · Czech with an English gloss · verify before using',
+      factual:[`Veřejný příspěvek ${name} (${date}) uvádí: „${quote}“ Zdroj: ${url}. Jde o citaci zdroje, nikoli nezávislé ověření tvrzení. [Doplňte ověřenou odpověď]. [odkaz na program]`,
+        `The public post by ${name} (${date}) states: “${quote}” Source: ${url}. This is a source quotation, not independent verification. [Add a verified response]. [programme link]`],
+      warm:[`Děkuji za tento veřejný podnět. Příspěvek ${name} (${date}) uvádí: „${quote}“ Zdroj: ${url}. [Doplňte ověřenou odpověď a příslušný odkaz].`,
+        `Thank you for this public contribution. The post by ${name} (${date}) states: “${quote}” Source: ${url}. [Add a verified response and the relevant link].`],
+      brief:[`Citace z příspěvku ${name} (${date}): „${quote}“ Zdroj: ${url}. [ověřená odpověď]`,
+        `Quotation from the post by ${name} (${date}): “${quote}” Source: ${url}. [verified response]`]};
+  }
+  const ti=x.type==='topic'?x.ts.t:(x.a?topicOf(x.a):null);
+  const t=ti==null?'dění ve městě':TOP[ti][1], en=ti==null?'city affairs':TOP[ti][0].toLowerCase(), T=t[0].toUpperCase()+t.slice(1), EN=en[0].toUpperCase()+en.slice(1);
+  const ra=YOU.fem?'ráda':'rád', a_=YOU.fem?'a':'';
+  const o=x.a&&x.a.outlet, rr=(x.ratio||1).toFixed(1);
+  const K={
+   reply:{label:'Reply comment · under your own '+(x.a?platN(x.a)+' '+kindN(x.a):'post'),
+     factual:[`Děkuji za ${fmtN(x.a?x.a.comments:0)} komentářů k tématu ${t}. Nejčastější otázky shrnu v jednom příspěvku [kdy]. Konkrétní návrh najdete v programu: [odkaz na program].`,`Thank you for the ${fmtN(x.a?x.a.comments:0)} comments on ${en}. I'll answer the most common questions in one post [when]. The concrete proposal is in our programme: [programme link].`],
+     warm:[`Tolik reakcí jsem nečekal${a_}, děkuji! Je vidět, že vám téma ${t} není jedno. Čtu všechny komentáře a na ty nejčastější odpovím osobně [kdy].`,`I didn't expect so many reactions, thank you! Clearly ${en} matters to you. I'm reading every comment and will answer the most common ones personally [when].`],
+     brief:[`Díky za reakce! Odpovědi na nejčastější dotazy k tématu ${t}: [odkaz].`,`Thanks for the reactions! Answers to the most common questions on ${en}: [link].`]},
+   statement:{label:'Short statement · on the article',
+     factual:[`Děkuji redakci ${o} za článek k tématu ${t}. Pro úplnost doplňuji náš konkrétní návrh: [odkaz na program]. Na dotazy ${ra} odpovím.`,`Thank you to ${o} for the article on ${en}. For completeness, here is our concrete proposal: [programme link]. Happy to answer questions.`],
+     warm:[`Jsem ${ra}, že se o tématu ${t} píše. Týká se každého z nás. Pokud máte otázky, napište mi, odpovídám osobně.`,`I'm glad ${en} is being written about. It concerns all of us. If you have questions, message me; I answer personally.`],
+     brief:[`Náš návrh k tématu ${t}, o kterém dnes píše ${o}: [odkaz].`,`Our proposal on ${en}, which ${o} writes about today: [link].`]},
+   surge:{label:'Post idea · join the topic',
+     factual:[`Téma ${t} dnes ve městě ${P.name} přitahuje ${rr.replace('.',',')}× víc pozornosti než obvykle. Co navrhujeme my: [3 body z programu]. Ptejte se v komentářích, odpovím do večera.`,`${EN} is drawing ${rr}× its usual attention in ${P.name} today. What we propose: [3 points from the programme]. Ask in the comments, I'll reply by tonight.`],
+     warm:[`Vidím, že vás téma ${t} teď hodně zajímá. Mě taky. Napište mi, co vás v tom trápí nejvíc, a pojďme to probrat osobně [kde a kdy].`,`I can see ${en} matters a lot to you right now. To me too. Tell me what bothers you most, and let's talk it through in person [where and when].`],
+     brief:[`Téma ${t} hýbe městem ${P.name}. Náš plán ve třech bodech: [odkaz]`,`${EN} is moving ${P.name}. Our plan in three points: [link]`]},
+   idea:{label:'Post idea · on the topic, not the person',
+     factual:[`K tématu ${t} máme vlastní návrh: [jedna věta z programu]. Podrobnosti a čísla najdete tady: [odkaz na program].`,`On ${en}, we have our own proposal: [one sentence from the programme]. Details and figures here: [programme link].`],
+     warm:[`O tématu ${t} se teď ve městě ${P.name} hodně mluví a je to dobře. Chci slyšet i vás: co by vám ve vaší čtvrti pomohlo nejvíc? Napište do komentářů.`,`People in ${P.name} are talking about ${en} right now, and that's good. I want to hear from you too: what would help most in your neighbourhood? Tell me in the comments.`],
+     brief:[`${T}: náš návrh v jedné větě → [odkaz]`,`${EN}: our proposal in one sentence → [link]`]}};
+  return K[draftKind(x)]}
+function evidence(x){const a=x.a,e=x.e,L=[];
+  if(REAL){
+    L.push(`<b>${esc(e.name)}</b> · ${platN(a)} ${kindN(a)} · published ${esc(dateText(a.published_at))} ${sourceLink(a.url)}`);
+    L.push(`Observed ${esc(dateText(a.observed_at))}${METRICS.filter(([k])=>reported(a,k)).map(([k,l])=>` · ${l.toLowerCase()} ${fmt(a[k])}`).join('')}`);
+    if(a.topics.length)L.push(`Topics: <b>${esc(topicLabel(a))}</b> · ${esc(topicNote(a))}`);
+    if(x.type==='spike')L.push(`Median ${fmt(x.median)} ${responseLabel} across ${x.baseline.length} retained same-platform/format posts. <span class="bl-links">Baseline posts ${x.baseline.map((b,k)=>{try{const u=new URL(b.url);return ['http:','https:'].includes(u.protocol)?`<a href="${esc(u.href)}" target="_blank" rel="noopener noreferrer" aria-label="Baseline source ${k+1}">${k+1}</a>`:''}catch(e){return ''}}).join('')}</span>`);
+    L.push(`Programme facts are not supplied; <b>[odkaz na program]</b> stays a placeholder. The source's statements are not independently verified.`);
+    return L;
+  }
+  if(x.type==='topic'){L.push(`<b>${TOP[x.ts.t][0]}</b> · ${fmt(x.ts.last)} interactions city-wide in 24 h (${Math.round(x.ts.sh0*100)}% share)`);L.push(`30-day share <b>${Math.round(x.ts.sh30*100)}%</b> across ${fmtN(P.assets.length)} ${esc(P.name)} items`);
+    if(a)L.push(`Top item: <b>${esc(SW.ownerName(a))}</b> · ${platN(a)} ${kindN(a)} · ${fmt(a.inter)} interactions`)}
+  else{L.push(`<b>${esc(x.type==='news'?a.outlet:SW.ownerName(a))}</b> · ${platN(a)} ${x.type==='news'?'article':kindN(a)} · ${whenLong(a.age)} · ${fmt(a.inter)} interactions`);
+    if(x.type==='spike')L.push(`Baseline: median <b>${fmt(e.median)}</b> over ${e.created.length} items, 30 days`);
+    else if(x.type==='news')L.push(`Headline text only; no claim beyond what was published`);
+    else L.push(`Topic tag: <b>${topicOf(a)==null?'unclassified':TOP[topicOf(a)][0]}</b> (classifier, observed text)`)}
+  const ti=x.type==='topic'?x.ts.t:(a?topicOf(a):null);
+  const mine=ti==null?null:YOU.created.map(i=>assets[i]).filter(z=>z.topics.includes(ti)&&z!==a).sort((p,q)=>p.age-q.age)[0];
+  if(mine)L.push(`Your latest on ${TOP[ti][0].toLowerCase()}: ${platN(mine)} · ${whenLong(mine.age).replace('Today ','today ')} · ${fmt(mine.inter)} interactions`);
+  else L.push(`Your programme text: <b>not in Starwatch</b>, so it stays a placeholder`);
+  return L}
+
+/* ================= render: feed ================= */
+let filt='all',chip=null,platform='all',order='reach',showBare=false,revealed=false,ARRIVING=null;
+const hasPreview=x=>!x.a||!!(x.a.img||mediaURL(x.a));
+const tierOf=new Map();
+const byReach=(p,q)=>(reachOf(q.a)??-1)-(reachOf(p.a)??-1)||(p.age-q.age);
+const byTime=(p,q)=>p.age-q.age;
+const enabledWatches=new Set(WATCH.map(e=>e.key));
+function match(x){if(x.e&&!enabledWatches.has(x.e.key))return false;if(chip&&!(x.e&&x.e.key===chip))return false;
+  if(platform!=='all'&&!(x.a&&x.a.plat===+platform||x.account&&x.account.platform===PLAT[+platform].k))return false;
+  if(filt==='rivals')return x.e&&!x.e.me;if(filt==='me')return x.e&&x.e.me;if(filt==='topics')return REAL?x.a&&x.a.topics.length:x.type==='topic';return true}
+function card(x){const a=x.a,e=x.e,tier=tierOf.get(x)||'';
+  const rt=reachText(a);
+  const lead=a&&!hasPreview(x)?'':a?`<span class="th${a.img&&LOADED.has(a.img)||!a.img&&LOADED.has(mediaURL(a))?'':' sk'}${a.video?' vid':''}">${preview(a,true)}${tier==='lead'&&rt?`<span class="reach-pill">${rt}</span>`:''}</span>`:`<span class="th icon">${IC[x.type]}</span>`;
+  const role=e?(e.me?(REAL?'Focus':'You'):e.kind==='list'?'Party':'Rival'):'';
+  const who=e?`${av(e,20)}<span class="nm">${esc(e.name)}</span><em>${role}</em>`:`<span class="nm">${esc(P.name)}</span><em>all lists</em>`;
+  const meta=[];if(x.type==='spike')meta.push(`<b>${x.ratio.toFixed(1)}× ${REAL?'sample median':'median'}</b>`);if(x.type==='topic')meta.push(`<b>${x.ratio.toFixed(1)}× usual share</b>`);
+  if(rt&&tier!=='lead')meta.push(`<b>${rt}</b>`);if(a)meta.push(esc(platN(a)));
+  if(REAL&&a&&a.topics.length){meta.push(esc(TOP[a.topics[0]][0]));if(pending(a))meta.push(esc(topicNote(a)))}
+  meta.push(kindLbl(x)?`<span class="act">${starSvg(10)} ${kindLbl(x)}</span>`:`<span class="act base">${x.type==='snap'?'Dated count · no change inferred':'Source text unavailable · inspect only'}</span>`);
+  return `<button class="al${tier?' '+tier:''}${a&&!hasPreview(x)?' nothumb':''}${unread.has(x.id)?' unread':''}${x===ARRIVING?' arrive':''}" data-id="${x.id}">${lead}<span class="al-b"><span class="top"><span class="ty${x.type==='snap'?' base':''}">${TY[x.type].n}</span><span class="tm">${rel(x.age)}</span></span>
+    <span class="who">${who}</span><span class="bd">${esc(body(x))}</span><span class="ft">${meta.join('<i>·</i>')}</span></span></button>`}
+function renderFeed(fresh){const sc=$('#scroll');const st=sc.scrollTop;
+  const matched=FEED.filter(match), bare=REAL?matched.filter(x=>!hasPreview(x)):[], shown=showBare?matched:matched.filter(x=>!bare.includes(x));
+  const base=shown.filter(x=>x.type==='snap'), changes=shown.filter(x=>x.type!=='snap').sort(order==='reach'?byReach:byTime);
+  {const k=changes.findIndex(x=>x.live&&unread.has(x.id));if(k>0)changes.unshift(...changes.splice(k,1))} // a just-arrived alert lands on top
+  // size follows reach: the two largest stated audiences lead, the upper half gets a larger thumbnail
+  tierOf.clear();{const ranked=changes.filter(x=>x.a&&hasPreview(x)&&reachOf(x.a)!=null).sort(byReach);const half=ranked[Math.floor(ranked.length/2)];
+    ranked.forEach((x,k)=>tierOf.set(x,k<2&&reachOf(x.a)>0?'lead':half&&reachOf(x.a)>=reachOf(half.a)?'big':''))}
+  const today=changes.filter(x=>x.age!=null&&(at(x.age).d===0||x.age<0)), earlier=changes.filter(x=>!today.includes(x));
+  const covered=new Set(WATCH.filter(e=>enabledWatches.has(e.key)).flatMap(e=>e.kind==='cand'?e.c.assets:e.L.assets).filter(i=>retained(assets[i])));
+  const counts=PLAT.map((_,pi)=>[...covered].filter(i=>assets[i].plat===pi).length);
+  const grp=(h,d,list)=>`<div class="grp"><h2>${h}</h2><span class="d">${d}</span><span class="n">${list.length}</span></div><div class="feed">${list.map(card).join('')}</div>`;
+  const pl=PLAT.map((p,i)=>({i,n:p.n,k:counts[i]})).filter(p=>p.k), missing=PLAT.filter((_,i)=>!counts[i]).map(p=>p.n);
+  if(platform!=='all'&&!counts[+platform])platform='all';
+  sc.innerHTML=`<div class="ttl"><h1>Radar <span class="city">${esc(P.name)}</span></h1><div class="seg o" id="oseg" role="group" aria-label="Order">${[['reach','Reach'],['time','Newest']].map(([k,l])=>`<button data-o="${k}" class="${order===k?'on':''}">${l}</button>`).join('')}</div><button class="cbtn" title="Mark all read" aria-label="Mark all read" id="markall"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12.5 4.5 4.5L20 6.5"/></svg></button></div>
+   <div class="live ${REAL?'snapshot':''}"><i></i>${REAL?'Verified snapshot · exported '+esc(dateText(SW.source.exported_at)):'Simulation · push replay'}<span class="summary-count">· ${shown.length} ${REAL?'observations':'simulated alerts'}</span></div>
+   ${REAL?`<div class="cov">Retained public posts from the 48 h before export, not a live stream.</div>`:''}
+   <div class="chips">${WATCH.map(e=>`<button class="wchip ${chip===e.key?'on':''}" data-k="${e.key}" aria-pressed="${chip===e.key}">${av(e,24)}${esc(e.short)}</button>`).join('')}</div>
+   <div class="fseg"><div class="seg" id="fseg">${[['all','All'],['rivals','Rivals'],['me',REAL?'Focus':'About me'],['topics','Topics']].map(([k,l])=>`<button data-f="${k}" class="${filt===k?'on':''}">${l}</button>`).join('')}</div></div>
+   ${pl.length>1?`<div class="ctl">`:''}${pl.length>1?`<div class="seg" id="pseg" role="group" aria-label="Platform">${[{i:'all',n:'All',k:pl.reduce((n,p)=>n+p.k,0)},...pl].map(p=>`<button data-p="${p.i}" class="${platform===String(p.i)?'on':''}">${esc(p.n)} <em>${p.k}</em></button>`).join('')}</div></div>`:''}
+   ${today.length?grp('Today',esc(dateFmt.format(ASOF)),today):''}
+   ${earlier.length?grp('Earlier','before '+esc(dateFmt.format(ASOF)),earlier):''}
+   ${bare.length?`<button class="bare" id="bare">${showBare?'Hide':'Show'} ${bare.length} without a retained preview</button>`:''}
+   ${base.length?grp('Baselines','dated counts · not changes',base):''}
+   ${!shown.length?`<div class="coverage-note"><strong>${filt==='topics'?'No topic assignments in this selection':'No observed alerts match this selection'}.</strong> Nothing is inferred to fill this view.</div>`:''}
+   <div class="endnote">${REAL?'Recent profile samples are incomplete; this screen does not schedule collection.':'Labelled simulation of scheduled collection.'}${missing.length?` ${esc(missing.join(', '))}: nothing retained for this watchlist.`:''} Response is attention, not support.</div>`;
+  if(!revealed&&shown.length){revealed=true;sc.querySelectorAll('.al:not(.arrive)').forEach((el,k)=>{if(k<12){el.classList.add('rise');el.style.animationDelay=80+k*40+'ms'}})}
+  ARRIVING=null;
+  sc.scrollTop=st;
+  sc.querySelectorAll('.al').forEach(b=>b.onclick=()=>openSheet(+b.dataset.id));
+  sc.querySelectorAll('.wchip[data-k]').forEach(b=>b.onclick=()=>{chip=chip===b.dataset.k?null:b.dataset.k;renderFeed()});
+  sc.querySelector('#fseg').onclick=ev=>{const b=ev.target.closest('button');if(!b)return;filt=b.dataset.f;renderFeed()};
+  const ps=sc.querySelector('#pseg');if(ps)ps.onclick=ev=>{const b=ev.target.closest('button');if(!b)return;platform=b.dataset.p;renderFeed()};
+  sc.querySelector('#oseg').onclick=ev=>{const b=ev.target.closest('button');if(!b)return;order=b.dataset.o;renderFeed()};
+  const bb=sc.querySelector('#bare');if(bb)bb.onclick=()=>{showBare=!showBare;renderFeed()};
+  $('#markall').onclick=()=>{unread.clear();renderFeed();toast('All alerts marked read')};
+}
+$('#tabs').innerHTML=[['Atlas','<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5c2.6 2.3 3.8 5.2 3.8 8.5s-1.2 6.2-3.8 8.5c-2.6-2.3-3.8-5.2-3.8-8.5S9.4 5.8 12 3.5ZM3.5 12h17"/>'],['Spotlight','<circle cx="12" cy="9" r="4"/><path d="M4.5 20.5c1-4 4-6 7.5-6s6.5 2 7.5 6"/>'],['Radar','<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12 18 6"/><circle cx="12" cy="12" r="1" fill="currentColor"/>'],['Studio','<path d="M4 20h4L19 9l-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/>']]
+  .map(([n,p])=>`<button class="${n==='Radar'?'on':''}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${p}</svg>${n}</button>`).join('');
+
+/* ================= render: sheet ================= */
+let cur=null,tone='factual',streamTok=0;
+function whyHtml(x){const a=x.a,e=x.e;
+  if(REAL){
+    if(x.type==='snap')return `<div class="box why"><h4>What is observed <em>single account snapshot</em></h4><div class="ratio"><b>${fmtN(x.account.followers)}</b><span>followers on ${esc(x.account.platform)} · @${esc(x.account.handle)}</span></div><div class="src">Observed ${esc(dateText(x.account.followers_observed_at))}</div>${sourceLink(x.account.url,'Open verified account')}<p style="font-size:12.5px;color:var(--label2);line-height:1.5;margin-top:12px">The export retains one dated count for this account. Growth, decline and local audience are unknown. No next collection is scheduled here.</p></div>`;
+    const compared=x.type==='spike'?`<div class="ratio"><b style="color:var(--t-spike)">${x.ratio.toFixed(1)}×</b><span>${fmt(response(a))} ${responseLabel} versus a median of ${fmt(x.median)} in ${x.baseline.length} retained posts of the same entity, platform and format.</span></div>`:'';
+    return `<div class="box why"><h4>Why it appears <em>${x.type==='spike'?'≥ 3× sample median':'observed publication in last 48 h'}</em></h4>${compared}<p style="font-size:12.5px;color:var(--label2);line-height:1.5">Verified account and publication ownership. ${x.type==='spike'?'This is a comparison inside an incomplete sample, not evidence of a rise over time. Shares are excluded because their counts are unknown.':'A retained public post; no previous-checkpoint comparison or first-discovery time is available.'}</p><div class="obs"><div><b>${esc(dateText(a.published_at))}</b>published</div><div><b>${esc(dateText(a.observed_at))}</b>metric observation</div></div>${sourceLink(a.url)}</div>`;
+  }
+  if(x.type==='spike'){const mx=Math.max(a.inter,e.median);const first=seen(a),cr=cross(a);
+    return `<div class="box why"><h4>Why it fired <em>rule: ≥ 3× own median</em></h4><div class="ratio"><b style="color:var(--t-spike)">${x.ratio.toFixed(1)}×</b><span>${e.me?'your':esc(e.name.split(' ')[0]+'’s')} usual response, measured against ${pron(e)} own items only.</span></div>
+     <div class="bars"><div class="bar"><span>30-day median</span><div class="tr"><i style="width:${e.median/mx*100}%"></i></div><b>${fmt(e.median)}</b></div><div class="bar"><span>This ${kindN(a)}</span><div class="tr"><i style="width:${a.inter/mx*100}%"></i></div><b>${fmt(a.inter)}</b></div></div>
+     <div class="obs"><div><b>${at(a.age).hm}</b>published</div><div style="text-align:center"><b>${at(first).hm}</b>first seen</div><div class="hot" style="text-align:center"><b>${at(cr).hm}</b>crossed 3×</div><div><b>03:30</b>last seen</div></div></div>`}
+  if(x.type==='topic'){const d=x.ts.days,mx=Math.max(...d);
+    return `<div class="box why"><h4>Why it fired <em>rule: share ≥ 2× its 30-day share</em></h4><div class="ratio"><b style="color:var(--t-topic)">${x.ratio.toFixed(1)}×</b><span>${TOP[x.ts.t][0]} took ${Math.round(x.ts.sh0*100)}% of ${esc(P.name)}'s response in 24 h, usually ${Math.round(x.ts.sh30*100)}%.</span></div>
+     <svg viewBox="0 0 300 64" width="100%" height="64" style="display:block">${d.map((v,k)=>`<rect x="${k*21.5+2}" y="${60-v/mx*56}" width="15" height="${v/mx*56}" rx="2" fill="${k===13?'var(--label2)':'#CBD5E1'}"/>`).join('')}</svg>
+     <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--label2);margin-top:4px"><span>14 days ago</span><span>daily ${TOP[x.ts.t][0].toLowerCase()} interactions · ${esc(P.name)}</span><span>last 24 h</span></div></div>`}
+  if(x.type==='snap')return `<div class="box why"><h4>Why it fired <em>first observation</em></h4><div class="ratio"><b>${fmtN(e.fol)}</b><span>followers across tracked profiles, observed today ${at(x.age).hm}.</span></div>
+     <div class="obs" style="--hotc:var(--label2)"><div class="hot"><b>${at(x.age).hm}</b>observation 1</div><div style="text-align:center;opacity:.6"><b>04:00</b>next observation</div><div style="opacity:.6"><b>trend</b>from then on</div></div>
+     <div style="font-size:12.5px;color:var(--label2);margin-top:12px;line-height:1.45">One number is a baseline, not a change. Radar claims growth or decline only after a second observation.</div></div>`;
+  const first=a.age, sn=seen(a);
+  return `<div class="box why"><h4>Why it fired <em>rule: ${x.type==='news'?'an article names you':'a watched '+(e.kind==='list'?'party':'rival')+' publishes'}</em></h4>
+     <div style="font-size:13px;color:var(--label2);line-height:1.45">${x.type==='news'?`${esc(a.outlet)} published an item naming <b style="color:var(--label)">${esc(YOU.name)}</b>. Starwatch quotes the headline only.`:`A ${platN(a)} ${kindN(a)} not present in the previous collection.`}</div>
+     <div class="obs" style="--hotc:${TY[x.type].g[0]}"><div><b>${at(first).hm}</b>published</div><div class="hot" style="text-align:center"><b>${at(sn).hm}</b>first seen</div><div><b>03:30</b>last seen · ${fmt(a.inter)} int.</div></div></div>`}
+function mediaHtml(x){const a=x.a;if(!a)return '';const w=100,h=Math.round(Math.min(190,w/a.ar)),video=mediaURL(a);
+  const visual=video?`<video class="asset-player" style="aspect-ratio:${+a.ar||1}" controls playsinline preload="metadata" poster="${esc(a.img||'')}" src="${esc(video)}" aria-label="Video from ${esc(SW.ownerName(a))}"></video><div class="player-fallback" hidden><b style="color:var(--label);font-weight:600">Playback unavailable</b><span>The file could not be loaded here.</span>${sourceLink(a.url,'Open source')}</div>`:a.img?`<div class="mthumb${LOADED.has(a.img)?'':' sk'}" style="aspect-ratio:${Math.max(.8,+a.ar||1.3)}">${preview(a)}</div>`:'';
+  return `<div class="box"><h4>Source <em>${esc(platN(a))} ${kindN(a)}${REAL?' · published '+esc(dateText(a.published_at)):''}</em></h4><div class="media ${video||!a.img?'has-player':''}">${visual}
+   <div><div class="cap">${esc(a.cap)}</div><div class="src">${esc(SW.ownerName(a))}${a.outlet?' · '+esc(a.outlet):''}${REAL?'':' · '+whenLong(a.age)}</div>
+   ${a.video&&!video?`<div class="playback-note">${REAL?'No playable file is supplied.':'Simulated item · no video file.'} ${sourceLink(a.url,'Open source')}</div>`:REAL?sourceLink(a.url,'Open source'):''}
+   ${REAL?`<div class="src">Metrics observed ${esc(dateText(a.observed_at))}</div>`:''}
+   ${(M=>M.length?`<div class="mgrid" style="grid-template-columns:repeat(${M.length},minmax(0,1fr))">${M.map(([k,l])=>`<div><b>${fmt(a[k])}</b><span>${l}</span></div>`).join('')}</div>`:'')(METRICS.filter(([k])=>reported(a,k)))}</div></div>
+   ${REAL?`${a.topics.length?`<div class="evidence-label">${esc(topicLabel(a))}</div><span class="evidence-label">${esc(topicNote(a))}</span>`:''}${a.claims.length?`<div class="src">Source-statement excerpts · truth not independently verified</div>${a.claims.map(c=>`<blockquote class="claim-quote">“${esc(c.quote||c.text||'')}”<span class="evidence-label">${esc(claimNote(c))}</span></blockquote>`).join('')}`:''}`:''}</div>`}
+function paHtml(x){
+  if(!draftable(x))return `<div class="pa empty"><div class="none">${starSvg(18,'currentColor')}<div><b style="color:var(--label)">No answer proposed.</b><br>${x.type==='snap'?'A single follower count does not establish change.':'No source text or reviewed quotation is supplied for this post.'} Inspect the source before preparing a response.</div></div></div>`;
+  const D=drafts(x),ev=evidence(x);
+  return `<div class="pa"><div class="pa-h"><span class="k">${starSvg(16)} Proposed answer</span><span class="dr">Draft · never sent</span></div>
+   <div class="pa-sub">${esc(D.label)}${REAL?' · source quotation stays Czech':''}</div>
+   <div class="seg" id="tone">${[['factual','Factual'],['warm','Warm'],['brief','Brief']].map(([k,l])=>`<button data-t="${k}" class="${tone===k?'on':''}">${l}</button>`).join('')}</div>
+   <div class="draft" id="draft" spellcheck="false"></div>
+   <div class="gloss" id="gloss"></div>
+   <div class="ev"><div class="l">Grounded in</div>${ev.map((s,k)=>`<div class="evr" data-k="${k}"><span class="n">${k+1}</span><span>${s}</span></div>`).join('')}</div>
+   <div class="acts"><button class="pill" id="bEdit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4Z"/></svg><span>Edit</span></button><button class="pill" id="bCopy" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="3"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Copy</button><button class="pill primary" id="bStudio" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Keep draft</button></div>
+   <div class="guard"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v5.5c0 4.6 3.1 8.2 7.5 9.5 4.4-1.3 7.5-4.9 7.5-9.5V6L12 3Z"/></svg><span>For your review. Starwatch never posts on its own. Drafts use only the observed public items above, say nothing about opponents beyond what they published, and never target or profile voters. Placeholders in <span style="border-bottom:1px dashed var(--label2)">[brackets]</span> are yours to fill.</span></div></div>`}
+function openSheet(id,instant){const x=ALERTS.find(z=>z.id===id);if(!x)return;cur=x;tone='factual';unread.delete(id);
+  const e=x.e;
+  $('#shb').innerHTML=`<div class="sh-head" id="shh"><span class="meta"><span class="ty">${TY[x.type].n}</span><em>${rel(x.age)}</em></span><button class="cbtn" id="shx" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 7l10 10M17 7 7 17"/></svg></button></div>
+   <div class="sh-title">${esc(head(x))}</div>
+   ${e?`<div class="ent">${av(e,36)}<span class="who2"><b>${esc(e.name)}</b><em>${esc(e.kind==='list'?'Party list · '+P.name:e.list.name)}${e.me?(REAL?' · focus':' · you'):''}</em></span></div>`:`<div class="ent">${starSvg(16,'currentColor')}<span class="who2"><b>${esc(P.name)}</b><em>all ${P.L} lists · ${fmtN(P.n)} candidates</em></span></div>`}
+   ${x.a?mediaHtml(x)+paHtml(x)+whyHtml(x):whyHtml(x)+paHtml(x)}
+   <div class="sh-foot">${e?`<button class="pill" id="bSpot">Open in Spotlight</button>`:''}<button class="pill" id="bAtlas">${starSvg(13,'currentColor')} Atlas</button><button class="pill" id="bMute">Mute similar</button></div>`;
+  $('#shb').scrollTop=0;
+  requestAnimationFrame(()=>{const c=$('#shx');if(c)c.focus({preventScroll:true})});
+  $('#sheet').classList.add('on');$('#scrim').classList.add('on');$('#app').classList.add('behind');
+  $('#shb').querySelectorAll('video').forEach(video=>{const unavailable=()=>{video.hidden=true;video.nextElementSibling.hidden=false};video.addEventListener('error',unavailable);if(video.error)unavailable()});
+  $('#shx').onclick=closeSheet;$('#bAtlas').onclick=()=>{location.href=e?`atlas.html?${e.kind==='list'?'list='+e.L.i:'cand='+e.c.i}`:'atlas.html'};const bs=$('#bSpot');if(bs)bs.onclick=()=>window.openSpotlight&&openSpotlight(e.kind==='list'?{type:'list',id:e.L.i}:{type:'cand',id:e.c.i});$('#bMute').onclick=()=>{if(!x.e){toast('City-wide topic has no individual entity to hide');return}enabledWatches.delete(x.e.key);document.querySelectorAll(`[data-watch="${x.e.key}"]`).forEach(b=>{b.classList.remove('on');b.setAttribute('aria-pressed','false')});closeSheet();renderFeed();toast('Entity hidden from this local feed')};
+  if(draftable(x)){$('#tone').onclick=ev=>{const b=ev.target.closest('button');if(!b||b.dataset.t===tone)return;tone=b.dataset.t;$('#tone').querySelectorAll('button').forEach(z=>z.classList.toggle('on',z===b));stream(x,0)};
+    $('#bEdit').onclick=()=>{const d=$('#draft');const on=d.getAttribute('contenteditable')==='true';if(on){d.setAttribute('contenteditable','false');$('#bEdit span').textContent='Edit';toast('Edits kept in this draft')}else{streamTok++;if(!$('#gloss').classList.contains('on'))finishDraft(x);d.setAttribute('contenteditable','true');d.focus();$('#bEdit span').textContent='Done'}};
+    $('#bCopy').onclick=()=>{const txt=$('#draft').innerText.replace(/\s+$/,'');(navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>toast('Copied locally · review before using'),()=>toast('Clipboard unavailable · select the draft to copy'))};
+    $('#bStudio').onclick=()=>{const draft={mode:REAL?'real':'sim',text:$('#draft').innerText,source_ids:x.a?[x.a.id]:[],source_urls:x.a?[x.a.url]:[],entity_id:focusId||null,entity_kind:YOU.kind,entity_index:YOU.kind==='cand'?YOU.c.i:YOU.L.i,status:'draft'};try{sessionStorage.setItem('sw-radar-draft',JSON.stringify(draft));toast('Draft saved locally · open Studio to continue')}catch(e){toast('Local draft storage unavailable')}};
+    stream(x,instant?-1:650)}
+  renderFeed()}
+function closeSheet(){$('#shb').querySelectorAll('video').forEach(video=>video.pause());$('#sheet').classList.remove('on');$('#scrim').classList.remove('on');$('#app').classList.remove('behind');$('#sheet').style.transform='';streamTok++;cur=null}
+$('#scrim').onclick=closeSheet;
+addEventListener('keydown',ev=>{if(ev.key==='Escape'&&cur&&!(ev.target.closest&&ev.target.closest('[contenteditable=true]'))){ev.stopImmediatePropagation();closeSheet()}});
+function segs(s){return s.split(/(\[[^\]]+\])/).filter(Boolean).map(p=>p[0]==='['?{ph:p}:{t:p})}
+function finishDraft(x){const [cs,en]=drafts(x)[tone];const d=$('#draft');d.classList.remove('in');void d.offsetWidth;d.classList.add('in');d.innerHTML=segs(cs).map(s=>s.ph?`<span class="ph">${esc(s.ph)}</span>`:esc(s.t)).join('');showGloss(en)}
+function showGloss(en){const g=$('#gloss');g.innerHTML=`<b>English gloss · not for posting</b>${esc(en)}`;$('#bCopy').disabled=false;$('#bStudio').disabled=false;requestAnimationFrame(()=>g.classList.add('on'));document.querySelectorAll('.evr').forEach((r,k)=>setTimeout(()=>r.classList.add('lit'),k*160))}
+function stream(x,delay){
+  streamTok++;const draft=$('#draft');if(!draft)return;
+  draft.setAttribute('contenteditable','false');$('#bEdit span').textContent='Edit';finishDraft(x);
+}
+// drag the sheet down to dismiss
+(()=>{let y0=null,dy=0;const sh=$('#sheet');
+  const down=ev=>{if(!ev.target.closest('#grab,#shh')||ev.target.closest('#shx'))return;y0=ev.clientY;dy=0;sh.classList.add('drag');ev.preventDefault()};
+  const move=ev=>{if(y0==null)return;const z=parseFloat(getComputedStyle($('#pw')).zoom)||1;dy=Math.max(0,(ev.clientY-y0)/z);sh.style.transform=`translateY(${dy}px)`};
+  const up=()=>{if(y0==null)return;y0=null;sh.classList.remove('drag');if(dy>110)closeSheet();else sh.style.transform=''};
+  sh.addEventListener('pointerdown',down);addEventListener('pointermove',move);addEventListener('pointerup',up)})();
+
+/* ================= toast ================= */
+let tT;function toast(m){const t=$('#toast');t.innerHTML=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12.5 4.5 4.5L20 6.5"/></svg>${esc(m)}`;t.classList.add('on');clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('on'),1900)}
+
+/* ================= lock screen + pushes ================= */
+const PUSH=REAL?FEED.filter(draftable).slice(0,2):[FEED.find(x=>x.type==='spike'&&at(x.age).d===0)||FEED.find(x=>x.type==='spike'),FEED.find(x=>x.type==='video')||FEED.find(x=>x.type==='post')].filter(Boolean);
+function pushText(x){const e=x.e,a=x.a;switch(x.type){
+  case 'spike':if(REAL)return [`${TY.spike.n} · ${e.name}`,body(x)];return [`${TY.spike.n} · ${e.me?'you':e.name}`,`${e.me?'Your':pron(e)[0].toUpperCase()+pron(e).slice(1)} ${platN(a)} ${kindN(a)} is at ${x.ratio.toFixed(1)}× ${pron(e)} median (${fmt(a.inter)} interactions).`];
+  case 'video':case 'post':return [`${TY[x.type].n} · ${e.name}`,`${platN(a)}: “${a.cap.length>70?a.cap.slice(0,68)+'…':a.cap}”`];
+  default:return [TY[x.type].n,body(x)]}}
+function lnHtml(x,cls='ln'){const [t,b]=pushText(x);return `<div class="${cls}" data-id="${x.id}"><span class="app-ico">${starSvg(22)}</span><div><div class="h"><span>${esc(t)}</span><em>${x.live?'now':rel(x.age).replace(' ago','')}</em></div><p>${esc(b)}</p><span class="pr">${starSvg(11)} ${kindLbl(x)} ready to review</span></div></div>`}
+function buildLock(){
+  $('#lock').innerHTML=`
+   <div class="lk"><svg width="14" height="18" viewBox="0 0 14 18" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1" y="8" width="12" height="9" rx="2.5" fill="currentColor" stroke="none"/><path d="M3.5 8V5.5a3.5 3.5 0 0 1 7 0V8"/></svg><div class="date">${esc(dateFmt.format(ASOF))} · ${REAL?'snapshot':'simulation'}</div><div class="clock">${timeFmt.format(ASOF)}</div></div>
+   <div class="stack">${PUSH.map(x=>lnHtml(x)).join('')}</div>
+   <div class="qb l"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M8 2.5h8v4l-2 3V21H10V9.5l-2-3Z"/></svg></div><div class="qb r"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3.5 8.5a2 2 0 0 1 2-2h2.5l1.5-2h5l1.5 2h2.5a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2Z"/><circle cx="12" cy="13" r="3.5"/></svg></div>
+   <div class="swipe">Tap a notification to open its proposed answer</div>`;
+  $('#lock').querySelectorAll('.ln').forEach(n=>n.onclick=()=>{unlock();setTimeout(()=>openSheet(+n.dataset.id),380)})}
+let timers=[];const later=(f,ms)=>timers.push(setTimeout(f,ms));
+function unlock(){timers.forEach(clearTimeout);timers=[];$('#lock').classList.add('gone');renderFeed();}
+function island(x,ms=2600){const il=$('#island');il.querySelector('.il').innerHTML=`${starSvg(16)}<span>${TY[x.type].n}</span>`;il.querySelector('.ir').innerHTML=x.type==='spike'?x.ratio.toFixed(1)+'×':`<span style="color:${TY[x.type].g[0]}">${esc(x.e?x.e.short:P.name)}</span>`;il.classList.add('on');setTimeout(()=>il.classList.remove('on'),ms)}
+function banner(x,ms=4800){if(!x)return;const b=$('#banner');const [t,bd]=pushText(x);b.dataset.id=x.id;b.innerHTML=`<span class="app-ico" style="width:24px;display:grid;place-items:center;color:var(--label2)">${starSvg(22)}</span><div><div style="display:flex;justify-content:space-between;font-size:15px;font-weight:650"><span>${esc(t)}</span><em style="font-style:normal;font-size:13px;color:var(--label2);font-weight:500">${REAL?'Snapshot replay':'now'}</em></div><p style="font-size:14px;line-height:1.35;color:var(--label2);margin-top:1px">${esc(bd)}</p><span style="display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-size:12px;font-weight:600">${starSvg(11)} ${kindLbl(x)} ready to review</span></div>`;
+  b.classList.add('on');clearTimeout(b._t);b._t=setTimeout(()=>b.classList.remove('on'),ms)}
+$('#banner').onclick=()=>{const b=$('#banner');b.classList.remove('on');openSheet(+b.dataset.id)};
+let liveIn=false;
+function liveArrives(){if(REAL||!LIVE||liveIn)return;liveIn=true;FEED.unshift(LIVE);unread.add(LIVE.id);island(LIVE);setTimeout(()=>{if(cur)return;ARRIVING=LIVE;renderFeed(true);const sc=$('#scroll');sc.scrollTo({top:0,behavior:'smooth'});ping()},500);}
+function playDemo(){timers.forEach(clearTimeout);timers=[];closeSheet();liveIn=false;const k=FEED.indexOf(LIVE);if(k>=0)FEED.splice(k,1);
+  if(REAL){$('#lock').classList.add('gone');revealed=false;$('#scroll').scrollTop=0;renderFeed();sweep();if(PUSH[0]){island(PUSH[0]);later(()=>banner(PUSH[0]),700)}else toast('No actionable observations in this snapshot');return}
+  if(MOBILE()){$('#lock').classList.add('gone');renderFeed();later(()=>banner(PUSH[0]),900);later(liveArrives,9000);return}
+  buildLock();$('#lock').classList.remove('gone');renderFeed();
+  const ns=[...$('#lock').querySelectorAll('.ln')];
+  ns.forEach((n,k)=>later(()=>n.classList.add('in'),700+k*900));
+  later(()=>{unlock();later(liveArrives,7000)},6200)}
+
+/* ================= side panels: watchlist (left), evidence rules (right) ================= */
+const shield='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v5.5c0 4.6 3.1 8.2 7.5 9.5 4.4-1.3 7.5-4.9 7.5-9.5V6L12 3Z"/></svg>';
+const ruleRows=R=>R.map(([b,s,st,cls])=>`<div class="rr"><div><b>${b}</b><span>${s}</span></div>${typeof st==='number'?`<button class="tgl ${st?'on':''}" aria-label="${esc(b)}" aria-pressed="${st?'true':'false'}"></button>`:`<span class="tag ${cls||''}">${st}</span>`}</div>`).join('');
+if(REAL)$('#explain').innerHTML=`<div class="kicker">${starSvg(12)} Radar · verified snapshot</div><h1>Observed public activity</h1><p>Public posts from ${esc(P.name)} with sources and dated metrics. Focus: ${esc(YOU.name)}.</p>
+ <div class="cta"><button class="pill primary" id="bTop">${starSvg(12,'currentColor')} Open a review draft</button><button class="pill" id="bReplay">Replay snapshot</button></div>
+ <p class="method">${shield}<span><b>Method.</b> Posts from the last 48 h are observed; outliers (≥ 3× the median of 8+ comparable posts) are a sample only. One follower snapshot is a baseline, not a change. Reach is attention, not support. Drafts quote their source and are never sent.</span></p>`;
+else $('#explain').innerHTML=`<div class="kicker">${starSvg(12)} Radar · simulation</div><h1>Observed public activity</h1>
+ <p>Pick people and parties in the Atlas. Radar watches their public posts, videos and news, flags observable changes and drafts an answer for you to review.</p>
+ <div class="cta"><button class="pill primary" id="bTop">${starSvg(12,'currentColor')} Open a proposed answer</button><button class="pill" id="bReplay">Replay push</button></div>
+ <p class="method">${shield}<span><b>Method.</b> Alerts fire at ≥ 3× an entity’s own 30-day median. A first observation is a baseline, not a change. Engagement is attention, not support. Drafts cite their source, need human review and are never sent.</span></p>`;
+$('#bReplay').onclick=playDemo;
+$('#bTop').disabled=!PUSH.length;$('#bReplay').disabled=!FEED.length;
+$('#bTop').onclick=()=>{if(!PUSH.length){toast('No actionable source to draft from');return}if(!$('#lock').classList.contains('gone'))unlock();setTimeout(()=>openSheet(PUSH[0].id),$('#lock').classList.contains('gone')?0:380)};
+const rows=WATCH.map(e=>{const n=e.created.length,role=e.me?`<span class="tag you">${REAL?'Focus':'You'}</span>`:e.kind==='list'?'<span class="tag">Party</span>':'<span class="tag">Rival</span>';
+  return `<div class="wl-row">${av(e,42)}<div style="min-width:0"><div class="n">${esc(e.name)} ${role}</div>
+  <div class="s"><span>${esc(e.kind==='list'?P.name+' · '+e.L.size+' candidates':e.list.name)}</span>${n?`${n} posts${e.median!=null?` · typical ${fmt(e.median)}`:''}`:'No retained posts in 30 days'}</div>${r22(e)}</div><button class="tgl on" data-watch="${e.key}" aria-label="Show ${esc(e.name)} in local feed" aria-pressed="true"></button></div>`}).join('');
+const HIDE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>';
+$('#watch').innerHTML=`<div class="wl-h"><h2>Watching</h2><span class="t-sub">${esc(P.name)} · ${WATCH.length}</span><button class="hide" data-side="l" aria-label="Hide watchlist" title="Hide">${HIDE}</button></div>${rows}${REAL?'':'<button class="pill add">＋ Add from Atlas</button>'}
+ <div class="wl-note">${REAL?'Typical = median likes + comments per retained post, last 30 days. Toggles filter this feed only; profile samples are incomplete.':'Typical = median interactions per item, 30 days, each entity compared only with itself. Follower counts become trends after a second observation.'}</div>`;
+$('#watch').insertAdjacentHTML('afterend',`<button class="reopen" data-side="l" aria-label="Show watchlist">${starSvg(13,'var(--brand)')} Watching ${WATCH.length}</button>`);
+$('#explain').insertAdjacentHTML('afterend',`<button class="reopen" data-side="r" aria-label="Show method">${starSvg(13,'var(--brand)')} Method</button>`);
+$('#explain .kicker').insertAdjacentHTML('beforeend',`<button class="hide" data-side="r" aria-label="Hide method panel" title="Hide" style="margin-left:auto">${HIDE}</button>`);
+{const sides={l:$('.side.l'),r:$('.side.r')};let st={};try{st=JSON.parse(localStorage.getItem('sw-radar-sides')||'{}')}catch(e){}
+  const set=(k,off)=>{sides[k].classList.toggle('off',off);st[k]=off;try{localStorage.setItem('sw-radar-sides',JSON.stringify(st))}catch(e){}};
+  Object.keys(sides).forEach(k=>{if(st[k])sides[k].classList.add('off')});
+  document.querySelectorAll('.hide[data-side],.reopen[data-side]').forEach(b=>b.addEventListener('click',()=>set(b.dataset.side,b.classList.contains('hide'))))}
+document.querySelectorAll('.tgl').forEach(t=>t.onclick=()=>{const on=t.classList.toggle('on');t.setAttribute('aria-pressed',String(on));if(t.dataset.watch){if(on)enabledWatches.add(t.dataset.watch);else enabledWatches.delete(t.dataset.watch);renderFeed()}});
+document.querySelectorAll('#watch .add').forEach(b=>b.onclick=()=>toast('Pick people or lists in the Atlas'));
+
+/* ================= backdrop: the focus city's boundary as a quiet radar plot ================= */
+function drawBg(){const G=window.SW_GEO,rings=G&&G.cities&&G.cities[P.name];const W=innerWidth,H=innerHeight;
+  const pr=([lon,lat])=>[(lon-15.5)*Math.cos(49.8*Math.PI/180)*1000,-(lat-49.8)*1000];
+  let pts=rings?rings.flat().map(pr):[];
+  let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;pts.forEach(([x,y])=>{x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y)});
+  const cx=W/2,cy=MOBILE()?H*.45:H*.54,R=Math.min(W*.46,H*.44)*(MOBILE()?1.25:1);
+  const k=pts.length?(R*(MOBILE()?1.6:2.15))/Math.max(x1-x0,y1-y0):1,mx=(x0+x1)/2,my=(y0+y1)/2,to=([x,y])=>[cx+(x-mx)*k,cy+(y-my)*k];
+  const path=rs=>rs.map(r=>'M'+r.map(pr).map(to).map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join('L')+'Z').join('');
+  const kraje=G&&G.kraje?G.kraje.map(kr=>`<path class="kraj" d="${path(kr.rings)}"/>`).join(''):'';
+  const ticks=[...Array(72)].map((_,i)=>{const a=i*5*Math.PI/180,r0=R*1.22,r1=r0+(i%6?5:11);return `<line class="tick" x1="${(cx+Math.cos(a)*r0).toFixed(1)}" y1="${(cy+Math.sin(a)*r0).toFixed(1)}" x2="${(cx+Math.cos(a)*r1).toFixed(1)}" y2="${(cy+Math.sin(a)*r1).toFixed(1)}"/>`}).join('');
+  const lat=rings?(-(my)/1000+49.8):null,lon=rings?(mx/1000/Math.cos(49.8*Math.PI/180)+15.5):null;
+  $('#bg').innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><defs><linearGradient id="swg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="rgb(14,110,107)" stop-opacity="0"/><stop offset="1" stop-color="rgb(14,110,107)" stop-opacity=".14"/></linearGradient></defs>
+    ${kraje}${[.4,.8,1.22].map((f,i)=>`<circle class="ring${i===1?' d':''}" cx="${cx}" cy="${cy}" r="${(R*f).toFixed(1)}"/>`).join('')}${ticks}
+    ${rings?`<path class="city" d="${path(rings)}"/>`:''}
+    <g class="sweep" style="transform-origin:${cx}px ${cy}px"><path d="M${cx} ${cy}L${cx+R*1.22} ${cy}A${R*1.22} ${R*1.22} 0 0 0 ${(cx+Math.cos(-.9)*R*1.22).toFixed(1)} ${(cy+Math.sin(-.9)*R*1.22).toFixed(1)}Z" fill="url(#swg)"/></g>
+    <circle class="ping" cx="${cx}" cy="${cy}" r="${(R*1.22).toFixed(1)}" style="transform-origin:${cx}px ${cy}px"/>
+    <circle class="ctr" cx="${cx}" cy="${cy}" r="2.5"/>
+    ${rings?`<text class="lbl" x="${cx}" y="${(cy+R*1.22+28).toFixed(1)}" text-anchor="middle">${esc(P.name)} · ${lat.toFixed(2)}° N ${lon.toFixed(2)}° E</text>`:''}</svg>`}
+function sweep(){const g=document.querySelector('#bg .sweep');if(!g)return;g.classList.remove('go');void g.getBoundingClientRect();g.classList.add('go')}
+function ping(){const g=document.querySelector('#bg .ping');if(!g)return;g.classList.remove('go');void g.getBoundingClientRect();g.classList.add('go')}
+drawBg();sweep();
+{let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(drawBg,150)})}
+
+/* ================= boot ================= */
+const S=Q.get('state');
+if(S==='feed'){$('#lock').classList.add('gone');renderFeed()}
+else if(S==='sheet'){$('#lock').classList.add('gone');renderFeed();if(PUSH[0])openSheet(PUSH[0].id,Q.has('instant'))}
+else if(S==='lock'){buildLock();renderFeed();$('#lock').querySelectorAll('.ln').forEach(n=>n.classList.add('in'))}
+else if(S==='banner'){$('#lock').classList.add('gone');renderFeed();banner(PUSH[0],60000)}
+else if(REAL){$('#lock').classList.add('gone');renderFeed()}
+else playDemo();
+if(Q.get('sheet')){$('#lock').classList.add('gone');openSheet(+Q.get('sheet'),Q.has('instant'))}
+</script>
+<script src="brand/chrome.js"></script>
+<script src="app.js" data-screen="radar"></script>
+</body>
+</html>

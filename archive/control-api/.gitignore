@@ -1,0 +1,18 @@
+# Local planning and collected material are not part of a future public submission.
+/TODO.md
+/docs/
+/research/
+/private/
+/tmp/
+/.claude/worktrees/
+/.claude/agents/
+/.claude/settings.local.json
+.env
+.env.*
+!.env.example
+__pycache__/
+.venv/
+node_modules/
+dist/
+.DS_Store
+/data/

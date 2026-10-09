@@ -1,0 +1,26 @@
+/* Starwatch motion kit (CSS half). Pair with fx/motion.js; include after ds.css and the screen's own styles.
+   Rules: exponential ease-out only, transform/opacity only, no bounce, no glow, nothing blank-then-pop.
+   The JS drives reveal, count-up, image fade and hover/press with the Web Animations API, so no rule here
+   overrides a screen's own `transition` or `transform`. This file only holds state classes and the page change. */
+:root{--mx-ease:cubic-bezier(.25,1,.5,1);--mx-dur:.48s;--mx-vt:.26s}
+
+/* offscreen units waiting to be revealed (set only while they are outside the viewport) */
+[data-mx-pre]{opacity:0!important}
+/* images still loading, faded in by motion.js once decoded */
+img.mx-img{opacity:0}
+/* count-up in progress: digits keep their width */
+.mx-counting{font-variant-numeric:tabular-nums}
+
+/* subtle cross-document page change: same-length cross-fade (keeps total opacity at 1, no background dip)
+   with a 6px settle on the incoming page. The chrome is named sw-chrome by app.js and stays put. */
+@view-transition{navigation:auto}
+::view-transition-old(root){animation:mx-vt-out var(--mx-vt) var(--mx-ease) both}
+::view-transition-new(root){animation:mx-vt-in var(--mx-vt) var(--mx-ease) both}
+@keyframes mx-vt-out{from{opacity:1}to{opacity:0}}
+@keyframes mx-vt-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+@media print{[data-mx-pre],img.mx-img{opacity:1!important}}
+@media (prefers-reduced-motion:reduce){
+  [data-mx-pre],img.mx-img{opacity:1!important}
+  ::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}
+}

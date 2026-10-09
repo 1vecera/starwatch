@@ -1,0 +1,74 @@
+/*
+  Starwatch design tokens. PLACEHOLDER until Daniel picks a Claude Design direction.
+  Replace this whole :root block with the hand-off's :root block. Screens use only --sw- tokens,
+  so a renamed token is fixed in the screen CSS, never by adding colours there.
+*/
+:root {
+  /* Type */
+  --sw-font-display: Georgia, "Times New Roman", serif;
+  --sw-font-text: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --sw-font-mono: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --sw-text-xs: 0.75rem;
+  --sw-text-sm: 0.875rem;
+  --sw-text-md: 1rem;
+  --sw-text-lg: 1.375rem;
+  --sw-text-xl: 2rem;
+  --sw-leading: 1.4;
+
+  /* Surfaces and ink */
+  --sw-surface: #ffffff;
+  --sw-surface-raised: #f3f3f1;
+  --sw-ink: #141414;
+  --sw-muted: #5c5c5c;
+  --sw-rule: #d4d4d0;
+  --sw-accent: #141414;
+  --sw-alert: #b3261e;
+
+  /* Run states */
+  --sw-state-live: #b3261e;
+  --sw-state-cached: #5c5c5c;
+  --sw-state-sample: #8a5a00;
+  --sw-state-missing: #8a8a8a;
+
+  /* Step states */
+  --sw-step-queued: #8a8a8a;
+  --sw-step-running: #141414;
+  --sw-step-done: #1f6b3a;
+  --sw-step-failed: #b3261e;
+  --sw-step-skipped: #8a5a00;
+  --sw-step-not-implemented: #8a8a8a;
+
+  /* Report kinds and confidence (S2) */
+  --sw-kind-fact: #141414;
+  --sw-kind-inference: #2f4f8f;
+  --sw-kind-open-question: #8a5a00;
+  --sw-kind-missing-source: #8a8a8a;
+  --sw-confidence-high: #141414;
+  --sw-confidence-medium: #5c5c5c;
+  --sw-confidence-low: #8a8a8a;
+
+  /* Platform marks */
+  --sw-platform-website: #141414;
+  --sw-platform-facebook: #141414;
+  --sw-platform-instagram: #141414;
+  --sw-platform-tiktok: #141414;
+  --sw-platform-youtube: #141414;
+  --sw-platform-x: #141414;
+
+  /* Space, lines, radius */
+  --sw-space-1: 0.25rem;
+  --sw-space-2: 0.5rem;
+  --sw-space-3: 0.75rem;
+  --sw-space-4: 1rem;
+  --sw-space-5: 1.5rem;
+  --sw-space-6: 2.5rem;
+  --sw-line: 1px;
+  --sw-line-strong: 2px;
+  --sw-radius: 2px;
+  --sw-thumb-height: 3.5rem;
+
+  /* Motion: only when data arrives */
+  --sw-motion-arrive: 240ms;
+  --sw-motion-strike: 300ms;
+  --sw-ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+}

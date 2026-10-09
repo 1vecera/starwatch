@@ -1,0 +1,27 @@
+# Local planning and collected material are not part of a future public submission.
+/TODO.md
+/docs/
+/research/
+/private/
+/tmp/
+/.claude/worktrees/
+/.claude/agents/
+/.claude/settings.local.json
+.env
+.env.*
+!.env.example
+__pycache__/
+.venv/
+node_modules/
+dist/
+.DS_Store
+/data/
+# Starwatch app: real research data and retained media stay local
+/web/data/real.js
+/web/data/real.json
+# Published-source snapshots are local research, not repository assets.
+/web/data/forecasts.json
+/web/media/
+/web/data/stats.js
+/walkthrough-shots/
+/web/data/issue-topics.js

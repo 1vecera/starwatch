@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Starwatch · Observing log</title>
+  <link rel="preload" href="/static/fonts/cormorant-garamond-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/static/fonts/literata-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/static/fonts/jost-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/static/tokens.css">
+  <link rel="stylesheet" href="/static/atlas.css">
+  <link rel="stylesheet" href="/static/s1.css">
+  <script type="module" src="/static/s1.js"></script>
+</head>
+<body class="s1">
+  <header class="masthead">
+    <a class="wordmark" href="/">Starwatch</a>
+    <p class="folio">Observing log</p>
+    <nav class="screens" aria-label="Screens">
+      <a data-screen-link="/" aria-current="page" href="/">The run</a>
+      <a data-screen-link="/static/s3.html" href="/static/s3.html">The chart</a>
+    </nav>
+    <p class="runline" id="runline"></p>
+    <p class="stamp" id="stamp" data-state="idle"><span class="stamp-word">No run</span></p>
+  </header>
+
+  <form class="request" id="request" autocomplete="off">
+    <p class="request-sentence">
+      <label>Research
+        <input name="subject" required minlength="2" placeholder="full name"></label>
+      <label>anchored by
+        <input name="anchor" required minlength="2" placeholder="website, party, city or IČO"></label>
+      <label>for
+        <select name="goal_preset">
+          <option value="G1">G1 Debate prep</option>
+          <option value="G2">G2 Respond to this post</option>
+          <option value="G3">G3 Background check</option>
+          <option value="">free text, nearest goal</option>
+        </select></label>
+      <label>on
+        <input name="goal_text" placeholder="topic or post link"></label>
+      <button type="submit" id="run-button">Run</button>
+    </p>
+    <p class="notice" id="credentials" hidden></p>
+    <p class="notice notice-error" id="form-error" role="alert" hidden></p>
+    <p class="request-sample">
+      <span class="caps">Recorded sample</span>
+      <a href="/?replay=/static/sample/run-g1.jsonl">play the sample run on this screen</a>
+      <a href="/static/s3.html?replay=/static/sample/run-g1.jsonl">or on the chart</a>
+      <span class="request-sample-note">labelled SAMPLE: invented placeholder content, image slots marked “post image”</span>
+    </p>
+  </form>
+
+  <main class="run" id="run" hidden>
+    <section class="subject" aria-label="Request">
+      <h1 class="subject-name" id="subject-name"></h1>
+      <dl class="subject-facts">
+        <dt>anchored by</dt><dd id="subject-anchor"></dd>
+        <dt>goal</dt><dd id="subject-goal"></dd>
+      </dl>
+    </section>
+
+    <section class="collect" aria-labelledby="collect-heading">
+      <h2 class="head" id="collect-heading">Collection · one lane per Apify Actor
+        <span class="head-aside" id="collect-total"></span></h2>
+      <ol class="lanes" id="lanes"></ol>
+    </section>
+
+    <aside class="side">
+      <section class="identity" aria-labelledby="identity-heading">
+        <h2 class="head" id="identity-heading">Identification <span class="head-aside" id="identity-aside"></span></h2>
+        <p class="identity-status" id="identity-status"></p>
+        <ul class="accounts" id="accounts"></ul>
+      </section>
+
+      <section class="analysis" aria-labelledby="analysis-heading">
+        <h2 class="head" id="analysis-heading">Analysis</h2>
+        <ol class="steps" id="downstream"></ol>
+      </section>
+
+      <section class="ledger" aria-labelledby="ledger-heading" aria-live="polite">
+        <h2 class="head" id="ledger-heading">Ledger <span class="head-aside" id="ledger-aside"></span></h2>
+        <dl class="ledger-figures">
+          <div><dt>Apify</dt><dd id="ledger-apify">—</dd></div>
+          <div><dt>Scribe</dt><dd id="ledger-scribe">—</dd></div>
+          <div><dt id="ledger-elapsed-label">Elapsed</dt><dd id="ledger-elapsed">0:00</dd></div>
+        </dl>
+        <p class="receipt" id="receipt"></p>
+      </section>
+    </aside>
+  </main>
+</body>
+</html>

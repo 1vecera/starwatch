@@ -1,0 +1,314 @@
+/* S3 · The chart, set as a printed star chart beside the night log. Uses only --sw- tokens. */
+
+body.s3 {
+  height: 100vh;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.empty {
+  margin: 20vh auto 0;
+  max-width: 48rem;
+  font: italic 500 2rem / 1.4 var(--sw-font-display);
+  color: var(--sw-muted);
+  text-align: center;
+}
+
+.chart-page {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 27rem;
+  column-gap: var(--sw-space-6);
+  padding-top: 1.5rem;
+}
+
+/* The chart --------------------------------------------------------------------------------- */
+
+.chart { position: relative; min-width: 0; min-height: 0; }
+.sky { position: absolute; inset: 0; overflow: visible; }
+.overlay { position: absolute; inset: 0; pointer-events: none; }
+.overlay > *, #layer-axis > *, #layer-rows > *, #layer-plates > *, #layer-claim-labels > * {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+/* Engraving */
+.grid-row { stroke: var(--sw-grid); stroke-width: 1; }
+.grid-month { stroke: var(--sw-grid); stroke-width: 1; }
+.grid-bucket { stroke: var(--sw-rule-strong); stroke-width: 1; stroke-dasharray: 3 4; }
+.tick-major { stroke: var(--sw-ink); stroke-width: 1.5; }
+.tick-minor { stroke: var(--sw-rule-strong); stroke-width: 1; }
+.neat-outer { fill: none; stroke: var(--sw-ink); stroke-width: 1.5; }
+.neat-inner { fill: none; stroke: var(--sw-rule); stroke-width: 1; }
+.spine, .branch { fill: none; stroke: var(--sw-ink); stroke-width: 1.5; }
+.branch-gap { stroke: var(--sw-state-missing); stroke-dasharray: 3 3; }
+.spine-root { fill: var(--sw-ink); }
+.band-lead { stroke: var(--sw-rule-strong); stroke-width: 1; stroke-dasharray: 1 5; }
+.hatch-line { stroke: var(--sw-rule); stroke-width: 1.5; }
+
+/* Stars: one per post, at its publication date. Size is a collected count, explained in the key. */
+.star-core { fill: var(--sw-ink); }
+.star-hollow { fill: none; stroke: var(--sw-ink); stroke-width: 1.25; }
+.star-ring { fill: none; stroke: none; stroke-width: 1.25; }
+.star.cited .star-ring { stroke: var(--sw-ink); }
+.star.before .star-core { opacity: 0.7; }
+.star { transition: opacity 200ms ease; }
+.star.dim { opacity: 0.18; }
+
+/* A star appears when its post arrives: it grows to size and one engraved ring spreads and fades. */
+.star.igniting .star-core, .star-flash { transform-box: fill-box; transform-origin: center; }
+.star.igniting .star-core { animation: ignite var(--sw-motion-ignite) var(--sw-ease) var(--delay, 0ms) both; }
+.star-flash { fill: none; stroke: var(--sw-ink); stroke-width: 1; animation: flash 760ms ease-out var(--delay, 0ms) both; }
+@keyframes ignite { from { transform: scale(0); } }
+@keyframes flash { from { transform: scale(0.7); opacity: 0.9; } to { transform: scale(2.8); opacity: 0; } }
+
+/* Leader lines from the inset plates down to their stars */
+.leader { fill: none; stroke: var(--sw-rule-strong); stroke-width: 1.25; transition: opacity 200ms ease; }
+.leader-cited { stroke: var(--sw-muted); }
+.leader.dim { opacity: 0.15; }
+
+/* Constellations: claims. Kind is carried by line style as well as ink. */
+.constellation { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: opacity 200ms ease; }
+.constellation.kind-fact { stroke: var(--sw-kind-fact); }
+.constellation.kind-inference { stroke: var(--sw-kind-inference); stroke-dasharray: 9 6; }
+.constellation.kind-open_question { stroke: var(--sw-kind-open-question); stroke-dasharray: 0.5 6; stroke-width: 3; }
+.constellation.kind-missing_source { stroke: none; }
+.constellation.dim { opacity: 0.15; }
+.constellation.focus { stroke-width: 3.5; }
+
+/* Cartouche: the subject, root of the chart */
+.cartouche { width: calc(21.5rem - 1.5rem); display: grid; gap: 6px; }
+.cartouche-kicker { color: var(--sw-muted); }
+.cartouche-name { margin: 0; font: 600 2.875rem / 0.95 var(--sw-font-display); letter-spacing: -0.005em; }
+.cartouche-anchor, .cartouche-goal { font: 400 var(--sw-text-sm) / 1.3 var(--sw-font-text); color: var(--sw-ink); }
+.cartouche-anchor .caps, .cartouche-goal .caps { color: var(--sw-muted); margin-right: 4px; }
+.cartouche-pages { display: flex; align-items: center; gap: 7px; margin-top: 2px; }
+.cartouche-pages .caps { color: var(--sw-muted); margin-right: 4px; }
+.page-glyph { width: 11px; height: 14px; border: var(--sw-line-mid) solid var(--sw-ink); pointer-events: auto; }
+
+/* Axis */
+.axis-month {
+  font: 500 var(--sw-text-xs) / 1 var(--sw-font-label);
+  letter-spacing: var(--sw-tracking-caps);
+  text-transform: uppercase;
+  color: var(--sw-muted);
+  white-space: nowrap;
+}
+.axis-now { font: 500 var(--sw-text-xs) / 1 var(--sw-font-mono); color: var(--sw-ink); white-space: nowrap; }
+.axis-now .caps { color: var(--sw-muted); }
+.axis-before {
+  display: grid;
+  font: 500 var(--sw-text-xs) / 1.1 var(--sw-font-label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sw-faint);
+}
+.axis-span { font: italic 500 1.25rem / 1 var(--sw-font-display); color: var(--sw-muted); white-space: nowrap; }
+
+/* Account bands */
+.row-label { display: grid; gap: 5px; }
+.row-handle { display: flex; align-items: center; gap: 9px; min-width: 0; font: 500 var(--sw-text-sm) / 1.2 var(--sw-font-mono); }
+.row-handle .mark { font-size: 0.9375rem; flex: none; }
+.row-handle-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row-more { color: var(--sw-muted); }
+.row-sub {
+  display: flex;
+  gap: 12px;
+  padding-left: 3.4rem;
+  font: 600 var(--sw-text-xs) / 1 var(--sw-font-label);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sw-muted);
+}
+.row-state { color: var(--sw-step-queued); }
+.row-state-accepted { color: var(--sw-identity-accepted); }
+.row-state-unconfirmed { color: var(--sw-identity-unconfirmed); }
+.row-state-missing { color: var(--sw-state-missing); }
+.row-count { font-weight: 500; color: var(--sw-muted); }
+
+.gap-label {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 0.5rem 0.9rem;
+  background: var(--sw-surface);
+  border: var(--sw-line-mid) solid var(--sw-state-missing);
+  white-space: nowrap;
+}
+.gap-label b {
+  font: 600 1.125rem / 1 var(--sw-font-label);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--sw-state-missing);
+}
+.gap-label span { font: 400 var(--sw-text-md) / 1.2 var(--sw-font-text); color: var(--sw-muted); }
+.row-waiting { font: italic 500 1.375rem / 1 var(--sw-font-display); color: var(--sw-faint); white-space: nowrap; }
+
+/* Inset plates along the top margin */
+.chart-plate {
+  margin: 0;
+  display: grid;
+  gap: 8px;
+  pointer-events: auto;
+  transition: transform var(--sw-motion-shift) var(--sw-ease), opacity 200ms ease;
+}
+.chart-plate.dim { opacity: 0.25; }
+.chart-plate-caption {
+  font: 500 var(--sw-text-xs) / 1 var(--sw-font-label);
+  letter-spacing: 0.06em;
+  color: var(--sw-muted);
+  white-space: nowrap;
+}
+.chart-plate-caption b { color: var(--sw-ink); font-weight: 600; letter-spacing: 0.1em; }
+
+/* Claim tags on the chart and in the list */
+.claim-tag {
+  display: inline-block;
+  padding: 4px 7px 3px;
+  font: 600 var(--sw-text-xs) / 1 var(--sw-font-label);
+  letter-spacing: 0.08em;
+  color: var(--sw-kind-fact);
+  background: var(--sw-surface);
+  border: var(--sw-line-mid) solid currentColor;
+  white-space: nowrap;
+  transition: opacity 200ms ease;
+}
+.claim-tag.kind-inference { color: var(--sw-kind-inference); border-style: dashed; }
+.claim-tag.kind-open_question { color: var(--sw-kind-open-question); border-style: dotted; border-width: var(--sw-line-strong); }
+.claim-tag.kind-missing_source { color: var(--sw-kind-missing-source); border-style: dashed; }
+.claim-tag.dim { opacity: 0.2; }
+
+/* Lower band: namesakes, key and the claims list */
+.namesakes { display: grid; gap: 10px; }
+.namesake { display: grid; gap: 4px; padding: 8px 12px 10px; border: var(--sw-line) dashed var(--sw-identity-rejected); }
+.namesake-state {
+  font: 600 var(--sw-text-xs) / 1 var(--sw-font-label);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--sw-identity-rejected);
+}
+.namesake-handle { display: flex; align-items: center; gap: 8px; min-width: 0; font: 500 var(--sw-text-sm) / 1.2 var(--sw-font-mono); color: var(--sw-muted); }
+.namesake-handle .mark { font-size: 0.875rem; flex: none; border-color: var(--sw-muted); color: var(--sw-muted); }
+.namesake-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-decoration: line-through;
+  text-decoration-color: var(--sw-identity-rejected);
+  text-decoration-thickness: var(--sw-line-strong);
+}
+.namesake-reason { font: 400 var(--sw-text-sm) / 1.3 var(--sw-font-text); color: var(--sw-ink); }
+
+.key { display: grid; gap: 4px; }
+.key .head { margin-bottom: 2px; }
+.key-stars svg { display: block; }
+.key-stars .star-core { fill: var(--sw-ink); }
+.key-scale { display: flex; margin-left: -15px; }
+.key-scale span {
+  width: 62px;
+  text-align: center;
+  font: 500 var(--sw-text-xs) / 1.2 var(--sw-font-mono);
+  color: var(--sw-muted);
+}
+.key-line { font: 400 var(--sw-text-xs) / 1.3 var(--sw-font-text); color: var(--sw-muted); }
+
+.claims { pointer-events: auto; }
+.claims .head { margin-bottom: var(--sw-space-2); }
+.claims-list { border-top: var(--sw-line-mid) solid var(--sw-ink); }
+.claim {
+  display: grid;
+  grid-template-columns: 3rem 3rem 12.5rem minmax(0, 1fr) 5.5rem;
+  align-items: center;
+  column-gap: var(--sw-space-3);
+  padding: 0.3rem 0.25rem;
+  border-bottom: var(--sw-line) solid var(--sw-rule);
+  cursor: default;
+}
+.claim.focus { background: var(--sw-surface-raised); }
+.claim-line { width: 3rem; height: 0.75rem; overflow: visible; }
+.claim-kind {
+  font: 600 var(--sw-text-xs) / 1 var(--sw-font-label);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.claim.kind-fact .claim-kind { color: var(--sw-kind-fact); }
+.claim.kind-inference .claim-kind { color: var(--sw-kind-inference); }
+.claim.kind-open_question .claim-kind { color: var(--sw-kind-open-question); }
+.claim.kind-missing_source .claim-kind { color: var(--sw-kind-missing-source); }
+.claim-text { font: 400 var(--sw-text-md) / 1.3 var(--sw-font-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.claim-posts { font: 500 var(--sw-text-xs) / 1 var(--sw-font-mono); color: var(--sw-muted); text-align: right; white-space: nowrap; }
+.claims-waiting { font: italic 500 1.5rem / 1.3 var(--sw-font-display); color: var(--sw-faint); padding-top: var(--sw-space-3); border-top: var(--sw-line-mid) solid var(--sw-rule); }
+
+/* The night log ---------------------------------------------------------------------------- */
+
+.log { display: flex; flex-direction: column; min-height: 0; }
+.log-list { flex: 1; min-height: 0; overflow: hidden; border-top: var(--sw-line-mid) solid var(--sw-ink); }
+.log-entry {
+  display: grid;
+  grid-template-columns: 6rem minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 14px;
+  row-gap: 4px;
+  padding: 10px 0;
+  border-bottom: var(--sw-line) solid var(--sw-rule);
+}
+.log-thumb {
+  grid-row: span 2;
+  width: 6rem;
+  height: 4.5rem;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  padding-left: 3px;
+}
+.log-thumb .plate { outline-offset: 2px; }
+.log-thumb .plate-label { padding: 3px 5px; }
+.log-noimage {
+  width: 3.5rem;
+  height: 4.25rem;
+  display: grid;
+  place-items: center;
+  border: var(--sw-line) solid var(--sw-rule-strong);
+  font: 500 var(--sw-text-xs) / 1 var(--sw-font-label);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--sw-muted);
+}
+.log-meta { display: flex; align-items: baseline; gap: 10px; font: 500 var(--sw-text-xs) / 1.1 var(--sw-font-mono); color: var(--sw-muted); white-space: nowrap; }
+.log-no { font: 600 var(--sw-text-xs) / 1 var(--sw-font-label); letter-spacing: 0.1em; color: var(--sw-ink); }
+.log-date { font-family: var(--sw-font-label); letter-spacing: 0.04em; }
+.log-text {
+  font: 400 1.125rem / 1.3 var(--sw-font-text);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.tally { padding-top: var(--sw-space-4); }
+.tally-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px 14px;
+  padding-top: var(--sw-space-3);
+  border-top: var(--sw-line-mid) solid var(--sw-ink);
+}
+.tally-cell { display: flex; align-items: baseline; gap: 8px; }
+.tally-cell .mark { align-self: center; font-size: 0.875rem; }
+.tally-value { font: 600 2rem / 1 var(--sw-font-display); }
+.tally-unit { font: 500 var(--sw-text-xs) / 1 var(--sw-font-label); color: var(--sw-muted); }
+.tally-cell.missing .tally-value, .tally-cell.missing .tally-unit { color: var(--sw-state-missing); }
+.tally-cell.missing .mark { border-color: var(--sw-state-missing); color: var(--sw-state-missing); }
+
+@media (max-width: 1280px) {
+  body.s3 { height: auto; overflow: auto; }
+  .chart-page { grid-template-columns: minmax(0, 1fr); row-gap: var(--sw-space-5); }
+  .chart { height: 58rem; }
+  .masthead { grid-template-columns: auto minmax(0, 1fr) auto; row-gap: var(--sw-space-3); }
+  .folio, .runline { display: none; }
+}

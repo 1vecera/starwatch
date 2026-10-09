@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Starwatch · Front page</title>
+  <link rel="preload" href="/static/fonts/newsreader-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/static/fonts/libre-franklin-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/static/fonts/grenze-gotisch-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/static/fonts/fonts.css">
+  <link rel="stylesheet" href="/static/tokens.css">
+  <link rel="stylesheet" href="/static/press.css">
+  <link rel="stylesheet" href="/static/s3.css">
+  <script type="module" src="/static/s3.js"></script>
+</head>
+<body class="frame-page s3">
+  <header class="masthead">
+    <div class="ear ear-left">
+      <p class="state-bug" id="state-bug" data-state="idle">No run</p>
+      <p class="ear-line" id="state-line"></p>
+    </div>
+    <a class="nameplate" href="/">Starwatch</a>
+    <div class="ear ear-right">
+      <p class="ear-kicker">This edition cost</p>
+      <p class="ear-money" id="cost-apify">—</p>
+      <p class="ear-line" id="cost-detail"></p>
+    </div>
+  </header>
+  <div class="folio">
+    <p class="folio-left" id="folio-left"></p>
+    <nav class="folio-nav" aria-label="Screens">
+      <a href="/" data-nav="desk">The desk</a>
+      <a href="/static/s3.html" data-nav="front" aria-current="page">Front page</a>
+    </nav>
+  </div>
+
+  <main class="front" id="front">
+    <section class="story">
+      <header class="lede">
+        <p class="kicker" id="kicker">The network</p>
+        <h1 class="headline" id="headline">Waiting for a run</h1>
+        <p class="deck" id="deck">Open a run from the desk, or play the sample run.</p>
+      </header>
+
+      <figure class="network" id="network" aria-label="Subject, accounts, posts and claims">
+        <div class="net-heads" aria-hidden="true">
+          <span class="net-head h-subject"><b>1</b> Subject</span>
+          <span class="net-head h-accounts"><b>2</b> Accounts</span>
+          <span class="net-head h-posts"><b>3</b> Posts, as collected</span>
+          <span class="net-head h-claims"><b>4</b> Claims they support</span>
+        </div>
+        <div class="net-body" id="net-body">
+          <div class="net-subject" id="net-subject">
+            <div class="subject-block" id="subject-block">
+              <p class="subject-name" id="subject-name"></p>
+              <p class="subject-anchor" id="subject-anchor"></p>
+            </div>
+            <div class="detached" id="detached" hidden>
+              <p class="label detached-head">Not linked to the subject</p>
+              <ol class="detached-list" id="detached-list"></ol>
+            </div>
+          </div>
+          <ol class="net-rows" id="net-rows"></ol>
+          <ol class="net-claims" id="net-claims"></ol>
+          <svg class="net-edges" id="net-edges" aria-hidden="true"></svg>
+        </div>
+        <figcaption class="net-foot">
+          <p class="legend" id="legend"></p>
+          <p class="source" id="source-line"></p>
+        </figcaption>
+      </figure>
+    </section>
+
+    <aside class="feed" aria-labelledby="feed-heading">
+      <div class="feed-head">
+        <h2 class="kicker" id="feed-heading">Latest</h2>
+        <p class="feed-count"><span class="num" id="feed-count">0</span> items</p>
+      </div>
+      <p class="feed-sub" id="feed-sub">Posts as they are collected, newest first</p>
+      <ol class="feed-list" id="feed-list"></ol>
+      <p class="feed-more" id="feed-more" hidden></p>
+    </aside>
+  </main>
+</body>
+</html>

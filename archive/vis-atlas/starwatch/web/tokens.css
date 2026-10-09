@@ -1,0 +1,134 @@
+/*
+  Starwatch design tokens · Direction A, Star atlas (night-plate edition).
+
+  The screens read like a printed observatory atlas: a flat night-blue plate, cream ink, fine
+  engraved rules, spaced-caps lettering and catalogue numbers. Overlay colours follow the printed
+  Atlas Coeli convention (red, ochre, green and Milky-Way blue on the plate), used only for states.
+  No gradients, glows or rounded cards. Screens use only these tokens.
+
+  Fonts are self-hosted from Google Fonts (OFL), latin + latin-ext, which covers Czech:
+  Cormorant Garamond (display), Literata (text), Jost (spaced-caps labels), JetBrains Mono (IDs, times).
+  Contrast on --sw-plate: ink 14.6:1, muted 8.3:1, ochre 8.7:1, verdigris 8.3:1, milky 6.9:1,
+  slate 5.5:1, vermilion 5.6:1 (used at 18 px bold or larger).
+*/
+@import url("/static/fonts/fonts.css");
+
+:root {
+  /* Families */
+  --sw-font-display: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
+  --sw-font-text: "Literata", Georgia, "Times New Roman", serif;
+  --sw-font-label: "Jost", "Futura", "Century Gothic", sans-serif;
+  --sw-font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  /* Type scale for a 1920×1080 frame. Nothing that carries meaning goes below --sw-text-sm. */
+  --sw-text-xs: 1rem;          /* 16 px: spaced-caps labels, legends, catalogue numbers */
+  --sw-text-sm: 1.0625rem;     /* 17 px: secondary lines */
+  --sw-text-md: 1.25rem;       /* 20 px: body, post excerpts, Actor IDs */
+  --sw-text-lg: 1.5rem;        /* 24 px: lane names, request line */
+  --sw-text-xl: 2.25rem;       /* 36 px: counts, section numbers */
+  --sw-text-2xl: 3.25rem;      /* 52 px: chart titles */
+  --sw-text-3xl: 4.25rem;      /* 68 px: the subject's name */
+  --sw-leading: 1.38;
+  --sw-leading-tight: 1.08;
+  --sw-tracking-caps: 0.14em;  /* engraved spaced capitals */
+  --sw-tracking-wordmark: 0.3em;
+
+  /* Surfaces and ink (skeleton names kept so every screen keeps working) */
+  --sw-surface: #101c2c;        /* the night plate */
+  --sw-surface-raised: #172941; /* hatching, highlighted rows, plate mounts */
+  --sw-surface-deep: #0c1623;   /* inside image frames */
+  --sw-ink: #f2ead8;            /* cream ink */
+  --sw-muted: #bcb5a4;          /* secondary ink */
+  --sw-faint: #8792a3;          /* tertiary ink: axis numerals, idle states */
+  --sw-rule: #2f425d;           /* hairline rules */
+  --sw-rule-strong: #5d6f88;    /* frames, leader lines */
+  --sw-grid: #1e3049;           /* coordinate grid, purely decorative */
+  --sw-accent: #f2ead8;
+  --sw-alert: #ef6a4a;
+
+  /* Atlas overlay inks */
+  --sw-vermilion: #ef6a4a;
+  --sw-ochre: #e3b453;
+  --sw-verdigris: #79c7a2;
+  --sw-milky: #8db2d8;
+  --sw-slate: #8f9bad;
+
+  /* Honesty states: first-class, never colour alone (each has a word and a frame style) */
+  --sw-state-live: var(--sw-vermilion);
+  --sw-state-cached: var(--sw-milky);
+  --sw-state-sample: var(--sw-ochre);
+  --sw-state-missing: var(--sw-slate);
+
+  /* Identity states */
+  --sw-identity-accepted: var(--sw-verdigris);
+  --sw-identity-unconfirmed: var(--sw-ochre);
+  --sw-identity-rejected: var(--sw-vermilion);
+
+  /* Step states */
+  --sw-step-queued: var(--sw-faint);
+  --sw-step-running: var(--sw-ink);
+  --sw-step-done: var(--sw-verdigris);
+  --sw-step-failed: var(--sw-vermilion);
+  --sw-step-skipped: var(--sw-ochre);
+  --sw-step-not-implemented: var(--sw-faint);
+
+  /* Report kinds (line style carries the kind too: solid, dashed, dotted, none) and confidence */
+  --sw-kind-fact: var(--sw-ink);
+  --sw-kind-inference: var(--sw-milky);
+  --sw-kind-open-question: var(--sw-ochre);
+  --sw-kind-missing-source: var(--sw-slate);
+  --sw-confidence-high: var(--sw-ink);
+  --sw-confidence-medium: var(--sw-muted);
+  --sw-confidence-low: var(--sw-faint);
+
+  /* Platform marks: letter codes in one engraved box style, no brand colours */
+  --sw-platform-website: var(--sw-ink);
+  --sw-platform-facebook: var(--sw-ink);
+  --sw-platform-instagram: var(--sw-ink);
+  --sw-platform-tiktok: var(--sw-ink);
+  --sw-platform-youtube: var(--sw-ink);
+  --sw-platform-x: var(--sw-ink);
+
+  /* SAMPLE image slots: flat tints per platform, so placeholders never pass for photographs */
+  --sw-sample-website: #24364f;
+  --sw-sample-facebook: #1f3a59;
+  --sw-sample-instagram: #43392a;
+  --sw-sample-tiktok: #263f3a;
+  --sw-sample-youtube: #46302b;
+  --sw-sample-x: #2c3442;
+
+  /* Hatching for gaps: an unobserved zone, never a zero */
+  --sw-hatch: repeating-linear-gradient(135deg, var(--sw-rule) 0 1.5px, transparent 1.5px 9px);
+
+  /* Space */
+  --sw-space-1: 0.25rem;
+  --sw-space-2: 0.5rem;
+  --sw-space-3: 0.75rem;
+  --sw-space-4: 1rem;
+  --sw-space-5: 1.5rem;
+  --sw-space-6: 2.5rem;
+  --sw-space-7: 3.5rem;
+
+  /* Lines and radius: printed, so square corners */
+  --sw-line: 1px;
+  --sw-line-mid: 1.5px;
+  --sw-line-strong: 2px;
+  --sw-line-heavy: 3px;
+  --sw-radius: 0;
+
+  /* Image plates */
+  --sw-thumb-height: 6rem;      /* S1 lane plates, 96 px */
+  --sw-plate-height: 7.5rem;    /* S3 inset plates, 120 px */
+  --sw-log-thumb: 4.5rem;       /* S3 night-log thumbnails, 72 px */
+
+  /* Motion: only when data arrives. Reduced motion drops every transform. */
+  --sw-motion-arrive: 360ms;    /* a plate slides into its lane, a log entry drops in */
+  --sw-motion-shift: 280ms;     /* a full lane shifts left by one plate */
+  --sw-motion-tick: 650ms;      /* a counter runs up to its collected value */
+  --sw-motion-strike: 300ms;    /* the rejected namesake is struck through */
+  --sw-motion-ignite: 480ms;    /* a star appears at its date */
+  --sw-motion-draw: 720ms;      /* a leader or constellation line draws */
+  --sw-motion-stagger: 90ms;
+  --sw-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --sw-ease-draw: cubic-bezier(0.65, 0, 0.35, 1);
+}

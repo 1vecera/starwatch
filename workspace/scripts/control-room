@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Mutations default to Agent CLI. Name the actual writer before the command:
+# ./scripts/control-room --actor hos-control mutate --json '{"op":"progress.record","text":"Checked evidence"}'
+checkout="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+common_git="$(git -C "$checkout" rev-parse --path-format=absolute --git-common-dir)"
+project_root="${CONTROL_ROOM_ROOT:-$(dirname -- "$common_git")}"
+exec uv --directory "$checkout" run python -m project_tracker.cli --root "$project_root" "$@"

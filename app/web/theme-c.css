@@ -1,0 +1,39 @@
+/* Atlas C overrides for screens first drawn in the dark v2 language: no sky, no glow, no glass, white surfaces. */
+canvas#sky,#sky{display:none!important}
+body{background:var(--space)!important;color:var(--label)}
+.glass,.glass.strong{background:var(--surface)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border:1px solid var(--hairline)!important;box-shadow:var(--shadow)!important}
+#sheet{background:var(--surface)!important;border:1px solid var(--hairline)!important;box-shadow:var(--shadow)!important;--top:84px}
+*{text-shadow:none!important}
+[class*="glow"],.halo{display:none!important}
+.sw-vthumb{width:100%;height:100%;object-fit:cover;display:block;background:#0F172A}
+#dim{display:none!important}
+.sw-chrome .sw-gl{background:transparent!important;border:0!important;box-shadow:none!important}
+
+/* ---------- Finishing refinements, safe on every screen. Zero-specificity :where() so any screen rule wins. ---------- */
+:where(html){-webkit-text-size-adjust:100%;text-size-adjust:100%;accent-color:var(--brand);scroll-padding-top:calc(var(--chrome-top,12px) + var(--chrome-h,46px) + 16px)}
+@media (prefers-reduced-motion:no-preference){:where(html){scroll-behavior:smooth}}
+::selection{background:var(--brand-soft);color:var(--label)}
+/* thin, quiet scrollbars; screens that hide or restyle theirs keep doing so */
+*{scrollbar-width:thin;scrollbar-color:rgba(15,23,42,.22) transparent}
+/* type: balanced headings, no orphans in prose, numbers that line up wherever they are compared */
+:where(h1,h2,h3,h4){text-wrap:balance}
+:where(p,li,figcaption,blockquote){text-wrap:pretty}
+:where(table,td,th,time,output,meter,progress,kbd,.num,.metric,.stats,.sw-kbd,[data-num]){font-variant-numeric:tabular-nums}
+:where(abbr[title]){text-decoration:underline dotted;text-underline-offset:.2em;cursor:help}
+/* links: underline sits below descenders and stays thin */
+:where(a){text-underline-offset:.2em;text-decoration-thickness:1px;text-decoration-skip-ink:auto}
+:where(a,button,[role="button"],[role="tab"],summary,label[for],select){-webkit-tap-highlight-color:transparent}
+:where(summary,[role="button"],[role="tab"],label[for],select){cursor:pointer}
+/* forms: teal caret, readable placeholders */
+:where(input,textarea,[contenteditable]:not([contenteditable="false"])){caret-color:var(--brand)}
+:where(input,textarea)::placeholder{color:var(--label3);opacity:1}
+/* states: disabled says no, loading says wait */
+:where(button,input,select,textarea,a,[role="button"]):where(:disabled,[aria-disabled="true"]){cursor:not-allowed}
+:where([aria-busy="true"]){cursor:progress}
+/* media: alt text reads like a caption, not a broken glyph */
+:where(img){color:var(--label3)}
+:where(img,video,svg,canvas){-webkit-user-drag:none}
+/* focus: one ring everywhere, keyboard only */
+:where(:focus:not(:focus-visible)){outline:none}
+:where(:focus-visible){outline:2px solid var(--brand);outline-offset:2px}
+:where([tabindex="-1"]:focus){outline:none}

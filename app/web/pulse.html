@@ -1,0 +1,816 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Starwatch Pulse</title>
+<link rel="stylesheet" href="ds.css">
+<style>
+/* Pulse · Atlas C: white surfaces on slate, one teal accent, minimum ink, evidence first. */
+:root{--gut:32px;--maxw:1480px;--xo:cubic-bezier(.25,1,.5,1)}
+img{transition:opacity .45s var(--xo)}
+.plot>.sk{position:absolute;inset:0}
+html{scroll-behavior:smooth}
+body{background:url(img/bg-topo.svg) center/cover fixed,url(img/bg-grid.svg) 0 0/192px repeat,var(--space);min-height:100%;overflow-x:hidden}
+#strip,#dock,.panel{background:var(--surface-float,rgba(255,255,255,.82));-webkit-backdrop-filter:var(--blur-float,blur(14px));backdrop-filter:var(--blur-float,blur(14px));border:1px solid rgba(15,23,42,.08);border-radius:16px;box-shadow:0 1px 1px rgba(15,23,42,.04),0 18px 44px -26px rgba(15,23,42,.28)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){#strip,#dock,.panel{background:rgba(255,255,255,.94)}}
+#dock,#strip,.panel{background:var(--surface-float-strong,rgba(255,255,255,.9))}
+main{position:relative;max-width:var(--maxw);margin:0 auto;padding:92px var(--gut) 64px}
+kbd{font:500 11px var(--mono);color:var(--label2);padding:1px 5px;border-radius:4px;background:var(--sunken);border:1px solid var(--hairline)}
+.num{font-variant-numeric:normal}
+.ent .mv{font-variant-numeric:tabular-nums}
+
+/* ---------- provisional chrome (app.js replaces it) ---------- */
+#chrome{position:fixed;z-index:40;top:0;left:0;right:0;height:60px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:0 16px}
+#chrome .logo{justify-self:start;text-decoration:none;color:var(--label);gap:9px;font-size:15px;font-weight:700;border:0}
+#chrome .right{justify-self:end;display:flex;align-items:center;gap:8px}
+.badge-mock{display:none}
+.av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:650;background:var(--brand-soft);color:var(--brand)}
+#tabbar{display:none}
+
+/* ---------- hero + dock ---------- */
+.hero{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin:0 0 16px}
+.eyebrow{font-size:var(--fs-sm,13px);font-weight:550;color:var(--label2)}
+.hero h1{margin-top:6px;font-size:30px;font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.hero h1 em{font-style:normal;color:var(--label2);font-weight:600}
+.lede{margin-top:6px;max-width:66ch;font-size:14px;line-height:1.5;color:var(--label2)}
+.hero .meta{text-align:right;font-size:12px;color:var(--label2);line-height:1.65;white-space:nowrap}
+.hero .meta b{color:var(--label2);font-weight:550}
+#dock{position:sticky;top:68px;z-index:30;display:flex;align-items:center;gap:12px;padding:8px;border-radius:var(--r-lg);margin-bottom:16px}
+#dock .ents{display:flex;align-items:center;gap:6px;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none}
+#dock .ents::-webkit-scrollbar{display:none}
+.epill{flex:none;display:inline-flex;align-items:center;gap:8px;min-height:34px;padding:4px 4px 4px 5px;border-radius:var(--r-sm);background:var(--surface);border:1px solid var(--hairline-strong);font-size:13px;font-weight:550;white-space:nowrap}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;flex:none}
+.epill .dot{background:var(--c)}
+.epill .x{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;color:var(--label2);font-size:15px;line-height:1;transition:background .15s,color .15s}
+.epill .x:hover{background:var(--sunken);color:var(--label)}
+.epill .x:disabled{opacity:.3;cursor:default;background:none}
+.add{flex:none;color:var(--label2);border-style:dashed;background:transparent}
+.add:hover{color:var(--label);border-color:var(--brand)}
+#dock .vr{width:1px;align-self:stretch;margin:4px 0;background:var(--hairline)}
+
+/* ---------- avatars: portrait, party logo, or initials ---------- */
+.avt{--s:32px;position:relative;flex:none;width:var(--s);height:var(--s);border-radius:50%;display:grid;place-items:center;overflow:hidden;background:color-mix(in srgb,var(--c) 14%,#fff);box-shadow:0 0 0 1.5px var(--c);color:var(--cd,var(--label));font:650 calc(var(--s)*.36)/1 var(--font);letter-spacing:.01em}
+.avt.logo{border-radius:9px;background:#fff}
+.avt img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#fff}
+.avt.logo img{object-fit:contain;padding:12%}
+.avt.has b{opacity:0}
+.avt.s22{--s:22px;font-size:10.5px}.avt.s26{--s:26px;font-size:10.5px}.avt.s40{--s:40px}
+
+/* ---------- entity metrics table ---------- */
+#strip{border-radius:var(--r-lg);margin-bottom:16px;padding:0;overflow:hidden}
+.mt-h,.ent{display:grid;grid-template-columns:minmax(0,2.2fr) repeat(4,minmax(80px,1fr)) minmax(220px,2fr);align-items:center;column-gap:20px;padding:0 20px}
+.mt-h{min-height:44px;padding-top:8px;padding-bottom:8px;font-size:12px;font-weight:600;color:var(--label);border-bottom:1px solid var(--hairline)}
+.mt-h small{display:block;font-size:12px;font-weight:400;color:var(--label2);margin-top:1px}
+.mt-h>div:not(:first-child):not(:last-child){text-align:right}
+.ent{min-height:52px;border-bottom:1px solid var(--hairline)}
+.ent:last-child{border-bottom:0}
+.eh{display:flex;align-items:center;gap:10px;min-width:0}
+.en a{color:inherit;text-decoration:none}.en a:hover{color:var(--brand)}
+.en{min-width:0}
+.en b{display:block;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.en span{display:block;font-size:12px;color:var(--label2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ent .mv{text-align:right;font-size:14px;font-weight:550}
+.ent .mv.na{color:var(--label2);font-weight:400}
+.ent .sp{display:flex;align-items:flex-end;gap:8px;padding-top:14px}
+.spw{position:relative;flex:1;min-width:0;height:28px}
+.spw svg{display:block;width:100%;height:28px}
+.spw .pd{position:absolute;width:5px;height:5px;border-radius:50%;transform:translate(-50%,-50%)}
+.spw .pk{position:absolute;top:-15px;transform:translateX(-50%);font-size:11px;font-weight:600;color:var(--label);white-space:nowrap}
+.sp .lv{flex:none;min-width:30px;font-size:11.5px;color:var(--label2);font-variant-numeric:tabular-nums;text-align:right}
+
+/* ---------- panels ---------- */
+.row{display:grid;gap:16px;margin-bottom:16px}
+.r1{grid-template-columns:minmax(0,7fr) minmax(0,5fr);align-items:start}
+.r2{grid-template-columns:minmax(0,7fr) minmax(0,5fr)}
+.panel{scroll-margin-top:140px;position:relative;padding:20px 24px;border-radius:var(--r-lg);min-width:0}
+.panel.solo{margin-bottom:16px}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.ph h2{font:600 var(--fs-sm,13px)/1.35 var(--font)!important;letter-spacing:0;color:var(--label2)}
+.ph p{font-size:12.5px;color:var(--label2);margin-top:2px}
+.ctl{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.ai{margin:10px 0 8px}
+.ai .hl{font:650 21px/1.32 var(--display);letter-spacing:-.015em;color:var(--label);text-wrap:balance;max-width:44ch}
+.ai .hl b{font-weight:750}
+.ai .hl .cite{font-weight:650}
+.ai .more{margin-top:6px;font-size:13.5px;line-height:1.5;color:var(--label2);max-width:68ch}
+.ai .more b{color:var(--label);font-weight:600}
+.ai .tag{display:block;margin-top:6px;font:500 var(--fs-xs,12px)/1.4 var(--font);color:var(--brand)}
+.cite{display:inline;font:inherit;font-weight:550;color:var(--label);border-bottom:1px dotted var(--label3);cursor:help;padding:0;background:none}
+.cite:hover{border-bottom-color:var(--brand);color:var(--brand)}
+.plot{position:relative;margin-top:8px}
+.plot svg{display:block;overflow:visible}
+.plot{width:100%;min-height:40px}
+.tipx{font-size:12px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12px;color:var(--label2);margin-top:8px}
+.legend i{display:inline-block;width:12px;height:2px;background:var(--c);vertical-align:3px;margin-right:6px}
+.legend .k{color:var(--label2)}
+.legend .lg-ent{display:none}
+
+/* svg chart atoms */
+.g-line{stroke:var(--hairline);stroke-width:1}
+.g-base{stroke:var(--hairline-strong);stroke-width:1}
+.g-txt{fill:var(--label2);font:400 12px var(--font);font-variant-numeric:tabular-nums}
+.ax-t{fill:var(--label2);font:500 12px var(--font)}
+.l-txt{fill:var(--label);font:600 12px var(--font);font-variant-numeric:tabular-nums}
+.l-sub{fill:var(--label2);font:400 12px var(--font);font-variant-numeric:tabular-nums}
+.ln{fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.1s var(--xo) forwards;animation-delay:var(--d,0ms)}
+@keyframes draw{to{stroke-dashoffset:0}}
+.pop{transform-box:fill-box;transform-origin:center;animation:pop .4s var(--xo) both;animation-delay:var(--d,0ms)}
+@keyframes pop{from{opacity:0}}
+.hov{cursor:pointer;transition:opacity .2s}
+.dim .hov{opacity:.18}
+.dim .hov.hi{opacity:1}
+.xh{stroke:var(--label3);stroke-width:1;stroke-dasharray:3 3;opacity:0;transition:opacity .15s}
+.xh.on{opacity:1}
+
+/* ---------- tooltip ---------- */
+#tip{position:fixed;left:0;top:0;z-index:60;pointer-events:none;opacity:0;transition:opacity .15s;padding:10px 12px;border-radius:var(--r-md);min-width:180px;max-width:300px;font-size:12px;box-shadow:0 8px 24px rgba(15,23,42,.12)!important}
+#tip.on{opacity:1}
+.tipx .tt{font-size:12px;color:var(--label2);font-weight:600;margin-bottom:6px}
+.tipx .tr{display:flex;align-items:center;gap:8px;padding:2px 0;color:var(--label2)}
+.tipx .tr i{width:8px;height:8px;border-radius:50%;background:var(--c);flex:none}
+.tipx .tr b{margin-left:auto;color:var(--label);font-variant-numeric:tabular-nums;font-weight:650}
+.tipx .ta{display:grid;grid-template-columns:64px 1fr;gap:10px;align-items:start}
+.tipx .ta .th{position:relative;width:64px;height:64px;border-radius:var(--r-sm);overflow:hidden;background:var(--sunken)}
+.tipx .ta .th svg,.tipx .ta .th img,.tipx .ta .th video{width:100%;height:100%;display:block;object-fit:cover}
+.tipx .ta p{color:var(--label);font-size:12px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.tipx .ta .mm{color:var(--label2);font-size:12px;margin-top:4px}
+.tipx .ta .mm b{color:var(--label2)}
+
+/* ---------- top posts (centrepiece) ---------- */
+#top{padding:24px 24px 20px}
+
+.sw{display:inline-flex;align-items:center;gap:10px;font-size:13px;color:var(--label2);cursor:pointer;user-select:none}
+.sw i{position:relative;width:36px;height:20px;border-radius:var(--pill);background:var(--hairline-strong);transition:background .2s}
+.sw i::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(15,23,42,.25);transition:transform .2s var(--xo)}
+.sw.on i{background:var(--brand)}
+.sw.on i::after{transform:translateX(16px)}
+.sw.on{color:var(--label)}
+.topics{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+.topics .chip b{font-weight:600;color:inherit;opacity:.55;font-variant-numeric:tabular-nums}
+.cols{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:20px;margin-top:18px}
+.col{min-width:0;display:flex;flex-direction:column}
+.colh{display:flex;align-items:center;gap:9px;padding:0 0 8px;margin-bottom:12px;border-bottom:2px solid var(--c)}
+.colh .av2{width:22px;height:22px;border-radius:50%;object-fit:cover;flex:none;align-self:center;background:var(--sunken);box-shadow:0 0 0 2px var(--c)}
+.sw.sm{font-size:12px;color:var(--label2)}
+.sw.sm i{width:30px;height:17px}.sw.sm i::after{width:13px;height:13px}.sw.sm.on i::after{transform:translateX(13px)}
+.colh b{font-size:14px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.colh span{margin-left:auto;font-size:12px;color:var(--label2);white-space:nowrap}
+.card{position:relative;border-radius:var(--r-lg);background:var(--surface);border:1px solid var(--hairline);overflow:hidden;margin-bottom:6px}
+.card.win{border-color:var(--brand);box-shadow:0 0 0 1px var(--brand)}
+.media{position:relative;aspect-ratio:16/10;overflow:hidden;background:var(--sunken)}
+.media>img,.media>video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:#0F172A}
+.media>svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.nopv{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-align:center;background:var(--sunken);color:var(--label2);font-size:12px;line-height:1.35;padding:8px}
+.nopv b{color:var(--label2);font-weight:600;font-size:12.5px}
+.rank{position:absolute;left:8px;top:8px;height:22px;min-width:28px;padding:0 7px;border-radius:6px;display:grid;place-items:center;font-size:12px;font-weight:700;background:var(--surface);color:var(--label);border:1px solid var(--hairline);z-index:1}
+.win .rank{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.fmt{position:absolute;right:8px;top:8px;height:22px;padding:0 8px;border-radius:6px;display:inline-flex;align-items:center;font-size:12px;font-weight:600;background:var(--surface);color:var(--label2);border:1px solid var(--hairline);z-index:1}
+.cb{padding:12px 14px}
+.pv{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.pv .num{font-size:24px;font-weight:700;letter-spacing:-.02em}
+.pv .u{font-size:12px;color:var(--label2)}
+.pv .alt{font-size:12px;color:var(--label2);margin-left:auto}
+.lead{display:inline-block;margin-top:6px;font-size:12px;font-weight:600;color:var(--brand)}
+.bar{height:4px;border-radius:2px;background:var(--sunken);margin:8px 0 10px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--c);transform-origin:0 50%;animation:grow .7s var(--xo) both}
+@keyframes grow{from{transform:scaleX(0)}}
+.cap{font-size:13px;line-height:1.45;color:var(--label);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:38px}
+.cm{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:var(--label2)}
+.cm .chip{height:20px;font-size:12px;padding:0 7px}
+.cm .by{color:var(--label2)}
+.src{color:var(--brand);font-weight:550;text-decoration:none;white-space:nowrap}
+.src:hover{text-decoration:underline}
+.cm .src{margin-left:auto}
+.mini{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:10px;padding-top:10px;border-top:1px solid var(--hairline)}
+.mini div{font-size:12px;color:var(--label2)}
+.mini b{display:block;font-size:13px;color:var(--label2);font-weight:600;font-variant-numeric:tabular-nums}
+.mini .on b{color:var(--label)}
+.mini .na b{color:var(--label2);font-weight:400}
+.rowc{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:12px;align-items:center;padding:8px 6px;border-bottom:1px solid var(--hairline);transition:background .15s}
+.rowc:hover{background:var(--sunken)}
+.rowc .th{position:relative;width:52px;height:52px;border-radius:var(--r-sm);overflow:hidden;background:var(--sunken)}
+.rowc .th>img,.rowc .th>video,.rowc .th>svg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.rowc .th .nopv,.tipx .th .nopv{font-size:9px;line-height:1.2;padding:16px 3px 3px}
+.rowc .th .rk{position:absolute;left:3px;top:3px;font-size:12px;font-weight:700;padding:0 4px;border-radius:4px;background:var(--surface);color:var(--label);z-index:1}
+.rowc .t{font-size:12.5px;line-height:1.35;color:var(--label);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.rowc .s{font-size:12px;color:var(--label2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rowc .v{text-align:right}
+.rowc .v .num{font-size:14px;font-weight:600;display:block}
+.rowc .v small{font-size:12px;color:var(--label2)}
+.rowc .vb{height:3px;border-radius:2px;background:var(--sunken);margin-top:5px;width:56px;margin-left:auto;overflow:hidden}
+.rowc .vb i{display:block;height:100%;background:var(--c);transform-origin:0 50%;animation:grow .7s var(--xo) both}
+.empty{display:grid;place-items:center;text-align:center;aspect-ratio:16/10;border-radius:var(--r-lg);border:1px dashed var(--hairline-strong);color:var(--label2);font-size:12.5px;padding:20px;line-height:1.5;margin-bottom:6px}
+.colsum{font-size:12px;color:var(--label2);padding:8px 2px 0}
+.colsum b{color:var(--label2);font-weight:600}
+.fine{font-size:12px;color:var(--label2);margin-top:16px;display:flex;gap:8px 16px;flex-wrap:wrap}
+.fine span::before{content:"·";margin-right:8px}
+.fine span:first-child::before{content:none}
+
+/* ---------- then vs now ---------- */
+#then[hidden]{display:none}
+.tn{display:grid;grid-template-columns:var(--tc);column-gap:28px;margin-top:14px}
+.tn-r>div{animation:rise .45s var(--xo) both;animation-delay:var(--rd,0ms)}
+.tn-h{font-size:12px;font-weight:600;color:var(--label);padding-bottom:8px;border-bottom:1px solid var(--hairline)}
+.tn-h small{display:block;font-size:var(--fs-xs,12px);font-weight:400;color:var(--label2);margin-top:1px}
+.tn-h.ms{display:flex;align-items:flex-end;gap:8px}
+.tn-h.ms i{font:600 var(--fs-cap,11px)/1.3 var(--font);color:var(--label2);background:var(--sunken);border-radius:5px;padding:2px 7px;margin-bottom:1px}
+.tn-r{display:contents}
+.tn-r>div{display:flex;align-items:center;min-height:60px;border-bottom:1px solid var(--hairline);min-width:0}
+.tn-r:last-child>div{border-bottom:0}
+.tn-e{gap:10px}
+.tn-m{flex-direction:column;align-items:stretch!important;justify-content:center;gap:6px}
+.tn-v{display:flex;align-items:baseline;gap:8px;min-width:0}
+.tn-v .num{font-size:17px;font-weight:700;letter-spacing:-.015em}
+.tn-v span{font-size:12px;color:var(--label2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tn-v .num{color:var(--label);font-size:17px;flex:none}
+.tn-v .el{color:var(--green);font-weight:600}
+.tn-t{height:6px;border-radius:3px;background:rgba(15,23,42,.06);overflow:hidden}
+.tn-t i{display:block;height:100%;border-radius:3px;transform-origin:0 50%;animation:grow .9s var(--xo) both;animation-delay:var(--d,0ms)}
+.tn-t.then i{background:color-mix(in srgb,var(--c) 55%,#fff)}
+.tn-t.now i{background:var(--c)}
+.tn-na{font-size:12.5px;color:var(--label2)}
+@media (max-width:760px){
+  .tn{grid-template-columns:repeat(var(--m),minmax(0,1fr));column-gap:14px}
+  .tn-h.ms i{display:none}
+  .tn-h.en0{display:none}
+  .tn-r>.tn-e{grid-column:1/-1;min-height:0;padding-top:12px;border-bottom:0}
+  .tn-r>.tn-m{min-height:0;padding:8px 0 12px}
+  .tn-v{flex-direction:column;align-items:flex-start;gap:1px}
+  .tn-v span{white-space:normal;font-size:11.5px;line-height:1.3}
+  .tn-v .num{font-size:15px}
+  .tn-na{font-size:11.5px}
+}
+
+/* ---------- mix bars ---------- */
+.mix{display:grid;gap:14px;margin-top:10px}
+.mrow{display:grid;grid-template-columns:118px minmax(0,1fr);gap:12px;align-items:center}
+.mrow>span{font-size:12.5px;color:var(--label2)}
+.mbars{display:grid;gap:5px}
+.mb{position:relative;height:6px;cursor:default}
+.mb i{position:absolute;left:0;top:0;height:6px;border-radius:0 2px 2px 0;background:var(--c);transform-origin:0 50%;animation:grow .7s var(--xo) both}
+.mb u{position:absolute;top:-2px;width:2px;height:10px;background:var(--label)}
+.mb em{position:absolute;top:-3px;font-style:normal;font-size:12px;line-height:13px;color:var(--label2);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* ---------- popover ---------- */
+#pop{position:fixed;z-index:70;width:360px;padding:8px;border-radius:var(--r-lg);display:none;box-shadow:0 12px 32px rgba(15,23,42,.14)!important}
+#pop.on{display:block}
+#pop input{width:100%;height:38px;border-radius:var(--r-sm);border:1px solid var(--hairline-strong);outline:0;padding:0 12px;font:500 14px var(--font);color:var(--label);background:var(--surface)}
+#pop input:focus{border-color:var(--brand)}
+#pop input::placeholder{color:var(--label2)}
+#pop .res{margin-top:6px;max-height:340px;overflow:auto}
+#pop .res button{width:100%;display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:10px;align-items:center;text-align:left;padding:8px 10px;border-radius:var(--r-sm)}
+#pop .res button:hover,#pop .res button.kb{background:var(--sunken)}
+#pop .res .dot{width:8px;height:8px}
+#pop .res b{display:block;font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#pop .res small{display:block;font-size:12px;color:var(--label2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#pop .res em{font-style:normal;font-size:12px;color:var(--label2);font-variant-numeric:tabular-nums}
+#pop .hint{font-size:12px;color:var(--label2);padding:6px 10px 2px}
+
+footer{margin:24px 0 0;padding-top:16px;border-top:1px solid var(--hairline);font-size:12px;color:var(--label2);line-height:1.7;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+footer b{color:var(--label2);font-weight:600}
+
+/* ---------- responsive ---------- */
+@media (max-width:1180px){
+  .r1,.r2{grid-template-columns:1fr}
+  .cols{grid-template-columns:repeat(min(var(--n),2),minmax(0,1fr))}
+}
+@media (max-width:760px){
+  :root{--gut:16px}
+  main{padding-top:76px;padding-bottom:40px}
+  .hero{flex-direction:column;align-items:flex-start;gap:8px}
+  .hero h1{font-size:24px}
+  .hero .meta{text-align:left;white-space:normal}
+  #dock{position:relative;top:auto;flex-wrap:wrap;gap:8px}
+  #dock #modeSeg{order:1}
+  #dock #metSeg{order:2;width:100%;justify-content:space-between;overflow-x:auto;max-width:100%;scrollbar-width:none}
+  #dock #metSeg button{padding:0 7px;font-size:12px}
+  #dock .ents{order:3;flex-basis:100%}
+  #dock .vr{display:none}
+  .mt-h{display:none}
+  .ent{grid-template-columns:repeat(4,minmax(0,1fr));row-gap:6px;padding:12px 16px}
+  .ent .eh{grid-column:1/-1}
+  .ent .mv{text-align:left;font-size:14px}
+  .ent .mv[data-s]::after{content:attr(data-s)}
+  .ent .mv::after{content:attr(data-l);display:block;font-size:12px;font-weight:400;color:var(--label2)}
+  .ent .sp{display:none}
+  .panel{padding:16px}
+  #top{padding:16px}
+  .cols{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:86%;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 16px;scrollbar-width:none;margin:16px -16px 0;padding:0 16px 6px}
+  .col{scroll-snap-align:start}
+  .mrow{grid-template-columns:92px minmax(0,1fr)}
+  .legend .lg-ent{display:inline}
+  #pop{width:calc(100vw - 32px)}
+  .ai .hl{font-size:18px}
+}
+.ph p{max-width:66ch}
+
+#fnote{max-width:68ch}
+
+#dock .seg,#top .seg{padding:3px}
+</style>
+<link rel="icon" type="image/svg+xml" href="brand/favicon.svg">
+<link rel="stylesheet" href="brand/chrome.css">
+<link rel="stylesheet" href="theme-c.css">
+<script src="fx/meta.js"></script>
+<script src="nav.js"></script>
+<link rel="stylesheet" href="fx/motion.css"><script src="fx/motion.js"></script>
+</head>
+<body>
+
+<header id="chrome" class="glass">
+  <a class="logo pill" href="#" aria-label="Starwatch home">
+    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 0C12.9 7.6 16.4 11.1 24 12C16.4 12.9 12.9 16.4 12 24C11.1 16.4 7.6 12.9 0 12C7.6 11.1 11.1 7.6 12 0Z" fill="#FFD60A"/></svg>
+    <span>Starwatch</span>
+  </a>
+  <nav class="seg tabs" aria-label="Sections">
+    <button>Star Atlas</button><button>Spotlight</button><button class="on" aria-current="page">Pulse</button><button>Radar</button><button>Studio</button>
+  </nav>
+  <div class="right">
+    <button class="pill search" id="gsearch"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span>Search people, lists, posts</span><kbd>⌘K</kbd></button>
+    <span class="badge-mock">MOCK DATA</span>
+    <button class="av" aria-label="Account">DV</button>
+  </div>
+</header>
+<nav id="tabbar" class="seg glass" aria-label="Sections"><button>Atlas</button><button>Spotlight</button><button class="on">Pulse</button><button>Radar</button><button>Studio</button></nav>
+
+<main>
+  <section class="hero">
+    <div>
+      <div class="eyebrow" id="eyebrow">Pulse · Praha</div>
+      <h1 id="title">How do we compare?</h1>
+      <p class="lede">Public response to each entity's own posts, side by side. Engagement measures attention, not support. No composite score.</p>
+    </div>
+    <div class="meta" id="hmeta">Window: last 45 days, by posting date<br>Follower counts: one dated snapshot per account</div>
+  </section>
+
+  <div id="dock"></div>
+  <div class="row r1">
+    <section id="cum" class="panel"><div class="sk" style="height:470px"></div></section>
+    <section id="tops" class="panel"><div class="sk" style="height:640px"></div></section>
+  </div>
+  <section id="then" class="panel solo" aria-label="2022 election and observed attention now"><div class="sk" style="height:300px"></div></section>
+  <section id="strip" aria-label="Entity metrics"><div class="sk" style="height:200px;margin:0"></div></section>
+  <section id="top" class="panel solo"><div class="sk" style="height:820px"></div></section>
+  <section id="best" class="panel solo"><div class="sk" style="height:470px"></div></section>
+  <div class="row r2">
+    <section id="cad" class="panel"><div class="sk" style="height:520px"></div></section>
+    <section id="mix" class="panel"><div class="sk" style="height:420px"></div></section>
+  </div>
+  <footer>
+    <div id="fnote"><b>Read with care.</b> Engagement is attention, not support and not reach.</div>
+    <div id="fsrc"></div>
+  </footer>
+</main>
+
+<div id="tip" class="glass strong tipx" role="tooltip"></div>
+<div id="pop" class="glass strong"><input id="q" placeholder="Search" autocomplete="off" spellcheck="false"><div class="res" id="res"></div><div class="hint">↑↓ to move · Enter to add · Esc to close · up to 4 entities</div></div>
+
+<script src="vendor/echarts-5.5.1.min.js"></script>
+<script src="data/real.js"></script>
+<script src="data/issue-topics.js"></script>
+<script src="mock.js"></script>
+<script src="sw-real.js" data-min-assets="0"></script>
+<script>
+"use strict";
+const {cities,lists,cands,assets,PLAT,TOP,dstr,css,thumb,TODAY}=SW;
+const fmt=v=>SW.fmt(Math.round(v));
+const DAYS=45, CITY=(()=>{const q=new URLSearchParams(location.search);const e=q.has('cand')?SW.cands[+q.get('cand')]:q.has('list')?SW.lists[+q.get('list')]:null;return e?e.city:0})();
+const METRICS=[['inter','Interactions'],['views','Views'],['likes','Likes'],['comments','Comments']];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fold=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+const mlab=()=>METRICS.find(m=>m[0]===S.metric)[1].toLowerCase();
+const f1k=v=>v>=100?fmt(v):v>=10?v.toFixed(0):v.toFixed(1);
+const WD=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const fmtName=a=>PLAT[a.plat].n+' '+(a.video?(a.plat===0?'reel':'video'):'post');
+const hash=i=>((Math.imul(i+1,2654435761)>>>0)/4294967296);
+
+/* ---------- data model ---------- */
+const created=c=>c.assets.filter(i=>assets[i].rel==='created'&&assets[i].age<DAYS);
+const partyFol=L=>SW.source.kind==='real'?(L.fol||0):Math.round(900*L.popular*1.6);            // party account, mock snapshot
+const ownerFol=a=>a.owner>=0?cands[a.owner].fol:partyFol(lists[a.list]);
+const partyIds=L=>[...L.assets.filter(i=>assets[i].age<DAYS),...L.cands.flatMap(ci=>created(cands[ci]))];
+const sumInter=ids=>ids.reduce((s,i)=>s+assets[i].inter,0);
+const ini2=n=>{const w=String(n).replace(/[^\p{L}\s-]/gu,' ').trim().split(/\s+/).filter(Boolean);return w.length?(w.length>1?w[0][0]+w[w.length-1][0]:w[0].slice(0,2)).toUpperCase():'?'};
+function ent(kind,id){
+  if(kind==='person'){const c=cands[id],L=lists[c.list];
+    return{kind,id,pic:c.photo||null,name:c.name,short:c.name.split(' ').slice(-1)[0],lab:c.name.split(' ').slice(-1)[0],sub:`#${c.k} on ${L.name}`,list:L.i,base:L.col,fol:c.fol,ids:created(c),ini:ini2(c.name)}}
+  const L=lists[id];
+  return{kind,id,pic:(L.logos&&L.logos[0]&&L.logos[0].path)||null,name:L.name,short:L.short,lab:L.name.length<=17?L.name:L.short,sub:`${L.cands.length} candidates · party + candidate accounts`,list:L.i,base:L.col,fol:partyFol(L)+L.cands.reduce((s,ci)=>s+cands[ci].fol,0),ids:partyIds(L),ini:ini2(L.short)}
+}
+function colorize(E){const seen={};E.forEach(e=>{const n=seen[e.list]=(seen[e.list]||0)+1;let c=e.base;
+  if(n===2)c=c.map(v=>v+(1-v)*.55);if(n===3)c=c.map(v=>v*.66);if(n===4)c=c.map(v=>v+(1-v)*.8);
+  const r=c.map(v=>Math.round(Math.min(1,v)*255)).join(',');e.col=`rgb(${r})`;e.ca=`rgba(${r},.30)`;e.cd=`rgb(${c.map(v=>Math.round(v*120)).join(',')})`;e.alpha=a=>`rgba(${r},${a})`})}
+const praha=cities[CITY];
+function defaultsPerson(){
+  const pc=praha.cands.map(i=>cands[i]);
+  const lead=(()=>{const q=new URLSearchParams(location.search);const c=q.has('cand')?SW.cands[+q.get('cand')]:null;return c||pc.slice().sort((a,b)=>created(b).length-created(a).length||b.fol-a.fol)[0]})();
+  const others=praha.lists.filter(l=>l!==lead.list).map(l=>lists[l].cands.map(i=>cands[i]).sort((a,b)=>created(b).length-created(a).length)[0]).filter(c=>c&&(SW.source.kind!=='real'||created(c).length))
+    .sort((a,b)=>sumInter(created(b))-sumInter(created(a))).slice(0,3);
+  return [lead,...others].map(c=>c.i)}
+const defaultsParty=()=>praha.lists.slice().sort((a,b)=>sumInter(partyIds(lists[b]))-sumInter(partyIds(lists[a]))).slice(0,4);
+const QL=(()=>{const q=new URLSearchParams(location.search);return !q.has('cand')&&q.has('list')&&SW.lists[+q.get('list')]?+q.get('list'):null})();
+const partySet=()=>{const d=defaultsParty();if(QL==null)return d;return [QL,...d.filter(i=>i!==QL)].slice(0,4)};
+const S={mode:QL!=null?'party':'person',sets:{person:defaultsPerson(),party:partySet()},metric:'inter',norm:false,view:'best',topic:null,media:false};
+let E=[];
+const val=a=>a[S.metric];
+const nval=a=>{const f=ownerFol(a);return f?a[S.metric]/f*1000:0};
+const score=a=>S.norm?nval(a):val(a);
+const valid=a=>(S.metric!=='views'||a.video)&&!(a.na&&a.na[S.metric]);
+function q(sorted,p){if(!sorted.length)return 0;const x=(sorted.length-1)*p,lo=Math.floor(x),hi=Math.ceil(x);return sorted[lo]+(sorted[hi]-sorted[lo])*(x-lo)}
+function stats(e){const vs=e.ids.map(i=>assets[i]).filter(valid).map(val).sort((a,b)=>a-b);return{n:e.ids.length,nv:vs.length,tot:vs.reduce((a,b)=>a+b,0),med:q(vs,.5),q1:q(vs,.25),q3:q(vs,.75),vs}}
+const ranked=(e,filt,any)=>e.ids.map(i=>assets[i]).filter(a=>valid(a)&&(any||S.media||a.img||a.vsrc)&&(!filt||filt(a))).sort((a,b)=>score(b)-score(a));
+const nice=v=>{if(v<=0)return 1;const p=Math.pow(10,Math.floor(Math.log10(v)));const n=v/p;return(n<=1?1:n<=2?2:n<=5?5:10)*p};
+const axis=(mx,n=4)=>{const st=nice(Math.max(1,mx)/n);const top=Math.ceil(Math.max(1,mx)/st)*st;return{top,step:st,n:Math.round(top/st)}};
+const topicName=t=>TOP[t][0];
+const REAL=SW.source.kind==='real';
+const NOTOPIC=!assets.some(a=>a.topics&&a.topics.length);
+if(NOTOPIC){const t=document.getElementById('tops');if(t)t.remove();document.querySelector('.r1').style.gridTemplateColumns='minmax(0,1fr)'}
+const SHARES_SOME=assets.some(a=>!(a.na&&a.na.shares));
+const INTER_DEF=SHARES_SOME?'likes + comments + shares where reported':'likes + comments';
+const mval=(a,k)=>a.na&&a.na[k]?'—':k==='views'&&!a.video?'—':fmt(a[k]);
+const n1k=a=>ownerFol(a)?f1k(nval(a)):'—';
+const folTxt=v=>v?fmt(v):'—';
+/* real evidence first: retained image, else the video's own first frame, else an honest tile */
+function media(a,big){
+  if(!a.real)return thumb(a,true);
+  if(big&&a.vsrc)return `<video controls playsinline preload="metadata"${a.img?` poster="${esc(a.img)}"`:''} src="${esc(a.vsrc)}" aria-label="${esc(fmtName(a))}, ${dstr(a.age)}"></video>`;
+  if(a.img)return `<img class="ld" onload="this.classList.remove('ld')" src="${esc(a.img)}" alt="" loading="lazy" decoding="async">`;
+  if(a.vsrc)return `<video class="sw-vthumb" src="${esc(a.vsrc)}#t=0.5" preload="metadata" muted playsinline aria-hidden="true"></video>`;
+  return big?`<div class="nopv"><b>${PLAT[a.plat].n}</b>No preview retained</div>`:`<div class="nopv sm">No preview retained</div>`}
+const srcA=(a,t='Open source ↗')=>a.url?`<a class="src" href="${esc(a.url)}" target="_blank" rel="noopener">${t}</a>`:'';
+
+/* ---------- shared bits ---------- */
+function ai(html,src='observed posts'){const m=/\.\s+(?=[A-Z0-9<])/.exec(html);const hl=m?html.slice(0,m.index+1):html,rest=m?html.slice(m.index+1).trim():'';
+  return `<div class="ai"><p class="hl">${hl}</p>${rest?`<p class="more">${rest}</p>`:''}<span class="tag">${REAL?'Insight computed from '+src:'Simulated insight'}</span></div>`}
+const cite=a=>`<button class="cite" data-a="${a.i}">${fmtName(a)}, ${dstr(a.age)}</button>`;
+const who=e=>`<b>${esc(e.kind==='person'?e.short:e.name)}</b>`;
+const ownerOf=a=>a.owner>=0?cands[a.owner].name:lists[a.list].name+' (party account)';
+const tip=$('#tip');
+function showTip(html,x,y){tip.innerHTML=html;tip.classList.add('on');const r=tip.getBoundingClientRect();let L=x+18,T=y+18;
+  if(L+r.width>innerWidth-8)L=x-r.width-18;if(T+r.height>innerHeight-8)T=y-r.height-18;tip.style.transform=`translate(${Math.max(8,L)}px,${Math.max(8,T)}px)`}
+const hideTip=()=>tip.classList.remove('on');
+function assetTip(a){const e=E.find(e=>e.ids.includes(a.i));
+  return `<div class="ta"><div class="th">${media(a,false)}</div><div><div class="tt" style="margin:0 0 3px">${fmtName(a)} · ${dstr(a.age)}</div><p>${esc(a.cap)}</p>
+  <div class="mm">${a.video?`<b>${mval(a,'views')}</b> views · `:''}<b>${mval(a,'likes')}</b> likes · <b>${mval(a,'comments')}</b> comments${a.na&&a.na.shares?'':` · <b>${fmt(a.shares)}</b> shares`}</div>
+  <div class="mm">${e?`<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${e.col};margin-right:5px"></span>`:''}${esc(ownerOf(a))} · <b>${n1k(a)}</b> ${mlab()} / 1k followers</div></div></div>`}
+document.addEventListener('pointerover',ev=>{const t=ev.target.closest('[data-a]');if(!t||t.classList.contains('card'))return;const a=assets[+t.dataset.a];
+  const mv=e=>showTip(assetTip(a),e.clientX,e.clientY);mv(ev);t.onpointermove=mv;t.onpointerleave=()=>{hideTip();t.onpointermove=null}});
+
+/* ---------- avatars ---------- */
+function avatar(e,sz=''){const logo=e.kind==='party';
+  return `<span class="avt${logo?' logo':''}${e.pic?' has':''} ${sz}" style="--c:${e.col};--cd:${e.cd}" aria-hidden="true"><b>${esc(e.ini)}</b>${e.pic?`<img class="ld" src="${esc(e.pic)}" alt="" decoding="async" onload="this.classList.remove('ld')" onerror="this.parentNode.classList.remove('has');this.remove()">`:''}</span>`}
+const spotHref=e=>`spotlight.html?${e.kind==='person'?'cand':'list'}=${e.id}`;
+
+/* ---------- dock ---------- */
+function renderDock(){
+  const max=4;
+  $('#dock').innerHTML=`<div class="seg" id="modeSeg" role="tablist"><button data-m="person" class="${S.mode==='person'?'on':''}">People</button><button data-m="party" class="${S.mode==='party'?'on':''}">Parties</button></div>
+  <span class="vr"></span>
+  <div class="ents">${E.map(e=>`<span class="epill" style="--c:${e.col}">${avatar(e,'s26')}${esc(e.name)}<button class="x" data-rm="${e.id}" aria-label="Remove ${esc(e.name)}" ${E.length<=2?'disabled title="Compare at least two"':''}>×</button></span>`).join('')}
+  ${E.length<max?`<button class="pill add" id="addBtn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add ${S.mode==='person'?'person':'party'}<kbd>/</kbd></button>`:''}</div>
+  <div class="seg" id="metSeg">${METRICS.map(([k,l])=>`<button data-k="${k}" class="${S.metric===k?'on':''}">${l}</button>`).join('')}</div>`;
+}
+$('#dock').addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;
+  if(b.dataset.m&&b.dataset.m!==S.mode){S.mode=b.dataset.m;S.topic=null;render()}
+  else if(b.dataset.k&&b.dataset.k!==S.metric){S.metric=b.dataset.k;render(true)}
+  else if(b.dataset.rm!=null){const set=S.sets[S.mode];if(set.length>2){set.splice(set.indexOf(+b.dataset.rm),1);render()}}
+  else if(b.id==='addBtn')openPop()});
+
+/* ---------- search popover ---------- */
+const pop=$('#pop'),qi=$('#q');let kbI=0;
+function openPop(){const b=$('#addBtn');if(!b)return;const r=b.getBoundingClientRect();pop.classList.add('on');
+  const w=pop.offsetWidth;pop.style.left=Math.max(16,Math.min(innerWidth-w-16,r.left))+'px';pop.style.top=(r.bottom+10)+'px';
+  qi.value='';qi.placeholder=S.mode==='person'?'Search candidates in 10 cities':'Search party lists';kbI=0;fillPop();qi.focus()}
+function closePop(){pop.classList.remove('on')}
+function fillPop(){const qq=fold(qi.value.trim()),set=S.sets[S.mode];let items;
+  if(S.mode==='person'){items=cands.filter(c=>!set.includes(c.i)&&(qq?fold(c.name).includes(qq)||fold(lists[c.list].name).includes(qq):c.city===CITY&&c.k<=2))
+    .map(c=>({id:c.i,col:css(lists[c.list].col),pic:c.photo,logo:false,ini:ini2(c.name),t:c.name,s:`${lists[c.list].name} · ${cities[c.city].name}`,n:created(c).length}))}
+  else{items=lists.filter(L=>!set.includes(L.i)&&(qq?fold(L.name).includes(qq)||fold(cities[L.city].name).includes(qq):L.city===CITY))
+    .map(L=>({id:L.i,col:css(L.col),pic:L.logos&&L.logos[0]&&L.logos[0].path,logo:true,ini:ini2(L.short),t:L.name,s:`${cities[L.city].name} · ${L.cands.length} candidates`,n:partyIds(L).length}))}
+  items.sort((a,b)=>b.n-a.n);items=items.slice(0,8);kbI=Math.min(kbI,Math.max(0,items.length-1));
+  $('#res').innerHTML=items.length?items.map((it,k)=>`<button data-add="${it.id}" class="${k===kbI?'kb':''}">${avatar({kind:it.logo?'party':'person',pic:it.pic,col:it.col,cd:'var(--label)',ini:it.ini},'s26')}<span><b>${esc(it.t)}</b><small>${esc(it.s)}</small></span><em>${it.n} posts</em></button>`).join(''):'<div class="hint">No match. Try a surname or city.</div>'}
+qi.addEventListener('input',()=>{kbI=0;fillPop()});
+qi.addEventListener('keydown',ev=>{const bs=[...$('#res').querySelectorAll('button')];
+  if(ev.key==='ArrowDown'){kbI=Math.min(bs.length-1,kbI+1);fillPop();ev.preventDefault()}
+  else if(ev.key==='ArrowUp'){kbI=Math.max(0,kbI-1);fillPop();ev.preventDefault()}
+  else if(ev.key==='Enter'&&bs[kbI])bs[kbI].click();else if(ev.key==='Escape')closePop()});
+$('#res').addEventListener('click',ev=>{const b=ev.target.closest('[data-add]');if(!b)return;const set=S.sets[S.mode];if(set.length<4)set.push(+b.dataset.add);closePop();render()});
+document.addEventListener('pointerdown',ev=>{if(pop.classList.contains('on')&&!pop.contains(ev.target)&&!ev.target.closest('#addBtn'))closePop()});
+document.addEventListener('keydown',ev=>{if(ev.key==='/'&&document.activeElement!==qi){ev.preventDefault();openPop()}if(ev.key==='Escape')closePop()});
+
+/* ---------- entity strip ---------- */
+/* one shared scale across rows; peak and latest day labelled in place (readable without hover) */
+function sparkSvg(vals,col,mx){const n=vals.length;mx=Math.max(1,mx||Math.max(...vals));let d='';const Y=v=>(27-v/mx*22);vals.forEach((v,i)=>{d+=(i?'L':'M')+(i/(n-1)*100).toFixed(2)+' '+Y(v).toFixed(2)});
+  let pi=0;vals.forEach((v,i)=>{if(v>vals[pi])pi=i});const px=pi/(n-1)*100,py=Y(vals[pi])/28*100,last=vals[n-1];
+  return `<div class="spw"><svg viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><line x1="0" x2="100" y1="27.5" y2="27.5" stroke="var(--hairline)" vector-effect="non-scaling-stroke"/><path d="${d}" fill="none" stroke="${col}" stroke-width="1.4" vector-effect="non-scaling-stroke"/></svg>
+  ${vals[pi]>0?`<i class="pd" style="left:${px}%;top:${py}%;background:${col}"></i><span class="pk" style="left:${Math.min(88,Math.max(8,px))}%">${fmt(vals[pi])} · ${dstr(n-1-pi)}</span>`:''}</div><span class="lv" title="Latest day">${fmt(last)}</span>`}
+function daily(e){const v=new Array(DAYS).fill(0);e.ids.forEach(i=>{const a=assets[i];if(valid(a))v[DAYS-1-Math.floor(a.age)]+=val(a)});return v}
+function renderStrip(){const el=$('#strip');const ML=mlab();const SMX=Math.max(1,...E.flatMap(daily));
+  el.innerHTML=`<div class="mt-h"><div>${S.mode==='person'?'Candidate':'Party list'}<small>own accounts, last ${DAYS} days</small></div><div>Posts<small>published</small></div><div>${METRICS.find(m=>m[0]===S.metric)[1]}<small>total${S.metric==='inter'?', '+INTER_DEF:''}</small></div><div>Median<small>${ML} per post</small></div><div>Followers<small>dated snapshot</small></div><div>Daily ${ML}<small>${dstr(DAYS-1)} – ${dstr(0)} · shared scale · peak and latest day</small></div></div>`+
+  E.map((e,k)=>{const st=stats(e),none=!st.nv;return `<div class="ent rise" style="--c:${e.col};animation-delay:${k*35}ms">
+    <div class="eh">${avatar(e)}<div class="en"><b><a href="${spotHref(e)}" title="Open ${esc(e.name)} in Spotlight">${esc(e.name)}</a></b><span>${esc(e.sub)}</span></div></div>
+    <div class="mv num" data-l="posts">${st.n}</div><div class="mv num${none?' na':''}" data-l="${ML}">${none?'—':fmt(st.tot)}</div><div class="mv num${none?' na':''}" data-l="median / post" data-s="median">${none?'—':fmt(st.med)}</div><div class="mv num${e.fol?'':' na'}" data-l="followers">${folTxt(e.fol)}</div>
+    <div class="sp" title="Daily ${ML} by posting date, last ${DAYS} days, shared scale">${sparkSvg(daily(e),e.col,SMX)}</div></div>`}).join('')}
+
+/* ---------- then vs now: 2022 ballot, published expectation, observed attention (never combined) ---------- */
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const d1=d=>{const t=new Date(d);return isNaN(t)?null:t};
+const dshort=d=>{const p=String(d||'').split('/').map(d1);if(p.length===2&&p[0]&&p[1]){const[a,b]=p;return a.getFullYear()===b.getFullYear()?`${a.getDate()} ${MON[a.getMonth()]} – ${b.getDate()} ${MON[b.getMonth()]} ${b.getFullYear()}`:`${MON[a.getMonth()]} ${a.getFullYear()} – ${MON[b.getMonth()]} ${b.getFullYear()}`}
+  const t=p[0];return t?`${t.getDate()} ${MON[t.getMonth()]} ${t.getFullYear()}`:esc(String(d||''))};
+const pctTxt=v=>(+v).toFixed(+v<10?1:1).replace(/\.0$/,'')+'%';
+const FK={poll:'poll',model:'model',betting:'betting market',ranking:'ranking'};
+function fcPick(arr){const f=(arr||[]).filter(x=>x&&x.value!=null&&isFinite(+x.value));const dt=x=>{const t=d1(String(x.date||'').split('/').pop());return t?+t:0};return f.sort((a,b)=>dt(b)-dt(a))[0]||null}
+function fcVal(f){const v=+f.value;return f.unit==='pct'?pctTxt(v):f.unit==='seats'?`${fmt(v)} seat${v===1?'':'s'}`:f.unit==='odds'?`odds ${v.toFixed(2).replace(/0$/,'')}`:`#${fmt(v)}`}
+function countUp(root){const els=[...root.querySelectorAll('[data-cu]')];if(!els.length)return;const t0=performance.now(),D=900;
+  const go=t=>{const k=Math.min(1,(t-t0)/D),e=1-Math.pow(2,-10*k);els.forEach(el=>{const v=+el.dataset.cu,f=el.dataset.f;el.textContent=f==='pct'?pctTxt(v*(k<1?e:1)):fmt(v*(k<1?e:1))});if(k<1)requestAnimationFrame(go)};requestAnimationFrame(go)}
+function renderThen(){
+  const box=$('#then');const ML=mlab();const party=S.mode==='party';
+  const rows=E.map(e=>{const st=stats(e),src=party?lists[e.id]:cands[e.id];
+    const r=party?src.result2022:src.pref2022;
+    const tv=r?(party?(r.pct!=null?+r.pct:null):(r.votes!=null?+r.votes:null)):null;
+    return{e,r,tv,f:fcPick(src.forecast),now:st.tot,n:st.nv}});
+  const anyThen=rows.some(x=>x.tv!=null),anyF=rows.some(x=>x.f);
+  if(!anyThen&&!anyF){box.hidden=true;box.innerHTML='';return}
+  box.hidden=false;
+  const tmax=Math.max(1e-9,...rows.map(x=>x.tv||0)),nmax=Math.max(1,...rows.map(x=>x.now));
+  const fmaxU={};rows.forEach(x=>{if(x.f&&(x.f.unit==='pct'||x.f.unit==='seats'))fmaxU[x.f.unit]=Math.max(fmaxU[x.f.unit]||0,+x.f.value)});
+  const thenUnit=party?'list share':'preference votes';
+  // computed insight: who leads on each measure, stated as different measures
+  const by=k=>rows.filter(x=>x[k]!=null&&x[k]>0).sort((a,b)=>b[k]-a[k]);
+  const T=by('tv'),N=by('now');let txt='';
+  if(T[0]&&N[0]){
+    const tl=party?`${pctTxt(T[0].tv)} of the vote${T[0].r.seats!=null?` and ${T[0].r.seats} seat${T[0].r.seats===1?'':'s'}`:''}`:`${fmt(T[0].tv)} preference votes`;
+    txt=T[0].e===N[0].e?`${who(T[0].e)} leads on both: the largest 2022 ${party?'result':'preference vote'} (<b>${tl}</b>) and the most observed ${ML} now (<b>${fmt(N[0].now)}</b>).`
+      :`${who(T[0].e)} had the strongest 2022 ${party?'result':'personal vote'} (<b>${tl}</b>), but ${who(N[0].e)} draws the most observed ${ML} now (<b>${fmt(N[0].now)}</b>).`;
+    if(!party){const el=rows.filter(x=>x.r&&x.r.elected);if(el.length)txt+=` ${el.length} of ${rows.length} won a seat in 2022.`}
+    txt+=' Ballots and attention are different measures; neither predicts the other here.';
+  }else if(T[0])txt=`Only ${T.map(x=>who(x.e)).join(', ')} ${T.length>1?'have':'has'} a matched 2022 result in this comparison.`;
+  else txt='No matched 2022 results for this comparison; published expectations are shown where they exist.';
+  const fcCell=(x,k)=>{const f=x.f;if(!f)return `<div class="tn-m"><span class="tn-na">No published forecast</span></div>`;
+    const bar=fmaxU[f.unit]?`<div class="tn-t now" style="--c:${x.e.alpha(.45)}"><i style="width:${Math.max(2,+f.value/fmaxU[f.unit]*100)}%;--d:${700+k*60}ms"></i></div>`:'';
+    return `<div class="tn-m"><div class="tn-v"><span class="num" style="color:var(--label)">${fcVal(f)}</span><span>${esc(FK[f.kind]||f.kind||'forecast')} · ${f.url?`<a class="src" href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.publisher||'source')} ↗</a>`:esc(f.publisher||'')} · ${dshort(f.date)}</span></div>${bar}</div>`};
+  const thenCell=(x,k)=>{if(x.tv==null)return `<div class="tn-m"><span class="tn-na">No 2022 result matched</span></div>`;
+    const r=x.r,sub=party?[r.votes!=null?`${fmt(+r.votes)} votes`:'',r.seats!=null?`${r.seats} seat${r.seats===1?'':'s'}`:''].filter(Boolean).join(' · ')
+      :[r.rank_in_list!=null?`#${r.rank_in_list} on ${r.list_name_2022?esc(r.list_name_2022):'2022 list'}`:'',r.elected?'<span class="el">elected</span>':r.elected===false?'not elected':''].filter(Boolean).join(' · ');
+    const lnk=r.source_url?` <a class="src" href="${esc(r.source_url)}" target="_blank" rel="noopener" title="Official 2022 result">↗</a>`:'';
+    return `<div class="tn-m"><div class="tn-v"><span class="num" data-cu="${x.tv}" data-f="${party?'pct':''}">0</span><span>${sub}${lnk}</span></div><div class="tn-t then" style="--c:${x.e.col}"><i style="width:${Math.max(2,x.tv/tmax*100)}%;--d:${k*60}ms"></i></div></div>`};
+  const nowCell=(x,k)=>`<div class="tn-m"><div class="tn-v"><span class="num" data-cu="${x.now}">0</span><span>${x.n} post${x.n===1?'':'s'}</span></div><div class="tn-t now" style="--c:${x.e.col}"><i style="width:${Math.max(x.now?2:0,x.now/nmax*100)}%;--d:${350+k*60}ms"></i></div></div>`;
+  const ms=[anyThen&&['then','2022 election',thenUnit,'Ballots',thenCell],['now','Now',`observed ${ML}, own posts`,'Attention',nowCell],anyF&&['f','Expected','latest published forecast','Forecast',fcCell]].filter(Boolean);
+  const lede=[anyThen?`2022 municipal ${party?'result':'preference votes'}`:'',`observed ${ML} on own posts, last ${DAYS} days`,anyF?'published expectations':''].filter(Boolean);
+  box.innerHTML=`<header class="ph"><div><h2>Then and now</h2><p>${lede.join(' · ')} · separate scales, never combined</p></div></header>${ai(txt,anyThen?'observed posts and official 2022 results':'observed posts and published forecasts')}
+  <div class="tn" style="--tc:minmax(0,1.4fr) repeat(${ms.length},minmax(0,2fr));--m:${ms.length}">
+    <div class="tn-h en0">${party?'Party list':'Candidate'}</div>
+    ${ms.map(m=>`<div class="tn-h ms"><div>${m[1]}<small>${m[2]}</small></div><i>${m[3]}</i></div>`).join('')}
+    ${rows.map((x,k)=>`<div class="tn-r" style="--rd:${k*45}ms"><div class="tn-e">${avatar(x.e)}<div class="en"><b><a href="${spotHref(x.e)}" title="Open in Spotlight">${esc(x.e.name)}</a></b><span>${esc(party?cities[lists[x.e.id].city].name:lists[x.e.list].name)}</span></div></div>${ms.map(m=>m[4](x,k)).join('')}</div>`).join('')}
+  </div>`;
+  countUp(box);
+}
+
+/* ---------- ECharts plumbing (vendored 5.5.1, no runtime CDN) ---------- */
+const TK=(()=>{const cs=getComputedStyle(document.documentElement),g=k=>cs.getPropertyValue(k).trim();return{l1:g('--label')||'#0F172A',l2:g('--label2')||'#475569',l3:g('--label2')||'#475569',hair:'rgba(15,23,42,.07)',hair2:'rgba(15,23,42,.16)',sunk:g('--sunken')||'#EEF1F5',brand:g('--brand')||'#0E6E6B',font:g('--font')||'system-ui, sans-serif'}})();
+function ec(id,h){const el=$('#'+id+' .plot');el.style.height=h+'px';const old=echarts.getInstanceByDom(el);if(old)old.dispose();return echarts.init(el,null,{renderer:'canvas'})}
+const AX={axisLine:{show:false},axisTick:{show:false},axisLabel:{color:TK.l3,fontSize:11,fontFamily:TK.font},splitLine:{lineStyle:{color:TK.hair}}};
+const TIP={backgroundColor:'#fff',borderColor:TK.hair2,borderWidth:1,padding:[10,12],className:'tipx',textStyle:{color:TK.l1,fontFamily:TK.font,fontSize:12},extraCssText:'border-radius:10px;box-shadow:0 8px 24px rgba(15,23,42,.12);min-width:180px'};
+function bindTip(c,fn){c.on('mousemove',p=>{const h=fn(p);const ev=p.event&&p.event.event;if(h&&ev)showTip(h,ev.clientX,ev.clientY)});c.on('mouseout',hideTip);c.on('globalout',hideTip)}
+const hasMedia=a=>!!(a.img||a.vsrc);
+const IMG={};function img(u){if(!u)return null;if(!IMG[u]){const im=new Image();im.decoding='async';im.src=u;IMG[u]=im}return IMG[u]}
+const loaded=ims=>Promise.race([Promise.all(ims.filter(Boolean).map(im=>im.complete?1:new Promise(r=>{im.onload=im.onerror=r}))),new Promise(r=>setTimeout(r,2500))]);
+const rowAxes=lab=>[{...AX,type:'value',inverse:true,min:0,max:E.length,interval:1,axisLabel:{show:false},splitLine:{lineStyle:{color:TK.hair}}},
+  {...AX,type:'category',inverse:true,position:'left',data:E.map((e,k)=>String(k)),boundaryGap:true,splitLine:{show:false},axisLabel:{...AX.axisLabel,interval:0,margin:14,lineHeight:17,rich:entRich(),formatter:(v,i)=>lab(+v)}}];
+const entRich=()=>Object.fromEntries(E.map((e,k)=>[`c${k}`,{color:e.col,fontSize:12,fontWeight:700}]).concat([['n',{color:TK.l1,fontSize:12.5,fontWeight:600,fontFamily:TK.font}],['s',{color:TK.l3,fontSize:11,fontFamily:TK.font}]]));
+const dateOf=a=>new Date(TODAY-a.age*864e5);
+const reachLab=a=>a.reachKind==='views'?'views':'likes + comments';
+
+/* ---------- 1. cumulative ---------- */
+function chartCum(){
+  const box=$('#cum');
+  const ser=E.map(e=>{const d=daily(e);let s=0;return{e,d,c:d.map(v=>s+=v)}});
+  const lead=ser.slice().sort((a,b)=>b.c[DAYS-1]-a.c[DAYS-1]);
+  const L=lead[0],top3=ranked(L.e,null,true).slice(0,3),share=L.c[DAYS-1]?top3.reduce((s,a)=>s+val(a),0)/L.c[DAYS-1]:0;
+  const busiest=E.map(e=>({e,n:stats(e).nv})).sort((a,b)=>b.n-a.n)[0];
+  let txt=`${who(L.e)} leads with <b>${fmt(L.c[DAYS-1])}</b> ${mlab()}; <b>${Math.round(share*100)}%</b> of it comes from three posts, led by ${top3[0]?cite(top3[0]):'none'}.`;
+  if(busiest.e!==L.e){const ls=stats(L.e),bs=stats(busiest.e);txt+=` ${who(busiest.e)} posts more (${bs.nv} vs ${ls.nv}) yet draws ${(ls.tot/ls.nv/(bs.tot/bs.nv||1)).toFixed(1)}× less per post.`}
+  else if(lead[1])txt+=` ${who(lead[1].e)} follows at <b>${fmt(lead[1].c[DAYS-1])}</b>.`;
+  box.innerHTML=`<header class="ph"><div><h2>Cumulative ${mlab()} by posting date</h2><p>Each post counted on the day it was published${S.metric==='inter'?' · '+INTER_DEF:''}${S.metric==='views'?' · video only':''} · own accounts · ${dstr(DAYS-1)} – ${dstr(0)} ${TODAY.getFullYear()}</p></div></header>${ai(txt)}<div class="plot"></div>
+  <div class="legend"><span class="k">○ each entity's best post · lines labelled at their end value</span></div>`;
+  const el=box.querySelector('.plot'),mob=el.clientWidth<520,c=ec('cum',mob?270:320);
+  const days=[...Array(DAYS)].map((_,i)=>dstr(DAYS-1-i));
+  const best=ser.map(sr=>{const b=ranked(sr.e,null,true)[0];return b?{a:b,i:DAYS-1-Math.floor(b.age)}:null});
+  c.setOption({animationDuration:1100,animationEasing:'exponentialOut',animationEasingUpdate:'exponentialOut',textStyle:{fontFamily:TK.font},
+    grid:{left:6,right:mob?78:132,top:30,bottom:6,containLabel:true},
+    xAxis:{...AX,type:'category',data:days,boundaryGap:false,axisLine:{show:true,lineStyle:{color:TK.hair2}},splitLine:{show:false},axisLabel:{...AX.axisLabel,interval:i=>(DAYS-1-i)%(mob?14:7)===0,margin:10}},
+    yAxis:{...AX,type:'value',splitNumber:4,name:mlab(),nameLocation:'end',nameGap:12,nameTextStyle:{color:TK.l3,fontSize:11,align:'left',padding:[0,0,0,-34]},axisLabel:{...AX.axisLabel,formatter:v=>fmt(v)}},
+    tooltip:{...TIP,trigger:'axis',axisPointer:{type:'line',lineStyle:{color:TK.l3,type:[3,3]}},formatter:ps=>{const i=ps[0].dataIndex;const rows=ser.map(sr=>({sr,v:sr.c[i],dv:sr.d[i]})).sort((a,b)=>b.v-a.v);
+      return `<div class="tt">${days[i]} · cumulative ${mlab()}</div>${rows.map(r=>`<div class="tr" style="--c:${r.sr.e.col}"><i></i>${esc(r.sr.e.short)}${r.dv?`<span style="color:var(--label2);font-size:11px">+${fmt(r.dv)}</span>`:''}<b>${fmt(r.v)}</b></div>`).join('')}`}},
+    series:ser.map((sr,k)=>({type:'line',name:sr.e.short,data:sr.c,showSymbol:false,symbol:'circle',symbolSize:8,z:10+k,
+      lineStyle:{width:2.25,color:sr.e.col,cap:'round',join:'round'},itemStyle:{color:sr.e.col,borderColor:'#fff',borderWidth:2},
+      emphasis:{focus:'series',lineStyle:{width:3}},blur:{lineStyle:{opacity:.18}},
+      endLabel:{show:true,distance:10,padding:[4,0],formatter:p=>`{n|${esc(mob?sr.e.short:sr.e.lab)}}\n{s|${fmt(p.value)} ${mob?'':mlab()}}`,rich:{n:{color:TK.l1,fontSize:12,fontWeight:600,fontFamily:TK.font,lineHeight:16},s:{color:TK.l2,fontSize:11.5,fontFamily:TK.font,lineHeight:15}}},
+      labelLayout:{moveOverlap:'shiftY'},
+      markPoint:best[k]?{silent:false,animationDelay:1000,symbol:'circle',symbolSize:11,label:{show:false},itemStyle:{color:'#fff',borderColor:sr.e.col,borderWidth:2.25},data:[{coord:[best[k].i,sr.c[best[k].i]],aid:best[k].a.i}]}:undefined}))});
+  bindTip(c,p=>p.componentType==='markPoint'&&p.data&&p.data.aid!=null?assetTip(assets[p.data.aid]):null);
+  c.on('click',p=>{if(p.componentType==='markPoint'&&p.data)openSrc(assets[p.data.aid])});
+}
+
+/* ---------- 2. best posts compared (real thumbnails, area = metric) ---------- */
+function openSrc(a){if(a&&a.url)window.open(a.url,'_blank','noopener')}
+function chartBest(){
+  const box=$('#best');const K=8;
+  const R=E.map(e=>({e,r:ranked(e).slice(0,K)}));
+  const vs=R.flatMap(x=>x.r.map(score)).filter(v=>v>0);const vmax=Math.max(1e-9,...vs),vmin=Math.max(S.norm?.01:1,Math.min(...vs,vmax));
+  const tops=R.filter(x=>x.r[0]).map(x=>({e:x.e,a:x.r[0],v:score(x.r[0])})).sort((a,b)=>b.v-a.v);
+  const unit=S.norm?mlab()+' per 1k followers':mlab();const show=v=>S.norm?f1k(v):fmt(v);
+  let txt=tops[0]?`${who(tops[0].e)}'s ${cite(tops[0].a)} is the biggest post in the set at <b>${show(tops[0].v)}</b> ${unit}`:'No posts with retained media in the window.';
+  if(tops[1])txt+=`, <b>${(tops[0].v/Math.max(1e-9,tops[1].v)).toFixed(1)}×</b> ${who(tops[1].e)}'s best (${show(tops[1].v)}).`;else if(tops[0])txt+='.';
+  const spread=R.filter(x=>x.r.length>2).map(x=>({e:x.e,f:score(x.r[0])/Math.max(1e-9,score(x.r[Math.min(x.r.length-1,K-1)]))})).sort((a,b)=>b.f-a.f)[0];
+  if(spread&&spread.f>=3)txt+=` ${who(spread.e)} depends most on one hit: its #1 is ${spread.f.toFixed(0)}× its #${Math.min(K,R.find(x=>x.e===spread.e).r.length)}.`;
+  const nNo=E.reduce((s,e)=>s+e.ids.filter(i=>!hasMedia(assets[i])).length,0);
+  box.innerHTML=`<header class="ph"><div><h2>Best posts compared</h2><p>Each entity's ${K} best posts in the window · position and thumbnail area = ${unit} (log scale) · click a thumbnail to open its source</p></div>
+    <div class="ctl"${nNo?'':' hidden'}><span class="sw${S.media?' on':''}" id="mediaSw2" role="switch" aria-checked="${S.media}" tabindex="0"><i></i>Include ${nNo} without media</span></div></header>${ai(txt)}<div class="plot"></div>
+    <div class="legend"><span class="k">▶ video</span></div>`;
+  const sw=box.querySelector('#mediaSw2');sw.onclick=()=>{S.media=!S.media;renderTop();chartBest()};sw.onkeydown=ev=>{if(ev.key===' '||ev.key==='Enter'){ev.preventDefault();sw.click()}};
+  const el=box.querySelector('.plot'),mob=el.clientWidth<520,rh=mob?92:104,c=ec('best',22+rh*E.length);
+  const smax=mob?54:72,smin=mob?16:20,SZ=v=>smin+(smax-smin)*Math.sqrt(Math.max(0,v)/vmax);
+  const data=[];R.forEach((x,k)=>x.r.forEach((a,j)=>{const v=score(a);data.push({value:[Math.max(vmin,v),k+.5+(j===0?0:(j%2?-.17:.17)),SZ(v),k,a.i,j+1],a})}));
+  data.sort((p,q2)=>q2.value[2]-p.value[2]);
+  const ims=data.map(d=>img(d.a.img));
+  const lo=Math.pow(10,Math.floor(Math.log10(vmin))),hi=Math.pow(10,Math.ceil(Math.log10(vmax*1.6)));
+  const draw=()=>c.setOption({animationDuration:800,animationEasing:'exponentialOut',animationEasingUpdate:'exponentialOut',animationDelay:i=>i*25,textStyle:{fontFamily:TK.font},
+    grid:{left:4,right:mob?24:40,top:8,bottom:22,containLabel:true},
+    xAxis:{...AX,type:'log',min:lo,max:hi,logBase:10,axisLabel:{...AX.axisLabel,formatter:v=>show(v)},splitLine:{lineStyle:{color:TK.hair}}},
+    yAxis:rowAxes(v=>{const e=E[v],nm=mob?e.short.slice(0,10):e.lab,x=R[v];return `{c${v}|●} {n|${esc(nm)}}\n{s|${x.r.length?(mob?'':x.r.length+' shown · ')+'best '+show(score(x.r[0])):'no posts'}}`}),
+    series:[{type:'custom',coordinateSystem:'cartesian2d',yAxisIndex:0,data,encode:{x:0,y:1},clip:false,
+      renderItem:(params,api)=>{const d=data[params.dataIndex],a=d.a,e=E[d.value[3]],s=d.value[2],[x,y]=api.coord([d.value[0],d.value[1]]);
+        const im=IMG[a.img],ok=im&&im.complete&&im.naturalWidth;let crop={};
+        if(ok){const w=im.naturalWidth,h=im.naturalHeight,m=Math.min(w,h);crop={sx:(w-m)/2,sy:(h-m)/3,sWidth:m,sHeight:m}}
+        const ch=[{type:'rect',shape:{x:x-s/2-2,y:y-s/2-2,width:s+4,height:s+4,r:6},style:{fill:e.col}}];
+        ch.push(ok?{type:'image',style:{image:im,x:x-s/2,y:y-s/2,width:s,height:s,...crop}}:{type:'rect',shape:{x:x-s/2,y:y-s/2,width:s,height:s,r:4},style:{fill:TK.sunk}});
+        if(a.video)ch.push({type:'text',style:{text:'▶',x:x+s/2-3,y:y+s/2-3,align:'right',verticalAlign:'bottom',fill:'#fff',fontSize:Math.max(8,s*.2),textShadowColor:'rgba(0,0,0,.5)',textShadowBlur:3}});
+        if(d.value[5]===1&&!mob)ch.push({type:'text',style:{text:show(score(a)),x:x+s/2+8,y,verticalAlign:'middle',fill:TK.l1,font:`600 12px ${TK.font}`}});
+        return{type:'group',children:ch}}}]});
+  const sk=document.createElement('div');sk.className='sk';el.appendChild(sk);
+  Promise.race([loaded(ims),new Promise(r=>setTimeout(r,1400))]).then(()=>{sk.remove();if(!c.isDisposed()){draw();loaded(ims).then(()=>{if(!c.isDisposed()){c.setOption({animation:false});draw()}})}});
+  bindTip(c,p=>p.componentType==='series'?assetTip(assets[data[p.dataIndex].value[4]]):null);
+  c.on('click',p=>{if(p.componentType==='series')openSrc(assets[data[p.dataIndex].value[4]])});
+}
+
+/* ---------- 3. top assets ---------- */
+function topicCounts(){return TOP.map((t,ti)=>({ti,n:E.reduce((s,e)=>s+e.ids.filter(i=>assets[i].topics.includes(ti)&&valid(assets[i])).length,0),cov:E.filter(e=>e.ids.some(i=>assets[i].topics.includes(ti)&&valid(assets[i]))).length}))}
+function heroCard(a,e,k,rank,max,win){const sc=score(a);
+  return `<article class="card${win?' win':''}" data-a="${a.i}" style="--c:${e.col}">
+    <div class="media">${media(a,true)}<span class="rank">#${rank}</span><span class="fmt">${fmtName(a)}</span></div>
+    <div class="cb"><div class="pv"><span class="num">${S.norm?n1k(a):fmt(sc)}</span><span class="u">${S.norm?mlab()+' / 1k followers':mlab()}</span><span class="alt">${S.norm?fmt(val(a))+' '+mlab():n1k(a)+' / 1k followers'}</span></div>
+      ${win?`<span class="lead">Leads on ${esc(topicName(S.topic))}</span>`:''}
+      <div class="bar"><i style="width:${Math.max(2,sc/max*100)}%"></i></div>
+      <p class="cap">${esc(a.cap)}</p>
+      <div class="cm">${a.topics.map(t=>`<span class="chip">${topicName(t)}</span>`).join('')}<span>${dstr(a.age)} ${TODAY.getFullYear()}</span>${e.kind==='party'?`<span class="by">· ${esc(a.owner>=0?cands[a.owner].name:'party account')}</span>`:''}${srcA(a)}</div>
+      <div class="mini" style="grid-template-columns:repeat(${a.na&&a.na.shares?3:4},1fr)">${[['views','views'],['likes','likes'],['comments','comments']].concat(a.na&&a.na.shares?[]:[['shares','shares']]).map(([k2,l])=>{const v=mval(a,k2);return `<div class="${S.metric===k2?'on':''}${v==='—'?' na':''}"><b>${v}</b>${l}</div>`}).join('')}</div></div></article>`}
+function rowCard(a,e,k,rank,max){const sc=score(a);
+  return `<div class="rowc" data-a="${a.i}" style="--c:${e.col}"><div class="th">${media(a,false)}<span class="rk">#${rank}</span></div>
+    <div><div class="t">${esc(a.cap)}</div><div class="s">${fmtName(a)} · ${dstr(a.age)}${a.topics.length?' · '+topicName(a.topics[0]):''}${a.url?' · ':''}${srcA(a,'Source ↗')}</div></div>
+    <div class="v"><span class="num">${S.norm?n1k(a):fmt(sc)}</span><small>${S.norm?'/ 1k':mlab()}</small><div class="vb"><i style="width:${Math.max(3,sc/max*100)}%"></i></div></div></div>`}
+function renderTop(){
+  const box=$('#top');const tc=topicCounts();
+  if(topicLess())S.view='best';
+  if(S.topic==null){S.topic=tc.slice().sort((a,b)=>b.cov-a.cov||b.n-a.n)[0].ti}
+  const h2h=S.view==='h2h',filt=h2h?(a=>a.topics.includes(S.topic)):null;
+  const R=E.map(e=>({e,r:ranked(e,filt)}));
+  const heroes=R.filter(x=>x.r[0]).map(x=>({e:x.e,a:x.r[0],v:score(x.r[0])})).sort((a,b)=>b.v-a.v);
+  const max=Math.max(1e-9,...R.flatMap(x=>x.r.slice(0,1).map(score)));
+  let txt;
+  if(!h2h){const raw=R.filter(x=>x.r.length).map(x=>({e:x.e,a:x.e.ids.map(i=>assets[i]).filter(valid).sort((p,q2)=>val(q2)-val(p))[0]})).filter(x=>x.a);
+    const rawL=raw.slice().sort((p,q2)=>val(q2.a)-val(p.a))[0],nL=raw.slice().sort((p,q2)=>nval(q2.a)-nval(p.a))[0];
+    txt=rawL?`Biggest single post: ${who(rawL.e)}'s ${cite(rawL.a)} with <b>${fmt(val(rawL.a))}</b> ${mlab()}.`:'';
+    if(nL&&rawL&&nL.e!==rawL.e)txt+=` Per 1k followers, ${who(nL.e)}'s ${cite(nL.a)} leads (<b>${f1k(nval(nL.a))}</b> vs ${n1k(rawL.a)}): more attention relative to its audience size.`;
+    else if(nL)txt+=` It also leads per 1k followers (<b>${f1k(nval(nL.a))}</b>).`;
+    const vid=E.map(e=>({e,r:ranked(e).slice(0,5)})).map(x=>({e:x.e,v:x.r.filter(a=>a.video).length,n:x.r.length})).sort((a,b)=>b.v-a.v)[0];
+    if(vid&&vid.n)txt+=` ${vid.v} of ${who(vid.e)}'s top ${vid.n} are video.`}
+  else{const t=topicName(S.topic),miss=R.filter(x=>!x.r.length).map(x=>x.e);
+    if(heroes.length){const H0=heroes[0],H1=heroes[1];txt=`On <b>${t}</b>, ${who(H0.e)}'s ${cite(H0.a)} leads with <b>${S.norm?f1k(H0.v)+' per 1k followers':fmt(H0.v)+' '+mlab()}</b>`+(H1?`, ${(H0.v/Math.max(1e-9,H1.v)).toFixed(1)}× ${who(H1.e)}'s best.`:'.')}
+    else txt=`Nobody in this comparison posted on <b>${t}</b> in the window.`;
+    if(miss.length)txt+=` ${miss.map(who).join(', ')} ${miss.length>1?'have':'has'} no ${t} posts in the window.`}
+  const winA=h2h&&heroes[0]?heroes[0].a.i:-1;
+  box.innerHTML=`<header class="ph"><div><h2>Top-performing posts, side by side</h2><p>${h2h?`Each entity's best post on one topic`:`Each entity's five best posts in the window`} · ranked by ${S.norm?mlab()+' per 1k followers of the posting account':mlab()}</p></div>
+    <div class="ctl"><div class="seg" id="viewSeg"${topicLess()?' hidden':''}><button data-v="best" class="${!h2h?'on':''}">Best overall</button><button data-v="h2h" class="${h2h?'on':''}">Head-to-head on topic</button></div>
+    <span class="sw${S.norm?' on':''}" id="normSw" role="switch" aria-checked="${S.norm}" tabindex="0"><i></i>Per 1k followers</span><span class="sw sm${S.media?' on':''}" id="mediaSw" role="switch" aria-checked="${S.media}" tabindex="0" title="Posts whose image or video was not retained at collection"><i></i>Posts without media</span></div></header>
+    ${h2h?`<div class="topics" id="topicChips">${tc.map(t=>`<button class="chip${t.ti===S.topic?' on':''}" data-t="${t.ti}">${topicName(t.ti)} <b>${t.n}</b></button>`).join('')}</div>`:''}
+    ${ai(txt)}
+    <div class="cols" style="--n:${E.length}">${R.map((x,k)=>{const e=x.e;const tot=x.r.reduce((s,a)=>s+val(a),0);
+      return `<div class="col rise" style="animation-delay:${k*40}ms"><div class="colh" style="--c:${e.col}">${avatar(e,'s26')}<b>${esc(e.name)}</b><span>${e.fol?folTxt(e.fol)+' followers':''}</span></div>
+      ${x.r[0]?heroCard(x.r[0],e,k,1,max,x.r[0].i===winA):`<div class="empty">No ${h2h?esc(topicName(S.topic))+' ':''}posts from ${esc(e.short)} in the last 45 days.<br>Absence of posts, not absence of position.</div>`}
+      ${x.r.slice(1,h2h?3:5).map((a,j)=>rowCard(a,e,k,j+2,Math.max(1e-9,score(x.r[0])))).join('')}
+      ${h2h&&x.r.length?`<div class="colsum"><b>${x.r.length}</b> ${esc(topicName(S.topic))} posts · <b>${fmt(tot)}</b> ${mlab()} in total</div>`:''}</div>`}).join('')}</div>
+    <div class="fine"><span>Engagement is attention, not support</span>${S.norm?`<span>Per 1k uses the posting account's dated follower snapshot</span>`:''}${REAL?'':'<span>Simulated thumbnails</span>'}</div>`;
+  box.querySelector('#viewSeg').onclick=ev=>{const b=ev.target.closest('button');if(b&&b.dataset.v!==S.view){S.view=b.dataset.v;renderTop()}};
+  const sw=box.querySelector('#normSw');sw.onclick=()=>{S.norm=!S.norm;renderTop();chartBest()};
+  const ms=box.querySelector('#mediaSw');ms.onclick=()=>{S.media=!S.media;renderTop();chartBest()};ms.onkeydown=ev=>{if(ev.key===' '||ev.key==='Enter'){ev.preventDefault();ms.click()}};sw.onkeydown=ev=>{if(ev.key===' '||ev.key==='Enter'){ev.preventDefault();sw.click()}};
+  const tcEl=box.querySelector('#topicChips');if(tcEl)tcEl.onclick=ev=>{const b=ev.target.closest('[data-t]');if(b){S.topic=+b.dataset.t;renderTop()}};
+}
+
+/* ---------- 4. cadence: every post by date, area = reach ---------- */
+function chartCad(){
+  const box=$('#cad');
+  const info=E.map(e=>{const as=e.ids.map(i=>assets[i]);const wd=new Array(7).fill(0);as.forEach(a=>wd[dateOf(a).getDay()]++);
+    const dd=daily(e);let bi=0;dd.forEach((v,i)=>{if(v>dd[bi])bi=i});return{e,n:as.length,wk:as.length/(DAYS/7),wd:wd.indexOf(Math.max(...wd)),bi,bv:dd[bi]}});
+  const most=info.slice().sort((a,b)=>b.n-a.n),big=info.slice().sort((a,b)=>b.bv-a.bv)[0];
+  const all=E.flatMap(e=>e.ids.map(i=>assets[i]));const rmax=Math.max(1,...all.map(a=>a.reach||0));
+  const topR=all.slice().sort((a,b)=>(b.reach||0)-(a.reach||0))[0];
+  let txt=`${who(most[0].e)} posts most: <b>${most[0].n}</b> posts, ${most[0].wk.toFixed(1)} a week, busiest on ${WD[most[0].wd]}s; ${who(most[most.length-1].e)} posts least (<b>${most[most.length-1].n}</b>). Biggest single day: ${who(big.e)} on <b>${dstr(DAYS-1-big.bi)}</b> with ${fmt(big.bv)} ${mlab()}.`;
+  if(topR&&topR.reach)txt+=` Largest mark: ${cite(topR)} with <b>${fmt(topR.reach)}</b> ${reachLab(topR)}.`;
+  box.innerHTML=`<header class="ph"><div><h2>Posting cadence</h2><p>Every post by posting date · dot area = reach: views where measured (filled), otherwise likes + comments (ring) · shaded = weekends</p></div><div class="ctl">${info.map(x=>`<span class="chip" style="cursor:default"><i class="dot" style="background:${x.e.col}"></i>${esc(x.e.short)} ${x.wk.toFixed(1)}/wk</span>`).join('')}</div></header>${ai(txt)}<div class="plot"></div>`;
+  const el=box.querySelector('.plot'),mob=el.clientWidth<520,rh=mob?78:88,c=ec('cad',24+rh*E.length);
+  const t0=+TODAY-DAYS*864e5,t1=+TODAY;
+  const SZ=r=>3+(mob?24:34)*Math.sqrt(Math.max(0,r)/rmax);
+  const wk=[];for(let dd=0;dd<DAYS+2;dd++){const dt=new Date(TODAY-dd*864e5);if(dt.getDay()===6){const s0=new Date(dt);s0.setHours(0,0,0,0);wk.push([{xAxis:Math.max(t0,+s0)},{xAxis:Math.min(t1,+s0+2*864e5)}])}}
+  const series=E.map((e,k)=>{const pts=e.ids.map(i=>assets[i]).map(a=>({a,r:a.reach||0})).sort((p,q2)=>q2.r-p.r);
+    return{type:'scatter',name:e.short,z:5,yAxisIndex:0,
+      data:pts.map(p=>({value:[+dateOf(p.a),k+.5+(hash(p.a.i)-.5)*.62,p.r],aid:p.a.i,symbolSize:SZ(p.r),
+        itemStyle:p.a.reachKind==='views'?{color:e.alpha(.42),borderColor:e.col,borderWidth:1}:{color:'rgba(255,255,255,.85)',borderColor:e.col,borderWidth:1.4}})),
+      emphasis:{scale:1.15,itemStyle:{borderWidth:2}},
+      markArea:k===0?{silent:true,itemStyle:{color:'rgba(15,23,42,.035)'},data:wk}:undefined}});
+  c.setOption({animationDuration:800,animationEasing:'exponentialOut',animationEasingUpdate:'exponentialOut',animationDelay:i=>i*4,textStyle:{fontFamily:TK.font},
+    grid:{left:4,right:mob?12:24,top:6,bottom:24,containLabel:true},
+    xAxis:{...AX,type:'value',min:t0,max:t1,interval:(mob?14:7)*864e5,axisLine:{show:true,lineStyle:{color:TK.hair2}},splitLine:{show:false},axisLabel:{...AX.axisLabel,showMaxLabel:false,formatter:v=>dstr((TODAY-v)/864e5),hideOverlap:true}},
+    yAxis:rowAxes(v=>{const e=E[v],x=info[v];return `{c${v}|●} {n|${esc(mob?e.short.slice(0,9):e.lab)}}\n{s|${mob?'':x.n+' posts · '}${x.wk.toFixed(1)}/wk}`}),
+    series});
+  bindTip(c,p=>p.componentType==='series'&&p.data?assetTip(assets[p.data.aid])+`<div class="mm" style="margin-top:6px">Mark area: <b>${fmt(assets[p.data.aid].reach||0)}</b> ${reachLab(assets[p.data.aid])}</div>`:null);
+  c.on('click',p=>{if(p.componentType==='series'&&p.data)openSrc(assets[p.data.aid])});
+}
+
+/* ---------- 5. format mix ---------- */
+const CATS=[['Instagram reels',a=>a.plat===0&&a.video],['Instagram photos',a=>a.plat===0&&!a.video],['Facebook',a=>a.plat===1],['TikTok',a=>a.plat===2],['YouTube',a=>a.plat===3],['X',a=>a.plat===4],['Web',a=>a.plat===6]];
+function chartMix(){
+  const box=$('#mix');const ALL=E.flatMap(e=>e.ids.map(i=>assets[i]));const cats=CATS.filter(([,f])=>ALL.some(f));
+  const off=[['TikTok',2],['YouTube',3],['X',4],['web',6]].filter(([,pl])=>!assets.some(a=>a.plat===pl)).map(x=>x[0]);
+  const M=E.map(e=>{const as=e.ids.map(i=>assets[i]);const tot=as.filter(valid).reduce((s,a)=>s+val(a),0)||1;
+    return{e,c:cats.map(([l,f])=>{const g=as.filter(f);return{l,p:g.length/(as.length||1),r:g.filter(valid).reduce((s,a)=>s+val(a),0)/tot}})}});
+  let bestR=null;M.forEach(x=>x.c.forEach(c=>{if(c.p>=.06){const ratio=c.r/c.p;if(!bestR||ratio>bestR.ratio)bestR={e:x.e,c,ratio}}}));
+  const top=M.map(x=>({e:x.e,c:x.c.slice().sort((a,b)=>b.r-a.r)[0]}));
+  let txt=bestR?`${who(bestR.e)} gets <b>${Math.round(bestR.c.r*100)}%</b> of its ${mlab()} from ${bestR.c.l} with only <b>${Math.round(bestR.c.p*100)}%</b> of its posts, the strongest format lift in the set.`:'';
+  txt+=` Largest source per entity: ${top.map(t=>`${who(t.e)} ${t.c.l}`).join(', ')}.`;
+  const vmax=Math.max(.05,...M.flatMap(x=>x.c.map(c=>Math.max(c.r,c.p))));
+  box.innerHTML=`<header class="ph"><div><h2>Format and platform mix</h2><p>Bar = share of each entity's ${mlab()} · white tick = share of its posts</p></div></header>${ai(txt)}
+   <div class="mix">${cats.map(([l],ci)=>`<div class="mrow"><span>${l}</span><div class="mbars">${M.map((x,k)=>{const c=x.c[ci],pw=c.r/vmax*82;
+     return `<div class="mb" style="--c:${x.e.col};--d:${200+ci*50+k*30}ms" title="${esc(x.e.name)} · ${l}: ${Math.round(c.r*100)}% of ${mlab()}, ${Math.round(c.p*100)}% of posts"><i style="width:${pw}%"></i>${c.p>0?`<u style="left:${c.p/vmax*82}%"></u>`:''}${c.r>=.03||c.p>=.03?`<em style="left:calc(${Math.max(pw,c.p/vmax*82)}% + 8px)">${Math.round(c.r*100)}%</em>`:''}</div>`}).join('')}</div></div>`).join('')}</div>
+   <div class="legend">${E.map(e=>`<span style="--c:${e.col}"><i></i>${esc(e.short)}</span>`).join('')}</div>${off.length?`<p class="fine" style="margin-top:12px">${off.join(', ').replace(/, ([^,]*)$/,' and $1')} ${off.length>1?'are':'is'} not collected in this checkpoint, so ${off.length>1?'they are':'it is'} not shown.</p>`:''}`;
+}
+
+/* ---------- 6. topic mix ---------- */
+function chartTopics(){
+  const box=$('#tops');if(!box||box.hidden)return;
+  const M=E.map(e=>{const m=new Array(TOP.length).fill(0);let tot=0;e.ids.map(i=>assets[i]).filter(valid).forEach(a=>{if(!a.topics.length)return;const v=val(a)/a.topics.length;a.topics.forEach(t=>m[t]+=v);tot+=val(a)});return{e,sh:m.map(v=>tot?v/tot:0)}});
+  const order=TOP.map((t,ti)=>ti).sort((a,b)=>M.reduce((s,x)=>s+x.sh[b],0)-M.reduce((s,x)=>s+x.sh[a],0)).filter(ti=>M.some(x=>x.sh[ti]>0));
+  const lab=M.filter(x=>x.sh.some(v=>v>0)),unl=M.filter(x=>!x.sh.some(v=>v>0));
+  const conc=lab.map(x=>{const ti=x.sh.indexOf(Math.max(...x.sh));return{e:x.e,ti,v:x.sh[ti]}}).sort((a,b)=>b.v-a.v);
+  const shared=lab.length<2?null:order.find(ti=>lab.every(x=>x.sh.map((v,j)=>[v,j]).sort((a,b)=>b[0]-a[0]).slice(0,3).some(p=>p[1]===ti)));
+  let txt=conc.length<2?'':`${who(conc[0].e)} concentrates <b>${Math.round(conc[0].v*100)}%</b> of its ${mlab()} on ${topicName(conc[0].ti)}; ${who(conc[conc.length-1].e)} is the most spread (top topic ${Math.round(conc[conc.length-1].v*100)}%).`;
+  if(conc.length<2)txt=conc.length?`${who(conc[0].e)} concentrates <b>${Math.round(conc[0].v*100)}%</b> of its ${mlab()} on ${topicName(conc[0].ti)}.`:'';
+  txt+=shared!=null?` <b>${topicName(shared)}</b> is in every labelled entity's top three: the contested ground.`:lab.length>1?' No topic sits in every entity\'s top three.':'';
+  if(unl.length)txt+=` ${unl.map(x=>who(x.e)).join(', ')} ${unl.length>1?'have':'has'} no topic-labelled posts yet.`;
+  const none=M.every(x=>x.sh.every(v=>!v));
+  if(none)txt=`No topic labels are applied to these posts yet${SW.topicsPending?': labels are pending review':''}, so no topic shares are shown.`;
+  box.innerHTML=`<header class="ph"><div><h2>Topic mix</h2><p>Share of each entity's ${mlab()} by topic · multi-topic posts split evenly${SW.topicsPending?' · labels pending review':''} · click a bubble for head-to-head</p></div></header>${ai(txt)}<div class="plot"></div>`;
+  if(none)return;
+  const el=box.querySelector('.plot'),W=el.clientWidth,mob=W<520,rh=mob?32:36,c=ec('tops',44+rh*order.length);
+  const lw=mob?96:132,cw=(W-lw-16)/E.length,rmax=Math.min(cw*.62,rh*.98),smax=Math.max(.01,...M.flatMap(x=>x.sh));
+  const data=[];order.forEach((ti,ri)=>M.forEach((x,k)=>{const v=x.sh[ti];data.push({value:[k,ri,v],ti,k,symbolSize:v>0?Math.max(5,Math.sqrt(v/smax)*rmax):3,
+    itemStyle:v>0?{color:x.e.alpha(.30),borderColor:x.e.col,borderWidth:1.5}:{color:TK.l3},label:{show:v>=.04}})}));
+  c.setOption({animationDuration:700,animationEasing:'exponentialOut',animationEasingUpdate:'exponentialOut',animationDelay:i=>i*12,textStyle:{fontFamily:TK.font},
+    grid:{left:lw,right:16,top:48,bottom:4},
+    xAxis:{...AX,type:'category',position:'top',data:E.map(e=>e.short),splitLine:{show:false},axisLabel:{...AX.axisLabel,interval:0,rich:entRich(),formatter:(v,i)=>`{n|${esc(mob?v.slice(0,9):v)}}\n{c${i}|▬}`,lineHeight:16}},
+    yAxis:{...AX,type:'category',inverse:true,data:order.map(topicName),splitLine:{show:true,lineStyle:{color:TK.hair}},axisLabel:{...AX.axisLabel,color:TK.l2,fontSize:12,width:lw-14,overflow:'truncate'}},
+    series:[{type:'scatter',data,label:{position:'right',distance:6,color:TK.l2,fontSize:11,fontFamily:TK.font,formatter:p=>Math.round(p.value[2]*100)+'%'},emphasis:{scale:1.1}}]});
+  bindTip(c,p=>{if(p.componentType!=='series')return null;const {ti,k}=p.data,e=E[k];const b=e.ids.map(i=>assets[i]).filter(a=>valid(a)&&a.topics.includes(ti)).sort((a,b)=>val(b)-val(a));
+    return `<div class="tt">${topicName(ti)} · ${esc(e.short)}</div><div class="tr" style="--c:${e.col}"><i></i>Share of ${mlab()}<b>${Math.round(M[k].sh[ti]*100)}%</b></div><div class="tr" style="--c:${e.col}"><i></i>Posts on topic<b>${b.length}</b></div>${b[0]?`<div style="margin-top:8px">${assetTip(b[0])}</div>`:''}`});
+  c.on('click',p=>{if(p.componentType!=='series')return;S.view='h2h';S.topic=p.data.ti;hideTip();renderTop();$('#top').scrollIntoView({behavior:'smooth',block:'start'})});
+}
+
+/* ---------- render ---------- */
+const FONTS=Promise.race([document.fonts&&document.fonts.ready||Promise.resolve(),new Promise(r=>setTimeout(r,1800))]);
+let fontsOk=false;FONTS.then(()=>{fontsOk=true});
+// a topic panel with no labelled posts for this comparison is noise: drop it and give the cumulative chart the row
+const topicLess=()=>NOTOPIC||!E.some(e=>e.ids.some(i=>assets[i].topics&&assets[i].topics.length));
+function topicLayout(){const t=$('#tops'),off=topicLess();if(t)t.hidden=off;const r=$('.r1');if(r)r.style.gridTemplateColumns=off?'minmax(0,1fr)':''}
+function charts(){topicLayout();chartCum();chartBest();chartCad();chartTopics()}
+function render(){
+  E=S.sets[S.mode].map(id=>ent(S.mode,id));colorize(E);
+  $('#eyebrow').textContent=`Pulse · ${S.mode==='person'?'candidates':'party lists'} in ${cities[CITY].name}`;
+  $('#title').innerHTML=S.mode==='person'?`${esc(E[0].name)} <em>vs ${E.length-1} rival${E.length>2?'s':''}</em>`:`${esc(E[0].name)} <em>vs ${E.length-1} list${E.length>2?'s':''}</em>`;
+  const ex=SW.source.exported_at?new Date(SW.source.exported_at):null;
+  $('#hmeta').innerHTML=`Window: <b>${dstr(DAYS-1)} – ${dstr(0)} ${TODAY.getFullYear()}</b>, by posting date<br>Source: <b>${esc(SW.source.label)}</b>${ex&&!isNaN(ex)?` · observed ${ex.getDate()} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][ex.getMonth()]} ${ex.getFullYear()}`:''}`;
+  $('#fnote').innerHTML=`<b>Read with care.</b> Interactions = ${INTER_DEF} on public posts; Instagram does not expose shares, so none are shown for Instagram posts. Views exist for video only. Engagement is attention, not support and not reach.<br>Follower counts are one dated snapshot of the posting account; per-1k figures inherit its error, and show — where no snapshot exists. Own accounts only, mentions excluded.`;
+  $('#fsrc').textContent=`${SW.source.label}${SW.source.checkpoint?' · '+SW.source.checkpoint:''}`;
+  renderDock();renderStrip();renderThen();topicLayout();renderTop();chartMix();
+  if(fontsOk)charts();else FONTS.then(charts);
+}
+render();
+let rz,lastW=innerWidth;addEventListener('resize',()=>{if(innerWidth===lastW)return;lastW=innerWidth;clearTimeout(rz);rz=setTimeout(charts,160)});
+
+</script>
+<script src="brand/chrome.js"></script>
+<script src="app.js" data-screen="pulse"></script>
+</body>
+</html>

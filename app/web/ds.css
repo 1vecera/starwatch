@@ -1,0 +1,134 @@
+/* Starwatch design language C (Atlas C, accepted 9 Oct 2026): slate schematic, minimum ink, exact information.
+   No galaxy, no glow, no yellow. White surfaces on slate, one teal accent for focus and primary actions.
+   Floating chrome (nav, popovers, sheets) may use the restrained translucent --surface-float; content cards stay opaque.
+   Encoding: colour = WHO posted (party) · shape = HOW (platform/format) · AREA = the stated metric · dashed = not observed. */
+/* variable weight ranges so 550/650 render as true weights instead of snapping to the nearest static instance */
+@import url('https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Sora:wght@600;700&display=swap');
+:root{
+  color-scheme:light;
+  /* surfaces (legacy token names kept so every screen re-themes; bare --space is the canvas COLOUR, not spacing).
+     Neutrals carry a faint tint toward the teal brand hue: oklch(97.3% .006 190) / (95.3% .008 190) / ink (25% .02 190) */
+  --space:#F2F7F7; --surface:#FFFFFF; --sunken:#EAF1F0;
+  --glass:#FFFFFF; --glass-strong:#FFFFFF; --glass-hi:#EEF4F4;
+  --hairline:rgba(22,37,36,.10); --hairline-strong:rgba(22,37,36,.18);
+  --blur:none;
+  /* floating surfaces: restrained translucency for chrome that sits over content (not for cards) */
+  --surface-float:rgba(255,255,255,.9);
+  --surface-float-strong:rgba(255,255,255,.90);  /* over imagery, maps or video, where text contrast must hold */
+  --blur-float:saturate(160%) blur(14px);
+  --line-float:rgba(15,23,42,.09);
+  /* text: --label3 darkened from #64748B so tertiary text passes AA on --space (5.1:1) and --sunken (4.8:1) */
+  --label:#0F172A; --label2:#475569; --label3:#5B6A7E;
+  /* one accent: teal (from the Aperture mark). --brand kept as the token name for focus/primary */
+  --brand:#0E6E6B; --brand-ink:#FFFFFF; --brand-soft:#E3F1F0; --brand-glow:transparent;
+  --brand-hover:#0B5F5C; --brand-press:#094F4C;
+  /* status hues nudged darker so they hold 4.5:1 on --sunken and --brand-soft */
+  --orange:#A84E08; --cyan:#0369A1; --green:#13783A; --red:#B91C1C;
+  --selection:rgba(14,110,107,.18);
+
+  /* radii: one scale, semantic aliases on top. Nested radius = outer radius minus padding */
+  --r-xs:6px; --r-sm:8px; --r-md:10px; --r-lg:12px; --r-xl:16px; --r-2xl:20px; --r-3xl:24px; --pill:999px;
+  --r-chip:var(--r-xs); --r-control:var(--r-sm); --r-card:var(--r-lg); --r-panel:var(--r-xl); --r-sheet:var(--r-2xl);
+
+  /* spacing: 4pt scale, semantic names */
+  --space-3xs:2px; --space-2xs:4px; --space-xs:8px; --space-sm:12px; --space-md:16px;
+  --space-lg:24px; --space-xl:32px; --space-2xl:48px; --space-3xl:64px; --space-4xl:96px;
+  --gutter:16px; --pad-control:0 12px; --pad-card:var(--space-md); --pad-panel:var(--space-lg); --stack:var(--space-sm);
+
+  /* elevation: layered, slate-tinted shadows (a tight contact shadow plus a soft ambient one), never a glow */
+  --shadow-rgb:15 23 42;
+  --elev-0:none;
+  --elev-1:0 1px 1px rgb(var(--shadow-rgb) / .04),0 1px 3px rgb(var(--shadow-rgb) / .06);                                                      /* resting card */
+  --elev-2:0 1px 2px rgb(var(--shadow-rgb) / .05),0 4px 10px -2px rgb(var(--shadow-rgb) / .07),0 12px 28px -10px rgb(var(--shadow-rgb) / .14); /* floating chrome, hover lift */
+  --elev-3:0 2px 4px rgb(var(--shadow-rgb) / .05),0 12px 24px -6px rgb(var(--shadow-rgb) / .10),0 32px 64px -16px rgb(var(--shadow-rgb) / .20); /* popover, sheet, dialog */
+  --shadow:var(--elev-1); --inner:none;
+
+  /* type: Schibsted Grotesk for UI and body, Bricolage Grotesque for display. Fixed px scale for app UI;
+     body steps stay tight, display steps keep a ~1.25 ratio (24 · 30 · 38 · 48 · 60) */
+  --font:'Schibsted Grotesk',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  --display:'Bricolage Grotesque','Schibsted Grotesk',system-ui,sans-serif;
+  --wordmark:'Sora','Inter',system-ui,sans-serif;
+  --mono:'Schibsted Grotesk',-apple-system,system-ui,sans-serif; /* no monospace for data (anti-slop) */
+  --fs-cap:11px; --fs-xs:12px; --fs-sm:13px; --fs-body:14.5px; --fs-lead:16px; --fs-head:15px;
+  --fs-title:20px; --fs-h3:24px; --fs-h2:30px; --fs-h1:38px; --fs-display:48px; --fs-hero:60px;
+  --lh-tight:1.06; --lh-snug:1.2; --lh-body:1.5; --lh-loose:1.6;
+  --tr-hero:-.032em; --tr-display:-.026em; --tr-title:-.015em; --tr-body:-.005em; --tr-cap:.06em;
+  --fw-regular:400; --fw-medium:500; --fw-semi:600; --fw-bold:650; --fw-display:720;
+  /* numerals: proportional by default (Schibsted's tabular set widens '.' and ',': "1.7K" 62px vs 45px);
+     tabular only for aligned columns via .tnum / .num-col */
+  --num:lining-nums proportional-nums; --num-col:lining-nums tabular-nums;
+
+  /* motion: exponential ease-out only (no bounce); animate transform and opacity */
+  --ease:cubic-bezier(.2,.8,.2,1); --spring:cubic-bezier(.2,.8,.2,1);
+  --ease-out:cubic-bezier(.25,1,.5,1); --ease-out-expo:cubic-bezier(.16,1,.3,1);
+  --t-fast:.12s; --t-base:.2s; --t-slow:.35s;
+
+  /* focus ring */
+  --ring-w:2px; --ring-offset:2px; --ring-color:var(--brand);
+
+  /* grain: opt-in (.grain), a faint monochrome noise for large flat canvases only; never on text-dense cards */
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .06 0 0 0 0 .09 0 0 0 0 .16 0 0 0 .045 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+@media (min-width:768px){:root{--gutter:24px}}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scrollbar-color:rgb(var(--shadow-rgb) / .22) transparent}
+html,body{height:100%;background:var(--space);color:var(--label);font-family:var(--font);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-kerning:normal;letter-spacing:var(--tr-body)}
+/* thin scrollbars everywhere; any rule that sets scrollbar-width:none on a class still wins (zero specificity here) */
+:where(*){scrollbar-width:thin}
+::selection{background:var(--selection);color:var(--label)}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+h1,h2,.t-large,.t-title,.t-h3,.t-display,.t-hero{font-family:var(--display);font-optical-sizing:auto}
+:where(h1,h2,h3){text-wrap:balance;letter-spacing:-.022em}
+:where(h1,h2){line-height:1.1}
+:where(p){text-wrap:pretty}
+.t-hero{font-size:var(--fs-hero);font-weight:var(--fw-display);letter-spacing:var(--tr-hero);line-height:var(--lh-tight)}
+.t-display{font-size:var(--fs-display);font-weight:var(--fw-display);letter-spacing:var(--tr-display);line-height:var(--lh-tight)}
+.t-large{font-size:var(--fs-h2);font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.t-h3{font-size:var(--fs-h3);font-weight:var(--fw-bold);letter-spacing:-.018em;line-height:var(--lh-snug)}
+@media (max-width:760px){.t-hero{font-size:40px}.t-display{font-size:34px}}
+/* loading: content never pops in blank; skeletons shimmer, media fades in */
+.sk{position:relative;overflow:hidden;background:var(--sunken);border-radius:var(--r-sm)}
+.sk::after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.65),transparent);animation:sk 1.2s var(--ease-out) infinite}
+@keyframes sk{to{transform:translateX(100%)}}
+img{transition:opacity var(--t-slow) var(--ease-out)}
+img.ld{opacity:0}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.rise{animation:rise .45s var(--ease-out) both}
+.t-title{font-size:var(--fs-title);font-weight:650;letter-spacing:var(--tr-title)}
+.t-head{font-size:var(--fs-head);font-weight:600}
+.t-lead{font-size:var(--fs-lead);line-height:var(--lh-loose);color:var(--label2)}
+.t-body{font-size:var(--fs-body);line-height:var(--lh-body)}
+.t-sub{font-size:var(--fs-sm);color:var(--label2)}
+/* section labels: sentence case, Linear-style; keep at most one uppercase kicker per view (.t-kicker) */
+.t-cap{font-size:var(--fs-sm);font-weight:550;letter-spacing:0;text-transform:none;color:var(--label3)}
+.t-kicker{font-size:var(--fs-cap);font-weight:600;letter-spacing:var(--tr-cap);text-transform:uppercase;color:var(--label3)}
+.num{font-variant-numeric:var(--num);font-weight:650;letter-spacing:-.01em}
+.tnum,.num-col{font-variant-numeric:var(--num-col)}
+.num-col{text-align:right}
+.u{font-size:.75em;font-weight:500;color:var(--label3);margin-left:.06em}
+.glass{background:var(--surface);border:1px solid var(--hairline);border-radius:var(--r-card);box-shadow:var(--shadow)}
+.glass.strong{background:var(--surface)}
+.float{animation:none}
+/* translucent floating surface for chrome over content; opaque fallback where backdrop-filter is unsupported */
+.surface-float{background:var(--surface-float);-webkit-backdrop-filter:var(--blur-float);backdrop-filter:var(--blur-float);border:1px solid var(--line-float);box-shadow:var(--elev-2)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.surface-float{background:var(--surface-float-strong)}}
+.elev-1{box-shadow:var(--elev-1)}.elev-2{box-shadow:var(--elev-2)}.elev-3{box-shadow:var(--elev-3)}
+.grain{background-image:var(--grain);background-size:160px 160px}
+.pill{display:inline-flex;align-items:center;gap:var(--space-xs);height:32px;padding:var(--pad-control);border-radius:var(--r-control);background:var(--surface);border:1px solid var(--hairline-strong);font-size:var(--fs-sm);font-weight:500;color:var(--label);transition:background var(--t-fast),border-color var(--t-fast)}
+.pill:hover{background:var(--glass-hi)}
+.pill.primary{background:var(--brand);color:var(--brand-ink);border-color:var(--brand);font-weight:600;box-shadow:none}
+.pill.primary:hover{background:var(--brand-hover);border-color:var(--brand-hover)}
+.pill.primary:active{background:var(--brand-press)}
+.seg{display:inline-flex;padding:var(--space-3xs);border-radius:var(--r-control);background:var(--sunken);border:1px solid var(--hairline)}
+.seg button{height:28px;padding:0 11px;border-radius:var(--r-chip);font-size:12.5px;font-weight:550;color:var(--label2)}
+.seg button.on{background:var(--surface);color:var(--label);box-shadow:0 1px 2px rgb(var(--shadow-rgb) / .12)}
+.chip{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:var(--r-chip);font-size:var(--fs-xs);font-weight:500;background:var(--sunken);color:var(--label2);border:1px solid transparent}
+.chip:hover{color:var(--label);border-color:var(--hairline-strong)}
+.chip.on{background:var(--brand-soft);color:var(--brand);border-color:var(--brand)}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.metric .v{font-size:24px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:var(--num)}
+.metric .l{font-size:11.5px;color:var(--label2);margin-top:2px}
+.metric .d{font-size:11.5px;font-weight:600;color:var(--green);font-variant-numeric:var(--num)}
+.metric .d.down{color:var(--red)}
+:focus-visible{outline:var(--ring-w) solid var(--ring-color);outline-offset:var(--ring-offset)}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001s!important;transition-duration:.001s!important}}

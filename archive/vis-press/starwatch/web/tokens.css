@@ -1,0 +1,125 @@
+/*
+  Starwatch tokens, direction B: Front page / news desk.
+
+  A serious daily set live on newsprint: ink on warm paper (projectors wash near-black into grey,
+  paper survives), one spot red for what is live, a blackletter nameplate, Newsreader for headlines
+  and post text, Libre Franklin for kickers and labels, JetBrains Mono for Actor IDs, times and money.
+  Fonts are self-hosted from Google Fonts (fonts/fonts.css, OFL) and carry full Czech diacritics.
+
+  Sizes are rem on a frame of 120 × 67.5 rem: 1rem = 16px at 1920×1080, and the root size scales the
+  whole page to fit any 16:9 screen (press.css). Nothing that carries meaning is below 1rem.
+  Screens use only these tokens. Contrast on --sw-paper: ink 16.2, ink-2 10.4, muted 6.1, red-ink 5.8,
+  inference 6.6, open-question 5.3; on solid boxes: white on red 6.0, ink on sample yellow 11.1.
+*/
+:root {
+  /* Type families */
+  --sw-font-nameplate: "Grenze Gotisch", "Newsreader", Georgia, serif;
+  --sw-font-display: "Newsreader", Georgia, "Times New Roman", serif;
+  --sw-font-text: "Newsreader", Georgia, serif;
+  --sw-font-label: "Libre Franklin", "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+  --sw-font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+
+  /* Type scale, 1920×1080 frame (size / line height / weight / tracking) */
+  --sw-size-nameplate: 3.5rem;      /* 56px, Grenze Gotisch 700 */
+  --sw-size-headline: 3.75rem;      /* 60px / 1.02, Newsreader 640, -0.015em */
+  --sw-size-headline-2: 3rem;       /* 48px / 1.04, S3 headline */
+  --sw-size-deck: 1.625rem;         /* 26px / 1.3, Newsreader italic 400 */
+  --sw-size-title: 1.375rem;        /* 22px / 1.2, handles, names, claim text */
+  --sw-size-body: 1.1875rem;        /* 19px / 1.32, post text */
+  --sw-size-label: 1rem;            /* 16px / 1.2, kickers and labels: the floor */
+  --sw-size-count: 2.25rem;         /* 36px / 1, collected counts */
+  --sw-size-money: 1.75rem;         /* 28px / 1, the edition's cost */
+  --sw-weight-headline: 640;
+  --sw-weight-label: 700;
+  --sw-weight-kicker: 800;
+  --sw-tracking-caps: 0.09em;
+  --sw-tracking-headline: -0.015em;
+  --sw-leading-tight: 1.04;
+  --sw-leading-text: 1.32;
+
+  /* Paper and ink */
+  --sw-paper: #f3eee4;
+  --sw-paper-shade: #e7e0d1;
+  --sw-paper-card: #faf7f0;
+  --sw-ink: #15120e;
+  --sw-ink-2: #3b362f;
+  --sw-muted: #5e584e;
+  --sw-rule: #a2998a;
+  --sw-rule-soft: #cfc7b8;
+  --sw-on-ink: #f3eee4;
+
+  /* The one spot colour: what is live, running, alerting or highlighted */
+  --sw-red: #c4161c;
+  --sw-red-ink: #b8141b;
+  --sw-on-red: #ffffff;
+
+  /* Run states: first-class labels, never footnotes */
+  --sw-state-live-bg: #c4161c;
+  --sw-state-live-ink: #ffffff;
+  --sw-state-cached-bg: #3b362f;
+  --sw-state-cached-ink: #f3eee4;
+  --sw-state-sample-bg: #f2c230;
+  --sw-state-sample-ink: #15120e;
+  --sw-state-missing-ink: #5e584e;
+  --sw-hatch: #b3aa9a;
+
+  /* Step states */
+  --sw-step-queued: #5e584e;
+  --sw-step-running: #b8141b;
+  --sw-step-done: #15120e;
+  --sw-step-failed: #b8141b;
+  --sw-step-skipped: #87570a;
+  --sw-step-not-implemented: #5e584e;
+
+  /* Identity states */
+  --sw-id-accepted: #15120e;
+  --sw-id-unconfirmed: #87570a;
+  --sw-id-rejected: #b8141b;
+
+  /* Report kinds and confidence; confidence describes the claim, never the person */
+  --sw-kind-fact: #15120e;
+  --sw-kind-inference: #1d5c63;
+  --sw-kind-open-question: #87570a;
+  --sw-kind-missing-source: #5e584e;
+  --sw-confidence-high: #15120e;
+  --sw-confidence-medium: #3b362f;
+  --sw-confidence-low: #5e584e;
+
+  /* Platform marks: one ink letter-code box for every platform; tints only fill SAMPLE image frames */
+  --sw-platform-mark-bg: #15120e;
+  --sw-platform-mark-ink: #f3eee4;
+  --sw-tint-website: #e3decf;
+  --sw-tint-facebook: #d5dce6;
+  --sw-tint-instagram: #e7d3cf;
+  --sw-tint-tiktok: #cfe0db;
+  --sw-tint-youtube: #ead7c3;
+  --sw-tint-x: #d9d6d0;
+
+  /* Space, lines, radius, image heights */
+  --sw-space-1: 0.25rem;
+  --sw-space-2: 0.5rem;
+  --sw-space-3: 0.75rem;
+  --sw-space-4: 1rem;
+  --sw-space-5: 1.5rem;
+  --sw-space-6: 2rem;
+  --sw-space-7: 3rem;
+  --sw-page-x: 2.75rem;
+  --sw-page-y: 1.25rem;
+  --sw-line-hair: 0.0625rem;
+  --sw-line-rule: 0.125rem;
+  --sw-line-heavy: 0.25rem;
+  --sw-radius: 0;
+  --sw-thumb-lane: 5.25rem;
+  --sw-thumb-net: 5.125rem;
+  --sw-thumb-feed: 4.25rem;
+
+  /* Motion: only when data arrives. Reduced motion drops every animation (press.css, common.js). */
+  --sw-motion-arrive: 420ms;   /* a thumbnail pushes into its lane, a feed entry drops in */
+  --sw-motion-tick: 450ms;     /* a counter runs to its collected value */
+  --sw-motion-strike: 320ms;   /* a rejected namesake is struck through */
+  --sw-motion-hatch: 520ms;    /* a gap's hatching wipes in when a platform comes back empty */
+  --sw-motion-draw: 640ms;     /* a network edge draws in */
+  --sw-motion-stagger: 70ms;
+  --sw-ease-arrive: cubic-bezier(0.16, 1, 0.3, 1);
+  --sw-ease-draw: cubic-bezier(0.65, 0, 0.35, 1);
+}

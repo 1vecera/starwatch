@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Starwatch · project desk</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <a class="wordmark" href="/">Starwatch<span>PROJECT DESK</span></a>
+      <div class="live">
+        <span id="connection-dot" class="dot"></span
+        ><span id="connection">Connecting to local evidence</span>
+      </div>
+      <span class="private">PRIVATE · LOCAL ONLY</span>
+    </header>
+    <main>
+      <section class="hero">
+        <div>
+          <p class="eyebrow">FROM DUSK TILL DAWN · 9 OCTOBER 2026</p>
+          <h1>The night, at a glance.</h1>
+          <p id="headline">
+            Reading the project's existing backlog and worker reports…
+          </p>
+        </div>
+        <div class="freeze">
+          <p class="eyebrow" id="freeze-label">UNTIL FREEZE</p>
+          <strong id="countdown">--:--:--</strong>
+          <p>07:14 · Europe/Prague</p>
+          <span id="clock"></span>
+        </div>
+      </section>
+      <div id="offline" class="notice" hidden></div>
+      <section
+        class="readiness"
+        id="readiness"
+        aria-label="Readiness"
+      ></section>
+      <section>
+        <div class="section-title">
+          <h2>What works now</h2>
+          <span>Completed checkpoints · recorded evidence</span>
+        </div>
+        <div id="completed" class="completed-grid"></div>
+        <p class="caption">
+          Worker results are reported evidence. This desk does not rerun their
+          functional checks.
+        </p>
+      </section>
+      <div class="columns">
+        <div class="primary">
+          <section>
+            <div class="section-title">
+              <h2>Worker lanes</h2>
+              <span id="worker-observed">Herdr · read only</span>
+            </div>
+            <div id="workers" class="workers"></div>
+            <p class="caption">
+              A finished turn does not complete a TODO task. A listed Herdr
+              session does not verify process liveness.
+            </p>
+          </section>
+          <section>
+            <div class="section-title">
+              <h2>Next checkpoints</h2>
+              <button data-source="todo" class="text-button">
+                Open TODO ↗
+              </button>
+            </div>
+            <p class="caption">
+              The existing TODO is the only backlog. Times are latest-by
+              checkpoints.
+            </p>
+            <div id="milestones"></div>
+          </section>
+          <section>
+            <div class="section-title">
+              <h2>Latest concrete changes</h2>
+              <span>Worker reports · claims retained as reports</span>
+            </div>
+            <div id="changes"></div>
+          </section>
+        </div>
+        <aside>
+          <section class="attention">
+            <div class="section-title">
+              <h2>Needs Daniel</h2>
+              <span id="decision-count"></span>
+            </div>
+            <div id="decisions"></div>
+          </section>
+          <section>
+            <div class="section-title"><h2>Blockers & gaps</h2></div>
+            <div id="blockers"></div>
+          </section>
+          <section>
+            <div class="section-title">
+              <h2>Budget observations</h2>
+              <span>USD</span>
+            </div>
+            <div id="budgets"></div>
+            <p class="caption">
+              No paid API calls. A fresh file is an observation, not a fresh
+              billing reconciliation.
+            </p>
+          </section>
+          <section>
+            <div class="section-title">
+              <h2>Publication</h2>
+              <span class="pill amber">Approval gate</span>
+            </div>
+            <div id="publication"></div>
+            <p class="caption">
+              Recorded status comes from TODO. This desk cannot publish, submit
+              or send messages.
+            </p>
+          </section>
+        </aside>
+      </div>
+      <section class="previews">
+        <div class="section-title">
+          <h2>Existing screen evidence</h2>
+          <span
+            >Local captures · cached / sample labels belong to each screen</span
+          >
+        </div>
+        <div id="demos" class="demo-links"></div>
+        <div id="screenshots" class="screen-grid"></div>
+        <details>
+          <summary>More local screenshots</summary>
+          <div id="more-screens" class="screen-list"></div>
+        </details>
+      </section>
+      <div class="columns communication">
+        <section>
+          <div class="section-title">
+            <h2>Share the state</h2>
+            <button id="copy" class="button">Copy summary</button>
+          </div>
+          <p class="caption">Copying keeps delivery in your hands.</p>
+          <textarea
+            id="summary"
+            readonly
+            aria-label="Project status summary"
+          ></textarea>
+          <p id="copy-result" aria-live="polite"></p>
+        </section>
+        <section>
+          <div class="section-title">
+            <h2>Question or decision note</h2>
+            <span>Local inbox</span>
+          </div>
+          <p class="caption">
+            Saved locally for the coordinator to read. Pending acknowledgement
+            does not mean acted on. Notes do not change TODO or authorize
+            actions.
+          </p>
+          <form id="note-form">
+            <label for="note">Your note</label
+            ><textarea
+              id="note"
+              maxlength="2000"
+              placeholder="A decision, question or clarification for the head of staff…"
+              required
+            ></textarea>
+            <div class="form-bottom">
+              <span id="note-result" aria-live="polite"></span
+              ><button class="button" type="submit">Save local note</button>
+            </div>
+          </form>
+          <div id="notes"></div>
+        </section>
+      </div>
+      <section>
+        <div class="section-title">
+          <h2>Decision history</h2>
+          <button data-source="learnings" class="text-button">
+            Open learnings ↗
+          </button>
+        </div>
+        <div id="history" class="history"></div>
+      </section>
+      <details class="sources">
+        <summary>Source freshness & verification limits</summary>
+        <p class="caption">
+          Herdr is observed every refresh. Report freshness uses filesystem
+          modification time; future headings are flagged. “Evidence recorded”
+          means a worker cited evidence, not that this desk reran their tests.
+          Only the dashboard is verified here. Source previews are text with
+          links, sensitive values and absolute paths removed.
+        </p>
+        <div id="sources"></div>
+        <div id="branches"></div>
+      </details>
+    </main>
+    <footer>
+      STARWATCH PROJECT DESK<span
+        >TODO → evidence → live observation · refreshes every 5 seconds</span
+      >
+    </footer>
+    <dialog id="evidence">
+      <div class="dialog-head">
+        <h2 id="evidence-title">Evidence</h2>
+        <button id="close-evidence" class="button">Close</button>
+      </div>
+      <pre id="evidence-body"></pre>
+    </dialog>
+    <dialog id="image-view">
+      <div class="dialog-head">
+        <h2 id="image-title">Screen evidence</h2>
+        <button id="close-image" class="button">Close</button>
+      </div>
+      <img id="large-image" alt="Existing local dashboard evidence" />
+    </dialog>
+  </body>
+</html>

@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Starwatch · The desk</title>
+  <link rel="preload" href="/static/fonts/newsreader-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/static/fonts/libre-franklin-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/static/fonts/grenze-gotisch-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/static/fonts/fonts.css">
+  <link rel="stylesheet" href="/static/tokens.css">
+  <link rel="stylesheet" href="/static/press.css">
+  <link rel="stylesheet" href="/static/s1.css">
+  <script type="module" src="/static/s1.js"></script>
+</head>
+<body class="frame-page s1">
+  <header class="masthead">
+    <div class="ear ear-left">
+      <p class="state-bug" id="state-bug" data-state="idle">No run</p>
+      <p class="ear-line" id="state-line"></p>
+    </div>
+    <a class="nameplate" href="/">Starwatch</a>
+    <div class="ear ear-right">
+      <p class="ear-kicker">This edition cost</p>
+      <p class="ear-money" id="cost-apify">—</p>
+      <p class="ear-line" id="cost-detail"></p>
+    </div>
+  </header>
+  <div class="folio">
+    <p class="folio-left" id="folio-left"></p>
+    <nav class="folio-nav" aria-label="Screens">
+      <a href="/" data-nav="desk" aria-current="page">The desk</a>
+      <a href="/static/s3.html" data-nav="front">Front page</a>
+    </nav>
+  </div>
+
+  <main class="desk">
+    <section class="commission" id="commission">
+      <form class="commission-form" id="request" autocomplete="off">
+        <p class="kicker">New research · public sources only</p>
+        <p class="sentence">
+          <span>Research</span>
+          <label class="blank blank-subject"><span class="blank-hint">a public politician, full name</span>
+            <input name="subject" required minlength="2" maxlength="200" placeholder="Jméno Příjmení"></label>
+          <span>anchored by</span>
+          <label class="blank blank-anchor"><span class="blank-hint">official website, party, city or IČO</span>
+            <input name="anchor" required minlength="2" maxlength="300" placeholder="jmenoprijmeni.cz"></label>
+          <span>for</span>
+          <label class="blank blank-goal"><span class="blank-hint">goal</span>
+            <select name="goal_preset">
+              <option value="G1">G1 Debate prep</option>
+              <option value="G2">G2 Respond to this post</option>
+              <option value="G3">G3 Background check</option>
+              <option value="">Free text → nearest goal</option>
+            </select></label>
+          <span>on</span>
+          <label class="blank blank-text"><span class="blank-hint">topic, post link or question (optional)</span>
+            <input name="goal_text" maxlength="1000" placeholder="doprava"></label>
+        </p>
+        <div class="commission-actions">
+          <button type="submit" id="run-button">Run the research</button>
+          <p class="credentials" id="credentials" hidden></p>
+          <p class="form-error" id="form-error" role="alert" hidden></p>
+        </div>
+      </form>
+      <section class="index" aria-labelledby="index-heading">
+        <h2 class="label" id="index-heading">Recent runs</h2>
+        <ol class="index-list" id="recent"></ol>
+        <p class="index-sample">
+          <a class="sample-link" href="/?replay=/static/sample/run-g1.jsonl">Play the sample run</a>
+          <span>design data at its recorded pace, labelled SAMPLE on every screen</span>
+        </p>
+      </section>
+    </section>
+
+    <section class="run" id="run" hidden>
+      <header class="lede">
+        <p class="kicker" id="kicker"></p>
+        <h1 class="headline" id="headline"></h1>
+        <p class="deck" id="deck"></p>
+      </header>
+
+      <section class="wire" aria-labelledby="wire-heading">
+        <div class="section-head">
+          <h2 class="label" id="wire-heading">The wire · one lane per Apify Actor</h2>
+          <p class="section-note" id="wire-note"></p>
+        </div>
+        <ol class="lanes" id="lanes"></ol>
+      </section>
+
+      <aside class="identity" aria-labelledby="identity-heading">
+        <div class="section-head">
+          <h2 class="label" id="identity-heading">Identity</h2>
+          <p class="section-note" id="identity-step" data-status="queued"><span class="status-word"></span></p>
+        </div>
+        <p class="identity-tally" id="identity-tally"></p>
+        <p class="anchor"><span class="label label-muted">Anchor</span> <span id="anchor"></span></p>
+        <ol class="accounts" id="accounts"></ol>
+        <p class="identity-empty" id="identity-empty"></p>
+      </aside>
+
+      <section class="downstream" aria-label="Analysis">
+        <ol class="cells" id="downstream"></ol>
+      </section>
+    </section>
+  </main>
+</body>
+</html>

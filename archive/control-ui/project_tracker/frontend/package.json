@@ -1,0 +1,1 @@
+{"name":"starwatch-control-room","version":"1.0.0","private":true,"type":"module","scripts":{"dev":"vite --host 127.0.0.1","build":"vite build"},"dependencies":{"@xyflow/react":"^12.10.0","react":"^19.2.0","react-dom":"^19.2.0"},"devDependencies":{"vite":"^7.1.0"}}

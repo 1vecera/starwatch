@@ -1,0 +1,12 @@
+[project]
+name = "starwatch-project-tracker"
+version = "0.1.0"
+description = "Private local project dashboard, reading the existing backlog and worker evidence"
+requires-python = ">=3.13"
+dependencies = []
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]

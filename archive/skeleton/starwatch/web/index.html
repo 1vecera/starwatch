@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Starwatch</title>
+  <link rel="stylesheet" href="/static/tokens.css">
+  <link rel="stylesheet" href="/static/s1.css">
+  <script type="module" src="/static/s1.js"></script>
+</head>
+<body>
+  <header class="masthead">
+    <p class="wordmark">Starwatch</p>
+    <p class="runline" id="runline" data-state="idle">
+      <span class="state-label" id="state-label">No run</span>
+      <span id="run-meta"></span>
+    </p>
+  </header>
+
+  <form class="request" id="request" autocomplete="off">
+    <label class="field field-subject">
+      <span class="field-label">Research</span>
+      <input name="subject" required minlength="2" placeholder="a public politician, full name">
+    </label>
+    <label class="field field-anchor">
+      <span class="field-label">anchored by</span>
+      <input name="anchor" required minlength="2" placeholder="official website, party, city or IČO">
+    </label>
+    <label class="field field-goal">
+      <span class="field-label">goal</span>
+      <select name="goal_preset">
+        <option value="G1">G1 Debate prep</option>
+        <option value="G2">G2 Respond to this post</option>
+        <option value="G3">G3 Background check</option>
+        <option value="">Free text → nearest goal</option>
+      </select>
+    </label>
+    <label class="field field-text">
+      <span class="field-label">topic, post link or question</span>
+      <input name="goal_text" placeholder="optional">
+    </label>
+    <button type="submit" id="run-button">Run</button>
+    <p class="credentials" id="credentials" hidden></p>
+    <p class="form-error" id="form-error" role="alert" hidden></p>
+  </form>
+
+  <main class="run" id="run" hidden>
+    <p class="run-request" id="run-request"></p>
+
+    <section class="collect" aria-labelledby="collect-heading">
+      <h2 id="collect-heading">Collection · one lane per Apify Actor</h2>
+      <ol class="lanes" id="lanes"></ol>
+    </section>
+
+    <aside class="identity" aria-labelledby="identity-heading">
+      <h2 id="identity-heading">Identity</h2>
+      <ol class="steps" id="identity-step"></ol>
+      <ul class="accounts" id="accounts"></ul>
+      <ul class="rejected" id="rejected"></ul>
+    </aside>
+
+    <section class="downstream" aria-labelledby="downstream-heading">
+      <h2 id="downstream-heading">Analysis</h2>
+      <ol class="steps" id="downstream"></ol>
+    </section>
+
+    <footer class="receipt" id="receipt" aria-live="polite"></footer>
+  </main>
+</body>
+</html>

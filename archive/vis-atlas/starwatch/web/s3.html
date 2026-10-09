@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Starwatch · Chart of posts and claims</title>
+  <link rel="preload" href="/static/fonts/cormorant-garamond-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/static/fonts/literata-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/static/fonts/jost-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/static/tokens.css">
+  <link rel="stylesheet" href="/static/atlas.css">
+  <link rel="stylesheet" href="/static/s3.css">
+  <script type="module" src="/static/s3.js"></script>
+</head>
+<body class="s3">
+  <header class="masthead">
+    <a class="wordmark" href="/">Starwatch</a>
+    <p class="folio">Chart of posts and claims</p>
+    <nav class="screens" aria-label="Screens">
+      <a data-screen-link="/" href="/">The run</a>
+      <a data-screen-link="/static/s3.html" aria-current="page" href="/static/s3.html">The chart</a>
+    </nav>
+    <p class="runline" id="runline"></p>
+    <p class="stamp" id="stamp" data-state="idle"><span class="stamp-word">No run</span></p>
+  </header>
+
+  <p class="empty" id="empty">Open a run from <a href="/">the run screen</a>, or
+    <a href="/static/s3.html?replay=/static/sample/run-g1.jsonl">play the recorded sample</a> (labelled SAMPLE).</p>
+
+  <main class="chart-page" id="page" hidden>
+    <section class="chart" id="chart" aria-label="Chart: the subject, their accounts, posts placed by date, and the claims that cite them">
+      <svg class="sky" id="sky" aria-hidden="true">
+        <defs>
+          <pattern id="hatch" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <line x1="0" y1="0" x2="0" y2="9" class="hatch-line"></line>
+          </pattern>
+        </defs>
+        <g id="layer-grid"></g>
+        <g id="layer-leaders"></g>
+        <g id="layer-claims"></g>
+        <g id="layer-stars"></g>
+      </svg>
+      <div class="overlay" id="overlay">
+        <div class="cartouche" id="cartouche">
+          <p class="cartouche-kicker caps">Subject</p>
+          <h1 class="cartouche-name" id="subject-name"></h1>
+          <p class="cartouche-anchor"><span class="caps">anchored by</span> <span id="subject-anchor"></span></p>
+          <p class="cartouche-goal" id="subject-goal"></p>
+        </div>
+        <div id="layer-axis"></div>
+        <div id="layer-rows"></div>
+        <div id="layer-plates"></div>
+        <div id="layer-claim-labels"></div>
+        <div class="namesakes" id="namesakes"></div>
+        <div class="key" id="key">
+          <p class="head">Key</p>
+          <div class="key-stars" id="key-stars"></div>
+          <p class="key-line" id="key-note"></p>
+        </div>
+        <section class="claims" id="claims" aria-labelledby="claims-heading">
+          <h2 class="head" id="claims-heading">Claims · a line joins the posts each claim cites
+            <span class="head-aside" id="claims-aside"></span></h2>
+          <ol class="claims-list" id="claims-list"></ol>
+          <p class="claims-waiting" id="claims-waiting"></p>
+        </section>
+      </div>
+    </section>
+
+    <aside class="log" aria-labelledby="log-heading">
+      <h2 class="head" id="log-heading">Night log · newest first <span class="head-aside" id="log-aside"></span></h2>
+      <ol class="log-list" id="log-list" aria-live="polite"></ol>
+      <section class="tally" aria-labelledby="tally-heading">
+        <h2 class="head" id="tally-heading">Collected <span class="head-aside" id="tally-aside"></span></h2>
+        <ul class="tally-grid" id="tally"></ul>
+      </section>
+    </aside>
+  </main>
+</body>
+</html>
