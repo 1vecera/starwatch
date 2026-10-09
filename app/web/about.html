@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>About · Starwatch</title>
+<meta name="description" content="What Starwatch is, how to read the Star Atlas, Spotlight, Pulse, Radar and By the numbers, where the data comes from, what the snapshot covers and what it cannot tell you.">
+<link rel="icon" type="image/svg+xml" href="brand/favicon.svg">
+<link rel="stylesheet" href="ds.css">
+<link rel="stylesheet" href="brand/chrome.css">
+<script src="nav.js"></script>
+<style>
+/* About · the in-app documentation of Star Atlas. Public: it loads only public files (ds.css, brand/, fx/, nav.js,
+   data/stats.js), never the gated snapshot. A reading column on the canvas, sections divided by hairlines, one surface
+   for the author. Coverage tables come from SW_STATS.public, computed from the snapshot at export time. */
+:root{--xo:cubic-bezier(.25,1,.5,1);--col:720px;--wide:1080px}
+html{scroll-behavior:smooth}
+body{min-height:100%;overflow-x:hidden}
+main{max-width:var(--wide);margin:0 auto;padding:104px 32px 96px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+a{color:var(--brand);text-decoration:underline;text-decoration-color:rgba(14,110,107,.35)}
+a:hover{text-decoration-color:currentColor}
+.kick{font-size:13px;font-weight:600;letter-spacing:0;color:var(--brand)}
+
+/* reveal: one orchestrated stagger for the opening, the rest is static reading */
+.rv{animation:rise .6s var(--xo) both;animation-delay:calc(var(--i,0)*60ms + 40ms)}
+
+/* ---------- opening ---------- */
+.open{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:48px;align-items:start}
+.open h1{margin-top:10px;font-size:clamp(34px,4.4vw,54px);font-weight:720;letter-spacing:-.03em;line-height:1.02}
+.open h1 span{color:var(--label2);font-weight:600}
+.open .lead{margin-top:20px;max-width:58ch;font-size:17.5px;line-height:1.6;color:var(--label2)}
+.open .lead b{color:var(--label);font-weight:600}
+.snap{display:inline-flex;align-items:center;gap:9px;margin-top:22px;min-height:32px;padding:6px 14px 6px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--hairline-strong);font-size:13px;color:var(--label2)}
+.snap i{flex:none;width:8px;height:8px;border-radius:50%;background:var(--label3)}
+.snap b{color:var(--label);font-weight:600}
+.facts{margin-top:18px;max-width:62ch;font-size:15px;line-height:1.6;color:var(--label2)}
+.facts b{color:var(--label);font-weight:650}
+
+/* the author: the one surface on the page */
+.author{background:var(--surface);border:1px solid var(--hairline);border-radius:var(--r-panel);box-shadow:var(--elev-2);padding:26px 24px 22px}
+.author .by{font-size:13px;color:var(--label3);font-weight:550}
+.author h2{margin-top:6px;font-size:30px;font-weight:720;letter-spacing:-.025em;line-height:1.05}
+.author .where{margin-top:4px;font-size:15px;color:var(--label2)}
+.author p.txt{margin-top:14px;font-size:14.5px;line-height:1.55;color:var(--label2)}
+.follow{display:grid;gap:10px;margin-top:18px}
+.fbtn{display:flex;align-items:center;justify-content:center;gap:11px;min-height:50px;padding:0 18px;border-radius:12px;background:var(--label);color:#fff;text-decoration:none;font-size:15.5px;font-weight:650;letter-spacing:-.005em;transition:background var(--t-base) var(--xo),transform var(--t-base) var(--xo)}
+.fbtn svg{width:19px;height:19px;flex:none;fill:currentColor}
+.fbtn:hover{background:#1E293B}
+.fbtn:active{transform:scale(.985)}
+.fbtn.alt{background:var(--surface);color:var(--label);border:1px solid var(--hairline-strong)}
+.fbtn.alt:hover{background:var(--glass-hi);border-color:rgba(15,23,42,.3)}
+.author .src{display:flex;align-items:center;gap:8px;margin-top:16px;padding:14px 0 2px;border-top:1px solid var(--hairline);font-size:13.5px;color:var(--label2)}
+.author .src svg{width:16px;height:16px;flex:none;fill:var(--label)}
+
+/* contents */
+.toc{display:flex;flex-wrap:wrap;gap:8px;margin:44px 0 0;padding:0;list-style:none}
+.toc a{display:inline-flex;align-items:center;min-height:36px;padding:6px 14px;border-radius:999px;background:var(--sunken);color:var(--label);text-decoration:none;font-size:13.5px;font-weight:550;transition:background var(--t-base)}
+.toc a:hover{background:var(--brand-soft);color:var(--brand)}
+
+/* sections */
+section.doc{margin-top:64px;padding-top:28px;border-top:1px solid var(--hairline-strong);scroll-margin-top:84px}
+section.doc>h2{font-size:30px;font-weight:700;letter-spacing:-.025em}
+section.doc>.intro{margin-top:10px;max-width:64ch;font-size:16px;line-height:1.6;color:var(--label2)}
+h3{font-size:17px;font-weight:650;letter-spacing:-.012em;line-height:1.3}
+.prose{max-width:66ch}
+.prose p,.prose li{font-size:15.5px;line-height:1.62;color:var(--label2)}
+.prose p+p{margin-top:12px}
+.prose b{color:var(--label);font-weight:600}
+
+/* screens: rows with an icon, a name that links to the screen and how to read it */
+.screens{margin-top:22px;border-top:1px solid var(--hairline)}
+.scr{display:grid;grid-template-columns:230px minmax(0,1fr);gap:8px 32px;padding:22px 0;border-bottom:1px solid var(--hairline)}
+.scr .nm{display:flex;align-items:flex-start;gap:12px}
+.scr .ic{flex:none;display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:var(--brand-soft);color:var(--brand)}
+.scr .ic svg{width:22px;height:22px}
+.scr .nm a{display:block;font-size:17px;font-weight:650;color:var(--label);text-decoration:none;letter-spacing:-.012em;line-height:1.25}
+.scr .nm a:hover{color:var(--brand)}
+.scr .nm small{display:block;margin-top:3px;font-size:13px;color:var(--label3)}
+.scr .tx p{font-size:15px;line-height:1.6;color:var(--label2);max-width:60ch}
+.scr .tx p+p{margin-top:8px}
+.scr .tx b{color:var(--label);font-weight:600}
+.scr .tx ul{margin:8px 0 0;padding-left:18px;max-width:60ch}
+.scr .tx li{font-size:15px;line-height:1.55;color:var(--label2)}
+.scr .tx li+li{margin-top:4px}
+
+/* reading the numbers: a two-column glossary */
+.gloss{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 40px;margin-top:22px}
+.gloss div{padding:14px 0;border-top:1px solid var(--hairline)}
+.gloss dt{font-size:15px;font-weight:650;color:var(--label)}
+.gloss dd{margin-top:4px;font-size:14.5px;line-height:1.55;color:var(--label2)}
+
+/* sources */
+.srcs{margin-top:22px;border-top:1px solid var(--hairline)}
+.srcs>div{display:grid;grid-template-columns:230px minmax(0,1fr);gap:6px 32px;padding:18px 0;border-bottom:1px solid var(--hairline)}
+.srcs dt{font-size:15.5px;font-weight:650;color:var(--label)}
+.srcs dd{font-size:15px;line-height:1.6;color:var(--label2);max-width:60ch}
+.srcs dd small{display:block;margin-top:6px;font-size:13px;line-height:1.5;color:var(--label3)}
+
+/* tables */
+.tw{margin-top:18px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:14.5px;font-variant-numeric:lining-nums proportional-nums}
+caption{caption-side:top;text-align:left;padding-bottom:10px;font-size:15.5px;font-weight:650;color:var(--label)}
+caption small{display:block;margin-top:2px;font-size:13px;font-weight:400;color:var(--label3)}
+th,td{padding:10px 12px;text-align:right;border-bottom:1px solid var(--hairline);white-space:nowrap}
+th:first-child,td:first-child{text-align:left;padding-left:0}
+th:last-child,td:last-child{padding-right:0}
+thead th{font-size:12.5px;font-weight:600;color:var(--label3);border-bottom:1px solid var(--hairline-strong)}
+tbody th{font-weight:600;color:var(--label)}
+td{color:var(--label2)}
+td.zero{color:var(--label3)}
+tfoot th,tfoot td{font-weight:650;color:var(--label);border-bottom:0;border-top:1px solid var(--hairline-strong)}
+.st{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:550;color:var(--label2)}
+.st i{width:7px;height:7px;border-radius:50%;background:var(--brand)}
+.st.part i{background:var(--orange)}
+.st.none i{background:transparent;border:1.5px dashed var(--label3)}
+.cov{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:48px;margin-top:26px;align-items:start}
+.when{margin-top:18px;display:flex;flex-wrap:wrap;gap:10px 28px;font-size:15px;color:var(--label2)}
+.when b{display:block;font-size:13px;font-weight:550;color:var(--label3);margin-bottom:2px}
+.when span{color:var(--label);font-weight:600}
+.topics{margin-top:26px;max-width:var(--wide)}
+.topics p{font-size:15px;line-height:1.6;color:var(--label2);max-width:64ch}
+.topics p b{color:var(--label);font-weight:600}
+.tl{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;padding:0;list-style:none}
+.tl li{display:inline-flex;align-items:center;gap:7px;min-height:28px;padding:0 10px;border-radius:var(--r-chip);background:var(--sunken);font-size:13px;color:var(--label)}
+.tl li span{color:var(--label3)}
+
+/* limitations */
+.lim{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 40px;margin-top:22px;padding:0;list-style:none}
+.lim li{padding:16px 0;border-top:1px solid var(--hairline)}
+.lim h3{font-size:15.5px}
+.lim p{margin-top:5px;font-size:14.5px;line-height:1.58;color:var(--label2)}
+
+details{margin-top:18px;max-width:var(--col)}
+summary{display:list-item;padding:8px 0;font-size:14.5px;font-weight:600;color:var(--label)}
+summary:hover{color:var(--brand)}
+summary::marker{color:var(--label3)}
+.credits{margin-top:8px;padding:0;list-style:none;font-size:13.5px;line-height:1.5;color:var(--label2)}
+.credits li{padding:6px 0;border-bottom:1px solid var(--hairline)}
+.credits b{color:var(--label);font-weight:600}
+
+/* closing author strip */
+.close{margin-top:72px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;padding:28px 0 0;border-top:1px solid var(--hairline-strong)}
+.close .who{font-size:15px;color:var(--label2)}
+.close .who b{display:block;font-family:var(--display);font-size:24px;font-weight:700;letter-spacing:-.02em;color:var(--label)}
+.close .follow{display:flex;gap:10px;margin-top:0}
+.close .fbtn{min-width:200px}
+
+@media (max-width:980px){
+  main{padding:84px 20px 120px}
+  .open{grid-template-columns:1fr;gap:28px}
+  .author{max-width:520px}
+  .cov{grid-template-columns:1fr;gap:28px}
+}
+@media (max-width:760px){
+  .scr,.srcs>div{grid-template-columns:1fr;gap:10px}
+  .gloss,.lim{grid-template-columns:1fr}
+  section.doc{margin-top:48px}
+  section.doc>h2{font-size:26px}
+}
+@media (max-width:860px){main{padding:76px 16px 120px}}
+@media (max-width:520px){
+  .open .lead{font-size:16.5px}
+  .author h2{font-size:27px}
+  th,td{padding:9px 8px;font-size:13.5px}
+  .hide-s{display:none}
+  tbody th,tfoot th{white-space:normal;min-width:84px}
+  .snap{border-radius:16px;align-items:flex-start}.snap i{margin-top:6px}
+  .close{flex-direction:column;align-items:stretch}
+  .close .follow{display:grid;grid-template-columns:1fr}
+  .close .fbtn{min-width:0}
+}
+@media (prefers-reduced-motion:reduce){.rv{animation:none}.fbtn{transition:none}}
+</style>
+<script src="fx/meta.js" data-screen="about"></script>
+<link rel="stylesheet" href="fx/motion.css">
+<script src="fx/motion.js"></script>
+</head>
+<body>
+<main id="m" aria-labelledby="h1">
+
+<div class="open">
+  <div>
+    <p class="kick rv" style="--i:0">About Starwatch</p>
+    <h1 id="h1" class="rv" style="--i:1">Who’s being heard. <span>Not just who’s talking.</span></h1>
+    <p class="lead rv" style="--i:2">Starwatch maps the public posts of candidates and party lists in the <b>2026 Czech municipal elections</b> in <span id="ncity">ten</span> cities, linked to the people and lists behind them. It shows which posts drew attention, from whom and on which topics, and every post opens the public source it was observed on.</p>
+    <p class="snap rv" style="--i:3"><i aria-hidden="true"></i><span><b>Snapshot</b> · public posts collected 8–9 October 2026 · not live</span></p>
+    <p class="facts rv" style="--i:4" id="facts">The snapshot is loading. Coverage figures below are computed from it.</p>
+  </div>
+  <aside class="author rv" style="--i:2" aria-labelledby="h-author">
+    <p class="by">Made by</p>
+    <h2 id="h-author">Daniel Večeřa</h2>
+    <p class="where">Prague</p>
+    <p class="txt">Starwatch started at the Agents 0.0.7 hackathon in Prague and is now open to everyone. Follow Daniel for updates, and send corrections his way.</p>
+    <div class="follow">
+      <a class="fbtn" href="https://www.linkedin.com/in/1vecera/" target="_blank" rel="noopener me"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.23 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>Follow on LinkedIn</a>
+      <a class="fbtn" href="https://x.com/1vecera" target="_blank" rel="noopener me"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.9 1.15h3.68l-8.04 9.19L24 22.85h-7.41l-5.8-7.58-6.64 7.58H.47l8.6-9.83L0 1.15h7.59l5.24 6.93zm-1.29 19.5h2.04L6.49 3.24H4.3z"/></svg>Follow on X</a>
+    </div>
+    <p class="src"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .3a12 12 0 0 0-3.8 23.38c.6.12.83-.26.83-.57v-2.02c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.08-.74.09-.73.09-.73 1.2.09 1.83 1.24 1.83 1.24 1.07 1.83 2.81 1.3 3.5 1 .1-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18a4.65 4.65 0 0 1 1.23 3.22c0 4.61-2.8 5.63-5.48 5.92.42.36.81 1.1.81 2.22v3.29c0 .32.21.7.82.58A12 12 0 0 0 12 .3"/></svg><span>Open source under MIT: <a href="https://github.com/1vecera/starwatch" target="_blank" rel="noopener">github.com/1vecera/starwatch</a></span></p>
+  </aside>
+</div>
+
+<nav aria-label="On this page"><ul class="toc rv" style="--i:5">
+  <li><a href="#read">How to read Starwatch</a></li>
+  <li><a href="#numbers">Reading the numbers</a></li>
+  <li><a href="#sources">Data sources</a></li>
+  <li><a href="#coverage">Snapshot and coverage</a></li>
+  <li><a href="#limits">Limitations</a></li>
+  <li><a href="#privacy">Privacy and source code</a></li>
+</ul></nav>
+
+<section class="doc" id="read" aria-labelledby="h-read">
+  <h2 id="h-read">How to read Starwatch</h2>
+  <p class="intro">Five views over the same snapshot. Colour always says <b>who</b> posted (one hue per party or list), the size of a post says <b>how much attention</b> it drew on the metric you chose, and a dashed outline means not observed, which is different from zero.</p>
+  <div class="screens">
+    <div class="scr">
+      <div class="nm"><span class="ic" data-icon="atlas"></span><div><a href="atlas.html">Star Atlas</a><small>Start here</small></div></div>
+      <div class="tx">
+        <p>A map of Czechia with the ten cities. Each city marker is sized by the chosen metric. <b>Pick a city</b> and the map flies into its street map and municipal boundary.</p>
+        <ul>
+          <li><b>Party islands.</b> Every party or list in the city floats as an island with its logo and 2022 result. Its posts are tiles, sized by the metric and ordered biggest first.</li>
+          <li><b>Rank by.</b> Switch the size of everything between reach, views, likes, comments and number of posts.</li>
+          <li><b>Parties.</b> The party picker finds a list fast by name, city or logo, and keeps lists of the same national party together across cities.</li>
+          <li><b>Topic lens.</b> Keep only posts with a given topic label; the counts tell you how many posts carry it.</li>
+          <li><b>Inspector.</b> Click a tile to read the caption, play the video where retained, and open the original post.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="scr">
+      <div class="nm"><span class="ic" data-icon="spotlight"></span><div><a href="spotlight.html">Spotlight</a><small>One person or list</small></div></div>
+      <div class="tx"><p>A profile of one candidate or list: portrait or logo, place on the ballot, the 2022 result where one matches, and their <b>best posts sized by reach</b>, with video playback and links to the sources. The <b>topic mix</b> counts their labelled posts per topic; click a topic to see those posts. Where available, it also shows the list’s election program and recent news mentions.</p></div>
+    </div>
+    <div class="scr">
+      <div class="nm"><span class="ic" data-icon="pulse"></span><div><a href="pulse.html">Pulse</a><small>Side by side</small></div></div>
+      <div class="tx"><p>Compare people or lists on posts, views, likes and comments, with their top posts next to each other. The <b>then-and-now</b> view sets 2022 ballots beside the attention observed in this snapshot. The two are shown side by side and never combined into one score.</p></div>
+    </div>
+    <div class="scr">
+      <div class="nm"><span class="ic" data-icon="radar"></span><div><a href="radar.html">Radar</a><small>A replay, not alerts</small></div></div>
+      <div class="tx"><p>A watchlist for one city, replayed over the snapshot: which posts by the lists and people you follow stood out, and when they were published. Switch the city at the top. Radar does not watch anything live; it replays what was collected on 8–9 October 2026.</p></div>
+    </div>
+    <div class="scr">
+      <div class="nm"><span class="ic" data-icon="data"></span><div><a href="data.html">By the numbers</a><small>The whole snapshot</small></div></div>
+      <div class="tx"><p>Totals for every post in Starwatch: how many there are, how many play as video, and the views, likes and comments observed on them, by platform, city and party.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="doc" id="numbers" aria-labelledby="h-num">
+  <h2 id="h-num">Reading the numbers</h2>
+  <p class="intro">Every figure is what a platform showed for a public post at the moment it was collected. Nothing is estimated or modelled.</p>
+  <dl class="gloss">
+    <div><dt>Views</dt><dd>The platform’s own view counter, where it reports one (mostly video). A view is not a unique person.</dd></div>
+    <div><dt>Reach</dt><dd>Views where the platform reports them, otherwise likes plus comments. Use it to compare attention across platforms, not as an audience size.</dd></div>
+    <div><dt>Likes and comments</dt><dd>Counts only. Starwatch never stores who liked or commented.</dd></div>
+    <div><dt>Not observed</dt><dd>No verified account or no reported counter. Shown dashed or as a dash, never as zero.</dd></div>
+    <div><dt>2022 results</dt><dd>Official ČSÚ results of the 2022 municipal elections, matched to 2026 lists and candidates where the match is unambiguous. History, not a forecast.</dd></div>
+    <div><dt>Topic labels</dt><dd>Machine-labelled from the post text, and they may be wrong. Only some posts carry one; see the coverage below.</dd></div>
+  </dl>
+</section>
+
+<section class="doc" id="sources" aria-labelledby="h-src">
+  <h2 id="h-src">Data sources</h2>
+  <p class="intro">Public sources only. Each record in the app links back to where it was observed.</p>
+  <dl class="srcs">
+    <div><dt>Candidates and lists</dt><dd>The registry of candidacies for the 2026 municipal elections, from the open data of the Czech Statistical Office (ČSÚ) at <a href="https://volby.gov.cz" target="_blank" rel="noopener">volby.gov.cz</a>.<small id="s-reg"></small></dd></div>
+    <div><dt>2022 results</dt><dd>ČSÚ open data for the 2022 municipal elections at volby.gov.cz. Candidate totals include votes allocated from list votes, so they are not preference votes only.<small id="s-2022"></small></dd></div>
+    <div><dt>Public posts</dt><dd>Recent posts from public profiles on Instagram, Facebook, TikTok and X, collected with <a href="https://apify.com" target="_blank" rel="noopener">Apify</a> Actors. An account appears only after an independent check confirmed that it belongs to the registered candidate or list. Platform counters were read once, at collection.</dd></div>
+    <div><dt>Party logos</dt><dd>From Wikimedia Commons, used under each file’s stated licence.</dd></div>
+    <div><dt>Candidate portraits</dt><dd>From public pages such as city council and party websites, each kept with its source page. Starwatch never infers who is pictured.</dd></div>
+    <div><dt>Programs and news</dt><dd>Where available: election programs found on the lists’ public sites, summarised by machine with verbatim quotes and source links, and news articles that mention a list or candidate, stored only as title, outlet, date and link.</dd></div>
+  </dl>
+</section>
+
+<section class="doc" id="coverage" aria-labelledby="h-cov">
+  <h2 id="h-cov">Snapshot and coverage</h2>
+  <p class="intro">Starwatch shows one snapshot of public posts, collected overnight on 8–9 October 2026, the eve of the vote. It does not update. The tables below are computed from that snapshot.</p>
+  <div class="when" id="when"></div>
+  <div class="cov">
+    <div class="tw"><table id="t-plat"><caption>By platform<small>Posts and accounts in the snapshot</small></caption><thead><tr><th scope="col">Platform</th><th scope="col">Accounts</th><th scope="col">Posts</th><th scope="col">Status</th></tr></thead><tbody></tbody></table></div>
+    <div class="tw"><table id="t-city"><caption>By city<small id="c-note">Lists, candidacies, verified accounts and posts</small></caption><thead><tr><th scope="col">City</th><th scope="col" class="hide-s">Lists</th><th scope="col" class="hide-s">In focus</th><th scope="col">Candidacies</th><th scope="col">Accounts</th><th scope="col">Posts</th></tr></thead><tbody></tbody><tfoot></tfoot></table></div>
+  </div>
+  <div class="topics">
+    <h3>Topic labels</h3>
+    <p id="t-line">Topic labels are machine-labelled from the post text and may be wrong.</p>
+    <ul class="tl" id="t-list" aria-label="Topic labels with the number of posts that carry them"></ul>
+  </div>
+</section>
+
+<section class="doc" id="limits" aria-labelledby="h-lim">
+  <h2 id="h-lim">Limitations</h2>
+  <p class="intro">Read Starwatch as a dated record of attention on public posts. It is not a measure of support, and it is not complete.</p>
+  <ul class="lim">
+    <li><h3>Dated observations</h3><p>Each number is what the platform showed on 8–9 October 2026. Posts, views and likes kept changing after that; Starwatch does not.</p></li>
+    <li><h3>Attention, not support</h3><p>Views, likes and comments measure attention. They are not votes, polls or forecasts, and a loud account is not a popular one.</p></li>
+    <li><h3>No polls or forecasts</h3><p>Czech election law (§ 30(2) of Act 491/2001 Sb.) bans publishing poll results from 7 October until voting ends on Saturday 10 October 2026 at 14:00. Starwatch shows no polls, forecasts or betting odds; 2022 results appear as history.</p></li>
+    <li><h3>Identity checks</h3><p>Accounts were matched to registered candidates and lists with independent checks. They can still miss an account, or rarely attach one to a namesake. Spotted a mistake? Message Daniel on LinkedIn or X.</p></li>
+    <li><h3>Missing platforms and history</h3><p>Only Instagram, Facebook, TikTok and X posts were collected; YouTube appears as accounts only, and news and web pages were not collected as posts. Each profile contributes its recent posts, not its full history, and most candidates have no verified account at all.</p></li>
+    <li><h3>Machine-made labels</h3><p>Topic labels and program summaries are written by machine and may be wrong. Quotes and links always point to the original wording.</p></li>
+  </ul>
+</section>
+
+<section class="doc" id="privacy" aria-labelledby="h-priv">
+  <h2 id="h-priv">Privacy and source code</h2>
+  <div class="prose" style="margin-top:12px">
+    <p>Starwatch covers public politicians and public posts only. It stores no commenters, followers or voters, does not profile anyone, and never posts on anyone’s behalf. The collected snapshot opens after sign-in with GitHub, Google or Facebook; the <a href="/privacy">privacy notice</a> explains what sign-in stores.</p>
+    <p>The code, the collection recipes and the documentation are open source under the MIT licence at <a href="https://github.com/1vecera/starwatch" target="_blank" rel="noopener">github.com/1vecera/starwatch</a>. The collected snapshot itself (posts, images and videos) is not in the repository; it is served only here, behind sign-in, and every post links to its original.</p>
+  </div>
+  <details id="logos" hidden><summary>Logo credits</summary><ul class="credits" id="credits"></ul></details>
+</section>
+
+<div class="close">
+  <p class="who">Starwatch is made by<b>Daniel Večeřa, Prague</b></p>
+  <div class="follow">
+    <a class="fbtn" href="https://www.linkedin.com/in/1vecera/" target="_blank" rel="noopener me"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.23 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>Follow on LinkedIn</a>
+    <a class="fbtn alt" href="https://x.com/1vecera" target="_blank" rel="noopener me"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.9 1.15h3.68l-8.04 9.19L24 22.85h-7.41l-5.8-7.58-6.64 7.58H.47l8.6-9.83L0 1.15h7.59l5.24 6.93zm-1.29 19.5h2.04L6.49 3.24H4.3z"/></svg>Follow on X</a>
+  </div>
+</div>
+
+</main>
+
+<script src="data/stats.js"></script>
+<script src="brand/chrome.js"></script>
+<script>SWChrome.mount(document.body,{active:'about',routes:true,mock:false})</script>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const fmt=v=>Number(v).toLocaleString('en-US');
+const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pct=(a,b)=>b?(a/b*100).toLocaleString('en-US',{maximumFractionDigits:a/b<.1?1:0})+'%':'0%';
+const num=v=>typeof v==='number'&&isFinite(v);
+
+// screen icons from the shared chrome
+if(window.SWChrome)document.querySelectorAll('[data-icon]').forEach(el=>{el.innerHTML=SWChrome.icon(el.dataset.icon)});
+
+// Coverage comes from the public summary computed at export time (data/stats.js); the snapshot itself stays behind sign-in.
+const P=window.SW_STATS&&window.SW_STATS.public;
+const T=P&&P.totals||{}, S=P&&P.snapshot||{};
+if(!P||!num(T.posts)){
+  $('facts').textContent='Coverage figures are not available in this copy of Starwatch.';
+  $('when').hidden=true;document.querySelector('.cov').hidden=true;
+  $('t-line').textContent='Topic labels are machine-labelled from the post text and may be wrong. Only some posts carry one.';
+  $('t-list').hidden=true;
+  return;
+}
+const cities=Array.isArray(P.cities)?P.cities:[];
+const names=cities.map(c=>c.name).filter(Boolean);
+const nc=num(T.cities)?T.cities:cities.length;
+$('ncity').textContent=nc===10?'ten':fmt(nc);
+
+// ---- opening facts ----
+const where=names.length?` in ${esc(names.join(', ').replace(/, ([^,]*)$/,' and $1'))}`:'';
+$('facts').innerHTML=`<b>${fmt(T.posts)}</b> public posts from <b>${fmt(T.accounts||0)}</b> verified accounts, set against <b>${fmt(T.candidacies||0)}</b> registered candidacies on <b>${fmt(T.lists||0)}</b> lists${where}.`;
+if(num(T.candidacies)&&num(T.lists))$('s-reg').textContent=`${fmt(T.candidacies)} candidacies on ${fmt(T.lists)} lists in ${fmt(nc)} cities.`;
+$('s-2022').textContent=(num(T.lists_with_2022_result)&&num(T.candidates_with_2022_votes)?`Matched for ${fmt(T.lists_with_2022_result)} lists and ${fmt(T.candidates_with_2022_votes)} candidates. `:'')+'Lists match when the municipality, the official party code and the composition are unchanged; candidates match by exact name and an overlapping birth-date range in the same municipality, and only when the match is unique.';
+
+// ---- when ----
+const tz={timeZone:'Europe/Prague'};
+const ok=s=>s&&!isNaN(new Date(s));
+const dt=s=>new Date(s).toLocaleString('en-GB',{...tz,day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+const d=s=>new Date(s).toLocaleDateString('en-GB',{...tz,day:'numeric',month:'short',year:'numeric'});
+$('when').innerHTML=[
+  ['Collected',S.collected||'8–9 October 2026'],
+  ok(S.exported_at)?['Exported',dt(S.exported_at)+' Prague time']:null,
+  ok(S.published_from)&&ok(S.published_to)?['Posts published',`${d(S.published_from)} to ${d(S.published_to)}`]:null,
+  num(T.playable_videos)?['Playable videos',fmt(T.playable_videos)]:null
+].filter(Boolean).map(([k,v])=>`<div><b>${k}</b><span>${esc(v)}</span></div>`).join('');
+
+// ---- by platform ----
+const PN={instagram:'Instagram',facebook:'Facebook',tiktok:'TikTok',x:'X',youtube:'YouTube',news:'News',web:'Web'};
+const ST={observed:['','Collected'],accounts_only:['part','Accounts only'],not_collected:['none','Not collected']};
+const plats=(Array.isArray(P.platforms)?P.platforms:[]).map(p=>{const posts=p.posts||0,acc=p.accounts||0;
+  return {name:p.name||PN[p.platform]||p.platform,posts,acc,st:ST[p.status]?p.status:(posts?'observed':acc?'accounts_only':'not_collected')}}).sort((a,b)=>b.posts-a.posts||b.acc-a.acc);
+const cell=v=>v?`<td>${fmt(v)}</td>`:'<td class="zero">–</td>';
+if(plats.length)$('t-plat').tBodies[0].innerHTML=plats.map(p=>`<tr><th scope="row">${esc(p.name)}</th>${cell(p.acc)}${cell(p.posts)}<td><span class="st ${ST[p.st][0]}"><i aria-hidden="true"></i>${ST[p.st][1]}</span></td></tr>`).join('');
+else $('t-plat').closest('.tw').hidden=true;
+
+// ---- by city ----
+const rows=cities.map(c=>({name:c.name,lists:c.lists||0,focus:c.relevant_lists||0,cands:c.candidacies||0,acc:c.accounts||0,posts:c.posts||0})).sort((a,b)=>b.posts-a.posts);
+const row=(h,r)=>`<tr><th scope="row">${esc(h)}</th><td class="hide-s">${fmt(r.lists)}</td><td class="hide-s">${fmt(r.focus)}</td><td>${fmt(r.cands)}</td><td>${fmt(r.acc)}</td><td>${fmt(r.posts)}</td></tr>`;
+if(rows.length){
+  const sum=k=>rows.reduce((s,r)=>s+r[k],0);
+  $('t-city').tBodies[0].innerHTML=rows.map(r=>row(r.name,r)).join('');
+  // accounts can belong to an entity outside the ten cities' rows only in theory; totals come from the export when present
+  $('t-city').tFoot.innerHTML=row('All cities',{lists:num(T.lists)?T.lists:sum('lists'),focus:num(T.relevant_lists)?T.relevant_lists:sum('focus'),cands:num(T.candidacies)?T.candidacies:sum('cands'),acc:num(T.accounts)?T.accounts:sum('acc'),posts:T.posts});
+  $('c-note').textContent='Lists in focus met the research-priority rule (current office, 2022 votes, party strength or public reach) used to decide where to look for accounts first.';
+}else $('t-city').closest('.tw').hidden=true;
+
+// ---- topics ----
+const lab=num(T.topic_labelled_posts)?T.topic_labelled_posts:null;
+$('t-line').innerHTML='Topic labels are machine-labelled from the post text and may be wrong'+
+  (lab!=null?`; only <b>${fmt(lab)}</b> of <b>${fmt(T.posts)}</b> posts (${pct(lab,T.posts)}) carry one${num(T.topics)?` of the ${fmt(T.topics)} labels`:''}. A post can carry several.`:'. Only some posts carry one.');
+const tops=Array.isArray(P.topics)?P.topics.filter(t=>t&&t.label&&t.posts):[];
+if(tops.length)$('t-list').innerHTML=tops.map(t=>`<li>${esc(t.label)}<span>${fmt(t.posts)}</span></li>`).join('');
+else $('t-list').hidden=true;
+
+// ---- logo credits, when the export carries them ----
+const lc=Array.isArray(P.logo_credits)?P.logo_credits.filter(g=>g&&g.source_url):[];
+if(lc.length){
+  $('logos').hidden=false;$('logos').querySelector('summary').textContent=`Logo credits (${lc.length})`;
+  $('credits').innerHTML=lc.map(g=>{let host='source';try{host=/commons\.wikimedia/.test(g.source_url)?'Wikimedia Commons':new URL(g.source_url).hostname}catch(e){}
+    return `<li><b>${esc(g.party||'Logo')}</b> · <a href="${esc(g.source_url)}" target="_blank" rel="noopener">${esc(host)}</a>${g.license?` · ${esc(g.license)}`:''}</li>`}).join('');
+}
+})();
+</script>
+</body>
+</html>
