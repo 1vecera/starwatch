@@ -52,7 +52,7 @@ html,body{overflow:hidden;background:var(--space)}
 .cbtn{width:28px;height:28px;border-radius:6px;display:grid;place-items:center;color:var(--label2);flex:none}.cbtn:hover{background:var(--sunken);color:var(--label)}.cbtn svg{width:16px;height:16px}
 .ttl{display:flex;align-items:baseline;justify-content:space-between;padding:14px 16px 0;gap:12px}.ttl h1{font-size:26px;font-weight:650;letter-spacing:-.03em;line-height:1.1}
 .summary-count{font-size:12px;color:var(--label2);font-variant-numeric:tabular-nums}
-.live{display:flex;align-items:center;gap:6px;padding:5px 16px 0;font-size:12px;color:var(--label2);flex-wrap:wrap;line-height:1.5}.live i{width:6px;height:6px;border-radius:50%;background:var(--brand)}
+.asof{display:block;padding:5px 16px 0;font-size:12px;color:var(--label2);line-height:1.5}.asof b{color:var(--label);font-weight:600}
 .chips{display:flex;gap:6px;padding:14px 16px 0;overflow-x:auto;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}
 .wchip{flex:none;display:flex;align-items:center;gap:6px;height:30px;padding:0 10px 0 3px;border-radius:15px;background:var(--surface);border:1px solid var(--hairline);font-size:12px;font-weight:500;color:var(--label)}
 .wchip:hover{border-color:var(--hairline-strong)}.wchip.on{background:var(--brand-soft);border-color:var(--brand);color:var(--brand)}
@@ -89,8 +89,6 @@ html,body{overflow:hidden;background:var(--space)}
 .evidence-label{display:inline-block;padding:2px 6px;margin:8px 5px 0 0;border-radius:4px;background:var(--sunken);color:var(--label2);font-size:11px;line-height:1.4}
 .claim-quote{padding:8px 0 0;margin-top:8px;border-top:1px solid var(--hairline);font-size:12px;line-height:1.5;color:var(--label2);overflow-wrap:anywhere}
 .tabs{display:none!important}
-/* local fixes for shared chrome on this screen (suggested upstream for app.js / chrome.css) */
-.sw-data{font-size:11px!important}.sw-data i{box-shadow:none!important;animation:none!important}.sw-kbd{font-size:11px!important}
 .al .th img,.al .th video{position:relative;z-index:1;transition:opacity .35s cubic-bezier(.25,1,.5,1)}video.ld{opacity:0}.al .th.vid::after{z-index:2}.reach-pill{z-index:2}.al .th.sk{border-radius:6px}.al.lead .th.sk{border-radius:8px}
 .al.rise{animation:rise .45s cubic-bezier(.25,1,.5,1) both}
 .bl-links{display:flex;flex-wrap:wrap;align-items:center;gap:3px;margin-top:5px;font-size:11px;color:var(--label2)}.bl-links a{display:inline-grid;place-items:center;min-width:20px;height:18px;padding:0 3px;border-radius:3px;background:var(--sunken);color:var(--brand);font:500 11px var(--mono);text-decoration:none}.bl-links a:hover{background:var(--brand-soft)}.bl-links a:first-of-type{margin-left:4px}
@@ -206,7 +204,16 @@ html,body{background:#EEF2F6}
 .ttl{align-items:center;padding:4px 18px 0}.ttl h1{font:650 28px var(--display);letter-spacing:-.03em}
 .ttl .city{font-size:13px;color:var(--label2);font-weight:500;margin-left:2px}
 .ttl .cbtn{margin-left:2px}.ttl .seg.o{margin-left:auto;padding:2px;background:rgba(15,23,42,.045);border-color:transparent}.ttl .seg.o button{height:26px;padding:0 10px;font-size:12px}
-.live{padding:6px 18px 0;color:var(--label2)}.live i{animation:none}
+.asof{padding:8px 18px 0;color:var(--label2)}
+.cityb{display:inline-flex;align-items:center;gap:6px;height:32px;margin-left:6px;padding:0 8px 0 9px;border-radius:9px;border:1px solid var(--hairline-strong);background:var(--surface);font:600 14px var(--font);color:var(--label);white-space:nowrap}
+.cityb:hover,.cityb[aria-expanded="true"]{border-color:var(--brand);color:var(--brand)}
+.cityb svg{width:15px;height:15px;flex:none;color:var(--brand)}.cityb .cv{width:13px;height:13px;color:var(--label2)}
+.cmenu{position:fixed;z-index:400;width:250px;max-height:70vh;overflow:auto;padding:6px;border-radius:14px;background:var(--surface);border:1px solid var(--hairline);box-shadow:var(--elev-3)}
+.cmenu .cm-h{padding:8px 10px 6px;font-size:12px;font-weight:600;color:var(--label3)}
+.cmenu a{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:9px 10px;border-radius:9px;color:var(--label);text-decoration:none;font-size:14px}
+.cmenu a span{font-size:12px;color:var(--label2);font-variant-numeric:tabular-nums}
+.cmenu a:hover,.cmenu a:focus-visible{background:var(--sunken);outline:none}.cmenu a.on{background:var(--brand-soft)}.cmenu a.on b{color:var(--brand)}
+.wchip.add svg{flex:none;margin-left:2px}
 .cov{padding:2px 18px 0;font-size:12px;color:var(--label2);line-height:1.5}
 .chips{padding:14px 18px 2px}.wchip{height:32px;padding:0 11px 0 4px;border-radius:16px;background:rgba(255,255,255,.7);border-color:var(--pane-edge);transition:background .15s,border-color .15s,color .15s}
 .wchip:hover{background:#fff}.wchip.on{background:var(--brand-soft)}
@@ -265,7 +272,7 @@ html,body{background:#EEF2F6}
 @media(max-width:860px){#stage{padding:76px 16px 96px}:root{--phone-h:calc(100dvh - 76px - 96px)}}
 @media(max-width:600px){#stage{padding:64px 0 0}.phone-wrap{height:calc(100dvh - 64px - 84px - env(safe-area-inset-bottom))}#stage .phone{background:rgba(255,255,255,.92)!important;border-radius:18px 18px 0 0!important;border:0!important}.ttl h1{font-size:26px}.al.big{grid-template-columns:80px minmax(0,1fr)}.al.big .th{width:80px;height:80px}}
 @media (prefers-reduced-motion:reduce){#bg .sweep,#bg .ping{display:none}}
-@media(max-width:600px){.ctl{flex-wrap:nowrap}.ctl .seg button em{display:none}.ctl .seg button{padding:0 9px}.live .summary-count{display:none}}
+@media(max-width:600px){.ctl{flex-wrap:nowrap}.ctl .seg button em{display:none}.ctl .seg button{padding:0 9px}.asof .summary-count{display:none}}
 /* final pass: floating, not boxed. No panel borders, wider air between columns, one methodology line instead of a rules table. */
 #stage{gap:clamp(20px,3.4vw,56px)}
 #stage .side .glass.card,#stage .phone{border-color:transparent!important;box-shadow:0 1px 2px rgba(15,23,42,.04),0 28px 64px -34px rgba(15,23,42,.34)!important}
@@ -308,9 +315,11 @@ html,body{background:#EEF2F6}
 
 <script src="data/real.js"></script>
 <script src="data/issue-topics.js"></script>
+<script src="data/topic-labels.js"></script>
 <script src="geo/cz.js"></script>
 <script src="mock.js"></script>
 <script src="sw-real.js" data-min-assets="0"></script>
+<script src="sw-picker.js"></script>
 <script>
 "use strict";
 const {cities,lists,cands,assets,PLAT,TOP,fmt,fmtN,css,thumb}=SW;
@@ -333,7 +342,8 @@ const reachText=a=>{const r=reachOf(a);return r==null?'':`${fmt(r)} ${reachKindO
 const sourceLink=(url,label='Open public source')=>{try{const u=new URL(url);if(!['http:','https:'].includes(u.protocol))return '';return `<a class="source-link" href="${esc(u.href)}" target="_blank" rel="noopener noreferrer">${esc(label)} ↗</a>`}catch(e){return ''}};
 const pending=a=>a&&((a.topicStatus&&a.topicStatus!=='admitted')||a.topics.some(t=>TOP[t][3]&&TOP[t][3]!=='admitted'));
 const topicLabel=a=>!a.topics.length?'No topic assigned':a.topics.map(t=>TOP[t][0]).join(' · ');
-const topicNote=a=>!a.topics.length?'No classification supplied':pending(a)?(a.topicStatus==='reviewed_pending_promotion'?'Reviewed · pending promotion':'Pending review'):(a.topicStatus==='admitted'||a.topics.every(t=>TOP[t][3]==='admitted'))?'Admitted classification':'Classification status not supplied';
+const topicNote=a=>{if(!a.topics.length)return 'No topic label';const m=SW.topicMeta(a,a.topics[0]);return m.issue?'Issue reviewed from the caption':m.machine?`Machine label${m.evidence?' · “'+m.evidence+'”':''} · can be wrong`:'Reviewed label'};
+const mlab=(a,t)=>{const m=SW.topicMeta(a,t);return m.machine?`<span class="sw-mlab" title="Machine label${m.evidence?` · “${esc(m.evidence)}”`:''}">machine</span>`:''};
 const claimNote=c=>c.status==='admitted'?'Admitted excerpt':c.status==='reviewed_pending_promotion'?'Pending promotion':c.status?'Pending review':'Review status not supplied';
 const sourceQuote=a=>a&&(a.claims.find(c=>c.quote)?.quote||rawAssets.get(a.id)?.text||(a.cap==='(no caption)'?'':a.cap)||'').trim();
 const draftable=x=>x.type!=='snap'&&(!REAL||!!sourceQuote(x.a));
@@ -348,8 +358,12 @@ const mediaURL=a=>{
 
 /* ================= watchlist in the richest evidence city ================= */
 const requested=(key,rows)=>{const value=Q.get(key),index=value==null||value.trim()===''?NaN:Number(value);return Number.isInteger(index)&&index>=0?rows[index]||null:null};
-const selectedCand=requested('cand',cands), selectedList=selectedCand?null:requested('list',lists);
-const P=cities[(selectedCand||selectedList)?.city]||cities[0];
+// focus: ?cand= or ?list= (or ?party=, resolved to that party's list in the chosen city); ?city= picks the town
+const qCity=requested('city',cities), qParty=window.SWPicker?SWPicker.party(Q):null;
+let selectedCand=requested('cand',cands), selectedList=selectedCand?null:requested('list',lists);
+if(qCity&&(selectedCand||selectedList)&&(selectedCand||selectedList).city!==qCity.i){selectedCand=null;selectedList=null}
+if(!selectedCand&&!selectedList&&qParty){const here=qParty.lists.filter(i=>lists[i].city===(qCity?qCity.i:lists[qParty.lists[0]].city));if(here.length)selectedList=lists[here[0]]}
+const P=qCity||cities[(selectedCand||selectedList)?.city]||cities[0];
 const byAssets=(a,b)=>b.assets.length-a.assets.length;
 const youC=selectedCand||P.cands.map(i=>cands[i]).sort(byAssets)[0];
 const focusList=selectedList?selectedList.i:youC.list;
@@ -378,8 +392,8 @@ const dayKey=d=>new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Prague',year:'
 const ageOf=s=>s&&Number.isFinite(Date.parse(s))?(ASOF-new Date(s))/864e5:null;
 const dateText=s=>s&&Number.isFinite(Date.parse(s))?dateFmt.format(new Date(s))+' '+timeFmt.format(new Date(s))+' '+zoneFmt.formatToParts(new Date(s)).find(p=>p.type==='timeZoneName').value:'Unknown date';
 function at(age){const date=new Date(ASOF-age*864e5),today=dayKey(ASOF),yesterday=dayKey(new Date(+ASOF-864e5));return {d:dayKey(date)===today?0:dayKey(date)===yesterday?1:2,hm:timeFmt.format(date),date}}
-function whenLong(age){if(age==null)return 'Unknown date';const t=at(age);return (t.d===0?'Today':t.d===1?'Yesterday':dateFmt.format(t.date))+' '+t.hm}
-function rel(age){if(age==null)return 'Undated';const m=Math.max(0,Math.round(age*1440)+NOW_LAG);if(m<2)return REAL?'just before export':'now';if(m<60)return m+'m before '+(REAL?'export':'now');if(m<1440)return Math.floor(m/60)+'h '+(REAL?'before export':'ago');return whenLong(age)}
+function whenLong(age){if(age==null)return 'Unknown date';const t=at(age);return (REAL?dateFmt.format(t.date):t.d===0?'Today':t.d===1?'Yesterday':dateFmt.format(t.date))+' '+t.hm}
+function rel(age){if(age==null)return 'Undated';const m=Math.max(0,Math.round(age*1440)+NOW_LAG);if(m<2)return REAL?'just before collection':'now';if(m<60)return m+'m before '+(REAL?'collection':'now');if(m<1440)return Math.floor(m/60)+'h '+(REAL?'before collection':'ago');return whenLong(age)}
 const lag=a=>((a.i*37)%26+6)/1440;
 const seen=a=>REAL?ageOf(a.observed_at):Math.max(0.0005,a.age-lag(a)), cross=a=>seen(a)*0.55;
 $('#clk').textContent=timeFmt.format(ASOF);
@@ -452,7 +466,7 @@ ALERTS.sort((x,y)=>x.age-y.age);
 const LIVE=REAL?null:ALERTS.find(x=>x.type==='post'||x.type==='video');
 if(LIVE){LIVE.age=-NOW_LAG/1440+0.3/1440; LIVE.live=true}
 const FEED=ALERTS.filter(x=>x!==LIVE);
-const unread=new Set(ALERTS.filter(x=>x.age<3.5/24).map(x=>x.id));
+const unread=new Set(REAL?[]:ALERTS.filter(x=>x.age<3.5/24).map(x=>x.id));
 
 /* ================= copy per alert ================= */
 const pron=e=>e.me?'your':(e.fem?'her':'his');
@@ -545,7 +559,7 @@ function card(x){const a=x.a,e=x.e,tier=tierOf.get(x)||'';
   const who=e?`${av(e,20)}<span class="nm">${esc(e.name)}</span><em>${role}</em>`:`<span class="nm">${esc(P.name)}</span><em>all lists</em>`;
   const meta=[];if(x.type==='spike')meta.push(`<b>${x.ratio.toFixed(1)}× ${REAL?'sample median':'median'}</b>`);if(x.type==='topic')meta.push(`<b>${x.ratio.toFixed(1)}× usual share</b>`);
   if(rt&&tier!=='lead')meta.push(`<b>${rt}</b>`);if(a)meta.push(esc(platN(a)));
-  if(REAL&&a&&a.topics.length){meta.push(esc(TOP[a.topics[0]][0]));if(pending(a))meta.push(esc(topicNote(a)))}
+  if(REAL&&a&&a.topics.length)meta.push(esc(TOP[a.topics[0]][0])+mlab(a,a.topics[0]));
   meta.push(kindLbl(x)?`<span class="act">${starSvg(10)} ${kindLbl(x)}</span>`:`<span class="act base">${x.type==='snap'?'Dated count · no change inferred':'Source text unavailable · inspect only'}</span>`);
   return `<button class="al${tier?' '+tier:''}${a&&!hasPreview(x)?' nothumb':''}${unread.has(x.id)?' unread':''}${x===ARRIVING?' arrive':''}" data-id="${x.id}">${lead}<span class="al-b"><span class="top"><span class="ty${x.type==='snap'?' base':''}">${TY[x.type].n}</span><span class="tm">${rel(x.age)}</span></span>
     <span class="who">${who}</span><span class="bd">${esc(body(x))}</span><span class="ft">${meta.join('<i>·</i>')}</span></span></button>`}
@@ -562,18 +576,18 @@ function renderFeed(fresh){const sc=$('#scroll');const st=sc.scrollTop;
   const grp=(h,d,list)=>`<div class="grp"><h2>${h}</h2><span class="d">${d}</span><span class="n">${list.length}</span></div><div class="feed">${list.map(card).join('')}</div>`;
   const pl=PLAT.map((p,i)=>({i,n:p.n,k:counts[i]})).filter(p=>p.k), missing=PLAT.filter((_,i)=>!counts[i]).map(p=>p.n);
   if(platform!=='all'&&!counts[+platform])platform='all';
-  sc.innerHTML=`<div class="ttl"><h1>Radar <span class="city">${esc(P.name)}</span></h1><div class="seg o" id="oseg" role="group" aria-label="Order">${[['reach','Reach'],['time','Newest']].map(([k,l])=>`<button data-o="${k}" class="${order===k?'on':''}">${l}</button>`).join('')}</div><button class="cbtn" title="Mark all read" aria-label="Mark all read" id="markall"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12.5 4.5 4.5L20 6.5"/></svg></button></div>
-   <div class="live ${REAL?'snapshot':''}"><i></i>${REAL?'Verified snapshot · exported '+esc(dateText(SW.source.exported_at)):'Simulation · push replay'}<span class="summary-count">· ${shown.length} ${REAL?'observations':'simulated alerts'}</span></div>
-   ${REAL?`<div class="cov">Retained public posts from the 48 h before export, not a live stream.</div>`:''}
-   <div class="chips">${WATCH.map(e=>`<button class="wchip ${chip===e.key?'on':''}" data-k="${e.key}" aria-pressed="${chip===e.key}">${av(e,24)}${esc(e.short)}</button>`).join('')}</div>
+  sc.innerHTML=`<div class="ttl"><h1>Radar</h1><button class="cityb" id="cityb" aria-haspopup="true" aria-expanded="false" aria-label="City: ${esc(P.name)}. Choose another city"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-5.6-6.5-10.5a6.5 6.5 0 0 1 13 0C18.5 15.4 12 21 12 21z"/><circle cx="12" cy="10.5" r="2.3"/></svg>${esc(P.name)}<svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 10 5 5 5-5"/></svg></button><div class="seg o" id="oseg" role="group" aria-label="Order">${[['reach','Reach'],['time','Newest']].map(([k,l])=>`<button data-o="${k}" class="${order===k?'on':''}">${l}</button>`).join('')}</div>${REAL?'':`<button class="cbtn" title="Mark all read" aria-label="Mark all read" id="markall"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m4 12.5 4.5 4.5L20 6.5"/></svg></button>`}</div>
+   <div class="asof">${REAL?`<b>Snapshot replay</b> · posts published in the 48 h before collection (${esc(SW.snapshot.short)})`:'Simulation · push replay'}<span class="summary-count"> · ${shown.length} ${REAL?'observations':'simulated alerts'}</span></div>
+   ${REAL?`<div class="cov">A watchlist over the collected snapshot, not live alerts: nothing new arrives here.</div>`:''}
+   <div class="chips">${WATCH.map(e=>`<button class="wchip ${chip===e.key?'on':''}" data-k="${e.key}" aria-pressed="${chip===e.key}">${av(e,24)}${esc(e.short)}</button>`).join('')}${window.SWPicker?`<button class="wchip add" id="pickFocus" aria-haspopup="dialog"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.4 15.4 20.5 20.5"/></svg>Watch a party or list</button>`:''}</div>
    <div class="fseg"><div class="seg" id="fseg">${[['all','All'],['rivals','Rivals'],['me',REAL?'Focus':'About me'],['topics','Topics']].map(([k,l])=>`<button data-f="${k}" class="${filt===k?'on':''}">${l}</button>`).join('')}</div></div>
    ${pl.length>1?`<div class="ctl">`:''}${pl.length>1?`<div class="seg" id="pseg" role="group" aria-label="Platform">${[{i:'all',n:'All',k:pl.reduce((n,p)=>n+p.k,0)},...pl].map(p=>`<button data-p="${p.i}" class="${platform===String(p.i)?'on':''}">${esc(p.n)} <em>${p.k}</em></button>`).join('')}</div></div>`:''}
-   ${today.length?grp('Today',esc(dateFmt.format(ASOF)),today):''}
+   ${today.length?grp(REAL?esc(dateFmt.format(ASOF)):'Today',REAL?'day of collection':esc(dateFmt.format(ASOF)),today):''}
    ${earlier.length?grp('Earlier','before '+esc(dateFmt.format(ASOF)),earlier):''}
    ${bare.length?`<button class="bare" id="bare">${showBare?'Hide':'Show'} ${bare.length} without a retained preview</button>`:''}
    ${base.length?grp('Baselines','dated counts · not changes',base):''}
    ${!shown.length?`<div class="coverage-note"><strong>${filt==='topics'?'No topic assignments in this selection':'No observed alerts match this selection'}.</strong> Nothing is inferred to fill this view.</div>`:''}
-   <div class="endnote">${REAL?'Recent profile samples are incomplete; this screen does not schedule collection.':'Labelled simulation of scheduled collection.'}${missing.length?` ${esc(missing.join(', '))}: nothing retained for this watchlist.`:''} Response is attention, not support.</div>`;
+   <div class="endnote">${REAL?'Profile samples are incomplete, and this is a fixed snapshot that is not refreshed.':'Labelled simulation of scheduled collection.'}${missing.length?` ${esc(missing.join(', '))}: nothing retained for this watchlist.`:''} Response is attention, not support.</div>`;
   if(!revealed&&shown.length){revealed=true;sc.querySelectorAll('.al:not(.arrive)').forEach((el,k)=>{if(k<12){el.classList.add('rise');el.style.animationDelay=80+k*40+'ms'}})}
   ARRIVING=null;
   sc.scrollTop=st;
@@ -583,10 +597,21 @@ function renderFeed(fresh){const sc=$('#scroll');const st=sc.scrollTop;
   const ps=sc.querySelector('#pseg');if(ps)ps.onclick=ev=>{const b=ev.target.closest('button');if(!b)return;platform=b.dataset.p;renderFeed()};
   sc.querySelector('#oseg').onclick=ev=>{const b=ev.target.closest('button');if(!b)return;order=b.dataset.o;renderFeed()};
   const bb=sc.querySelector('#bare');if(bb)bb.onclick=()=>{showBare=!showBare;renderFeed()};
-  $('#markall').onclick=()=>{unread.clear();renderFeed();toast('All alerts marked read')};
+  const ma=$('#markall');if(ma)ma.onclick=()=>{unread.clear();renderFeed();toast('All alerts marked read')};
+  $('#cityb').onclick=ev=>{ev.stopPropagation();cityMenu($('#cityb'))};
+  const pf=$('#pickFocus');if(pf)pf.onclick=()=>SWPicker.open({anchor:pf,title:'Watch a party or list',city:P.i,onPick(p){
+    if(p.type==='list'){location.href=`radar.html?list=${p.list}`;return}
+    const here=p.lists.filter(i=>lists[i].city===P.i);
+    if(here.length)location.href=`radar.html?city=${P.i}&party=${p.key}`;else location.href=`radar.html?party=${p.key}`}});
 }
-$('#tabs').innerHTML=[['Atlas','<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5c2.6 2.3 3.8 5.2 3.8 8.5s-1.2 6.2-3.8 8.5c-2.6-2.3-3.8-5.2-3.8-8.5S9.4 5.8 12 3.5ZM3.5 12h17"/>'],['Spotlight','<circle cx="12" cy="9" r="4"/><path d="M4.5 20.5c1-4 4-6 7.5-6s6.5 2 7.5 6"/>'],['Radar','<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><path d="M12 12 18 6"/><circle cx="12" cy="12" r="1" fill="currentColor"/>'],['Studio','<path d="M4 20h4L19 9l-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/>']]
-  .map(([n,p])=>`<button class="${n==='Radar'?'on':''}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${p}</svg>${n}</button>`).join('');
+/* city switch: ten towns, each a deep link (radar.html?city=<index>) */
+function cityMenu(btn){let m=$('#cmenu');if(m){m.remove();btn.setAttribute('aria-expanded','false');return}
+  m=document.createElement('div');m.id='cmenu';m.className='cmenu';m.setAttribute('role','menu');
+  m.innerHTML=`<div class="cm-h">Choose a city</div>`+cities.map(c=>`<a role="menuitem" href="radar.html?city=${c.i}" class="${c===P?'on':''}"><b>${esc(c.name)}</b><span>${fmtN(c.assets.length)} posts · ${c.L} lists</span></a>`).join('');
+  document.body.appendChild(m);const r=btn.getBoundingClientRect();m.style.left=Math.max(8,Math.min(innerWidth-m.offsetWidth-8,r.left))+'px';m.style.top=(r.bottom+6)+'px';btn.setAttribute('aria-expanded','true');
+  const f=m.querySelector('a.on')||m.querySelector('a');f&&f.focus({preventScroll:true});
+  const off=ev=>{if(ev.type==='keydown'&&ev.key!=='Escape')return;if(ev.type==='pointerdown'&&m.contains(ev.target))return;if(ev.type==='keydown')ev.stopImmediatePropagation();m.remove();btn.setAttribute('aria-expanded','false');removeEventListener('pointerdown',off,true);removeEventListener('keydown',off,true)};
+  addEventListener('pointerdown',off,true);addEventListener('keydown',off,true)}
 
 /* ================= render: sheet ================= */
 let cur=null,tone='factual',streamTok=0;
@@ -628,7 +653,7 @@ function paHtml(x){
    <div class="draft" id="draft" spellcheck="false"></div>
    <div class="gloss" id="gloss"></div>
    <div class="ev"><div class="l">Grounded in</div>${ev.map((s,k)=>`<div class="evr" data-k="${k}"><span class="n">${k+1}</span><span>${s}</span></div>`).join('')}</div>
-   <div class="acts"><button class="pill" id="bEdit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4Z"/></svg><span>Edit</span></button><button class="pill" id="bCopy" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="3"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Copy</button><button class="pill primary" id="bStudio" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Keep draft</button></div>
+   <div class="acts"><button class="pill" id="bEdit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4Z"/></svg><span>Edit</span></button><button class="pill" id="bCopy" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="8" width="12" height="12" rx="3"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Copy</button></div>
    <div class="guard"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v5.5c0 4.6 3.1 8.2 7.5 9.5 4.4-1.3 7.5-4.9 7.5-9.5V6L12 3Z"/></svg><span>For your review. Starwatch never posts on its own. Drafts use only the observed public items above, say nothing about opponents beyond what they published, and never target or profile voters. Placeholders in <span style="border-bottom:1px dashed var(--label2)">[brackets]</span> are yours to fill.</span></div></div>`}
 function openSheet(id,instant){const x=ALERTS.find(z=>z.id===id);if(!x)return;cur=x;tone='factual';unread.delete(id);
   const e=x.e;
@@ -645,7 +670,6 @@ function openSheet(id,instant){const x=ALERTS.find(z=>z.id===id);if(!x)return;cu
   if(draftable(x)){$('#tone').onclick=ev=>{const b=ev.target.closest('button');if(!b||b.dataset.t===tone)return;tone=b.dataset.t;$('#tone').querySelectorAll('button').forEach(z=>z.classList.toggle('on',z===b));stream(x,0)};
     $('#bEdit').onclick=()=>{const d=$('#draft');const on=d.getAttribute('contenteditable')==='true';if(on){d.setAttribute('contenteditable','false');$('#bEdit span').textContent='Edit';toast('Edits kept in this draft')}else{streamTok++;if(!$('#gloss').classList.contains('on'))finishDraft(x);d.setAttribute('contenteditable','true');d.focus();$('#bEdit span').textContent='Done'}};
     $('#bCopy').onclick=()=>{const txt=$('#draft').innerText.replace(/\s+$/,'');(navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>toast('Copied locally · review before using'),()=>toast('Clipboard unavailable · select the draft to copy'))};
-    $('#bStudio').onclick=()=>{const draft={mode:REAL?'real':'sim',text:$('#draft').innerText,source_ids:x.a?[x.a.id]:[],source_urls:x.a?[x.a.url]:[],entity_id:focusId||null,entity_kind:YOU.kind,entity_index:YOU.kind==='cand'?YOU.c.i:YOU.L.i,status:'draft'};try{sessionStorage.setItem('sw-radar-draft',JSON.stringify(draft));toast('Draft saved locally · open Studio to continue')}catch(e){toast('Local draft storage unavailable')}};
     stream(x,instant?-1:650)}
   renderFeed()}
 function closeSheet(){$('#shb').querySelectorAll('video').forEach(video=>video.pause());$('#sheet').classList.remove('on');$('#scrim').classList.remove('on');$('#app').classList.remove('behind');$('#sheet').style.transform='';streamTok++;cur=null}
@@ -653,7 +677,7 @@ $('#scrim').onclick=closeSheet;
 addEventListener('keydown',ev=>{if(ev.key==='Escape'&&cur&&!(ev.target.closest&&ev.target.closest('[contenteditable=true]'))){ev.stopImmediatePropagation();closeSheet()}});
 function segs(s){return s.split(/(\[[^\]]+\])/).filter(Boolean).map(p=>p[0]==='['?{ph:p}:{t:p})}
 function finishDraft(x){const [cs,en]=drafts(x)[tone];const d=$('#draft');d.classList.remove('in');void d.offsetWidth;d.classList.add('in');d.innerHTML=segs(cs).map(s=>s.ph?`<span class="ph">${esc(s.ph)}</span>`:esc(s.t)).join('');showGloss(en)}
-function showGloss(en){const g=$('#gloss');g.innerHTML=`<b>English gloss · not for posting</b>${esc(en)}`;$('#bCopy').disabled=false;$('#bStudio').disabled=false;requestAnimationFrame(()=>g.classList.add('on'));document.querySelectorAll('.evr').forEach((r,k)=>setTimeout(()=>r.classList.add('lit'),k*160))}
+function showGloss(en){const g=$('#gloss');g.innerHTML=`<b>English gloss · not for posting</b>${esc(en)}`;$('#bCopy').disabled=false;requestAnimationFrame(()=>g.classList.add('on'));document.querySelectorAll('.evr').forEach((r,k)=>setTimeout(()=>r.classList.add('lit'),k*160))}
 function stream(x,delay){
   streamTok++;const draft=$('#draft');if(!draft)return;
   draft.setAttribute('contenteditable','false');$('#bEdit span').textContent='Edit';finishDraft(x);
@@ -701,9 +725,9 @@ function playDemo(){timers.forEach(clearTimeout);timers=[];closeSheet();liveIn=f
 /* ================= side panels: watchlist (left), evidence rules (right) ================= */
 const shield='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v5.5c0 4.6 3.1 8.2 7.5 9.5 4.4-1.3 7.5-4.9 7.5-9.5V6L12 3Z"/></svg>';
 const ruleRows=R=>R.map(([b,s,st,cls])=>`<div class="rr"><div><b>${b}</b><span>${s}</span></div>${typeof st==='number'?`<button class="tgl ${st?'on':''}" aria-label="${esc(b)}" aria-pressed="${st?'true':'false'}"></button>`:`<span class="tag ${cls||''}">${st}</span>`}</div>`).join('');
-if(REAL)$('#explain').innerHTML=`<div class="kicker">${starSvg(12)} Radar · verified snapshot</div><h1>Observed public activity</h1><p>Public posts from ${esc(P.name)} with sources and dated metrics. Focus: ${esc(YOU.name)}.</p>
+if(REAL)$('#explain').innerHTML=`<div class="kicker">${starSvg(12)} Radar · snapshot replay</div><h1>A watchlist over the snapshot</h1><p>What the people and lists watched in ${esc(P.name)} published in the 48 hours before collection (${esc(SW.snapshot.long)}), with sources and dated metrics. Nothing here updates live. Focus: ${esc(YOU.name)}.</p>
  <div class="cta"><button class="pill primary" id="bTop">${starSvg(12,'currentColor')} Open a review draft</button><button class="pill" id="bReplay">Replay snapshot</button></div>
- <p class="method">${shield}<span><b>Method.</b> Posts from the last 48 h are observed; outliers (≥ 3× the median of 8+ comparable posts) are a sample only. One follower snapshot is a baseline, not a change. Reach is attention, not support. Drafts quote their source and are never sent.</span></p>`;
+ <p class="method">${shield}<span><b>Method.</b> Posts from the 48 h before collection are replayed; outliers (≥ 3× the median of 8+ comparable posts) are a sample only. One follower snapshot is a baseline, not a change. Reach is attention, not support. Drafts quote their source and are never sent.</span></p>`;
 else $('#explain').innerHTML=`<div class="kicker">${starSvg(12)} Radar · simulation</div><h1>Observed public activity</h1>
  <p>Pick people and parties in the Atlas. Radar watches their public posts, videos and news, flags observable changes and drafts an answer for you to review.</p>
  <div class="cta"><button class="pill primary" id="bTop">${starSvg(12,'currentColor')} Open a proposed answer</button><button class="pill" id="bReplay">Replay push</button></div>

@@ -1,7 +1,7 @@
 {
   "name": "Starwatch",
   "short_name": "Starwatch",
-  "description": "Who's being heard, not just who's talking: public posts, videos and statements of the 2026 Czech city-council races, linked to the people and lists behind them.",
+  "description": "Who's being heard, not just who's talking: a snapshot of public posts by candidates in the 2026 Czech municipal elections, collected 8–9 October 2026 and linked to the people and lists behind them.",
   "id": "./",
   "start_url": "./atlas.html",
   "scope": "./",
@@ -10,18 +10,60 @@
   "background_color": "#F2F7F7",
   "theme_color": "#F2F7F7",
   "lang": "en",
-  "categories": ["news", "productivity"],
+  "categories": [
+    "news",
+    "productivity"
+  ],
   "icons": [
-    { "src": "brand/app-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
-    { "src": "brand/app-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "brand/app-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "brand/app-icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "brand/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "brand/app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "brand/app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "brand/app-icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ],
   "shortcuts": [
-    { "name": "Star Atlas", "url": "./atlas.html" },
-    { "name": "Spotlight", "url": "./spotlight.html" },
-    { "name": "Pulse", "url": "./pulse.html" },
-    { "name": "Radar", "url": "./radar.html" },
-    { "name": "Studio", "url": "./studio.html" }
+    {
+      "name": "Star Atlas",
+      "url": "./atlas.html"
+    },
+    {
+      "name": "Spotlight",
+      "url": "./spotlight.html"
+    },
+    {
+      "name": "Pulse",
+      "url": "./pulse.html"
+    },
+    {
+      "name": "Radar",
+      "url": "./radar.html"
+    },
+    {
+      "name": "By the numbers",
+      "url": "./data.html"
+    },
+    {
+      "name": "About",
+      "url": "./about.html"
+    }
   ]
 }

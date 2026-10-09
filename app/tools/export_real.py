@@ -1249,93 +1249,6 @@ def export_videos(raw: Record, resources: list[Record], project: Path, media: Pa
     return counts
 
 
-def export_forecasts(raw: Record, path: Path) -> Counter[str]:
-    """Attach published values only to an exact, unique official name/abbreviation in the same city."""
-    counts: Counter[str] = Counter()
-    for entity in raw["lists"] + raw["cands"]:
-        entity["forecast"] = []
-    if not path.is_file():
-        counts["file_missing"] = 1
-        return counts
-    document = read_json(path)
-    datetime.fromisoformat(document["generated_at"].replace("Z", "+00:00"))
-    sources = {}
-    for source in document["sources"]:
-        source_id = source["id"]
-        if not isinstance(source_id, str) or not source_id or source_id in sources:
-            raise ValueError("Forecast source IDs must be unique nonempty strings")
-        if source["kind"] not in {"poll", "model", "betting", "ranking"}:
-            raise ValueError("Unknown forecast source kind")
-        for field in ("publisher", "fieldwork_or_published", "method_note", "url"):
-            if not isinstance(source[field], str) or not source[field].strip():
-                raise ValueError("Forecast source lacks provenance")
-        parsed = urlsplit(source["url"])
-        if parsed.scheme not in {"http", "https"} or not parsed.hostname or parsed.username or parsed.password:
-            raise ValueError("Forecast source is not a public web URL")
-        sample = source["sample_size"]
-        if sample is not None and (type(sample) is not int or sample <= 0):
-            raise ValueError("Invalid forecast sample size")
-        sources[source_id] = source
-    counts["sources"] = len(sources)
-    cities = {city["name"]: city["id"] for city in raw["cities"]}
-    if set(document["cities"]) != set(cities):
-        raise ValueError("Forecast coverage must explicitly contain every exported city")
-    # No case-folding, accent removal, coalition aliases or component-party matching.
-    indexes: dict[str, dict[tuple[str, str], set[str]]] = {}
-    entities = {entity["id"]: entity for entity in raw["lists"] + raw["cands"]}
-    for group, records in (("lists", raw["lists"]), ("candidates", raw["cands"])):
-        index: dict[tuple[str, str], set[str]] = defaultdict(set)
-        for entity in records:
-            names = {entity["name"]}
-            if group == "lists" and entity.get("short"):
-                names.add(entity["short"])
-            for name in names:
-                index[(entity["city_id"], name)].add(entity["id"])
-        indexes[group] = index
-    for city, forecast in document["cities"].items():
-        present = bool(forecast["lists"] or forecast["candidates"])
-        if forecast["status"] != ("found" if present else "none_found"):
-            raise ValueError("Forecast status disagrees with retained values")
-        counts["cities_" + forecast["status"]] += 1
-        for group, id_field in (("lists", "list_id_2026"), ("candidates", "cand_id_2026")):
-            for record in forecast[group]:
-                source = sources[record["source_id"]]
-                value, unit = record["value"], record["unit"]
-                if type(value) not in (int, float) or not math.isfinite(value) or value < 0:
-                    raise ValueError("Forecast value must be a finite nonnegative number")
-                if unit not in {"pct", "seats", "odds"}:
-                    raise ValueError("Unknown forecast unit")
-                if (unit == "pct" and value > 100) or (unit == "seats" and not float(value).is_integer()):
-                    raise ValueError("Invalid forecast percentage or seat count")
-                if unit == "odds" and (source["kind"] != "betting" or value < 1):
-                    raise ValueError("Decimal betting odds require a betting source and value >= 1")
-                if group == "candidates" and record["role"] not in {"mayor_candidate", "other"}:
-                    raise ValueError("Unknown forecast candidacy role")
-                counts[group + "_values"] += 1
-                entity_id = record[id_field]
-                if entity_id is None:
-                    counts[group + "_unmatched"] += 1
-                    continue
-                matches = indexes[group].get((cities[city], record["name_as_published"]), set())
-                if matches != {entity_id}:
-                    counts[group + "_match_rejected"] += 1
-                    continue
-                item = {
-                    "value": value,
-                    "unit": unit,
-                    "kind": source["kind"],
-                    "publisher": source["publisher"],
-                    "date": source["fieldwork_or_published"],
-                    "url": source["url"],
-                }
-                if item not in entities[entity_id]["forecast"]:
-                    entities[entity_id]["forecast"].append(item)
-                    counts[group + "_exported"] += 1
-    counts["matched_lists"] = sum(bool(entity["forecast"]) for entity in raw["lists"])
-    counts["matched_candidates"] = sum(bool(entity["forecast"]) for entity in raw["cands"])
-    return counts
-
-
 def platform_coverage(raw: Record) -> list[Record]:
     """Count exported verified records once, with absence explicit for every supported platform."""
     accounts = Counter(account["platform"] for account in raw["accounts"])
@@ -1397,7 +1310,6 @@ def main() -> None:
         )
     election_counts = export_election_results(raw, project)
     pending_labels(raw, project, gaps)
-    forecast_counts = export_forecasts(raw, app / "web/data/forecasts.json")
     print(
         json.dumps(
             {
@@ -1436,7 +1348,6 @@ def main() -> None:
         "videos": dict(video_counts),
         "logos": dict(logo_counts),
         "portraits": dict(portrait_counts),
-        "forecasts": dict(forecast_counts),
         "election_results2022": dict(election_counts),
         "platform_coverage": raw["platform_coverage"],
         "gaps": dict(gaps),

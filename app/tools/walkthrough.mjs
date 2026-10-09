@@ -1,5 +1,5 @@
-// Unattended walkthrough of the demo path: sign-in → Atlas (country, city, topic lens, party) →
-// Spotlight → Pulse → Radar (alert sheet) → Studio, at desktop and phone sizes.
+// Unattended walkthrough of the public path: welcome → Atlas (country, city, topic lens, party) →
+// Spotlight → Pulse → Radar (replay sheet) → By the numbers → About, at desktop and phone sizes.
 // Usage: node tools/walkthrough.mjs [baseUrl] [outDir]   (server from ./run.sh must be running)
 // PLAYWRIGHT_CORE may point at any playwright-core/index.mjs; CHROME at a Chrome binary.
 const pw = await import(process.env.PLAYWRIGHT_CORE || "/home/vecera/code/daniel-ai-skills/tools/json-render-report/node_modules/playwright-core/index.mjs");
@@ -7,7 +7,7 @@ import fs from "node:fs/promises";
 const base = (process.argv[2] || "http://127.0.0.1:5173").replace(/\/$/, "");
 const out = process.argv[3] || "walkthrough-shots";
 await fs.mkdir(out, { recursive: true });
-const browser = await pw.chromium.launch({ executablePath: process.env.CHROME || "/usr/bin/google-chrome-stable", headless: true,
+const browser = await pw.chromium.launch({ executablePath: process.env.CHROME || `${process.env.HOME}/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome`, headless: true,
   args: ["--no-sandbox", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
 const errors = [], steps = [];
 const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -17,7 +17,7 @@ async function run(label, viewport) {
   page.on("console", m => { if (m.type() === "error" && !/fonts\.g/.test(m.text())) errors.push(`${label} console: ${m.text()}`); });
   const shot = async name => { await page.screenshot({ path: `${out}/${label}-${name}.png` }); steps.push(`${label}:${name}`); };
   const call = (expr) => page.evaluate(expr).catch(e => errors.push(`${label} ${expr}: ${e.message}`));
-  await page.goto(`${base}/index.html`); await wait(1500); await shot("01-welcome");
+  await page.goto(`${base}/`); await wait(1500); await shot("01-welcome");
   await page.goto(`${base}/atlas.html`); await wait(2500); await shot("02-atlas-country");
   await call("window.__atlas && window.__atlas.fitCity && window.__atlas.fitCity(0)"); await wait(2500); await shot("03-atlas-city");
   await call("window.__atlas && window.__atlas.setTopic && window.__atlas.setTopic(0)"); await wait(1500); await shot("04-atlas-topic");
@@ -31,7 +31,8 @@ async function run(label, viewport) {
   await page.goto(`${base}/pulse.html${sel}`); await wait(2500); await shot("07-pulse");
   await page.goto(`${base}/radar.html${sel}`); await wait(2500); await shot("08-radar");
   const alert = await page.$("[data-alert], .alert, .al, .notif"); if (alert) { await alert.click().catch(() => {}); await wait(1800); await shot("09-radar-sheet"); }
-  await page.goto(`${base}/studio.html${sel}`); await wait(3500); await shot("10-studio");
+  await page.goto(`${base}/data.html`); await wait(2500); await shot("10-data");
+  await page.goto(`${base}/about.html`); await wait(2500); await shot("11-about");
   await page.close();
 }
 await run("desktop", { width: 1920, height: 1080 });

@@ -2,41 +2,70 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Starwatch</title>
-<link rel="icon" href="brand/favicon.svg" type="image/svg+xml">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Starwatch · Who’s being heard in the 2026 Czech municipal elections</title>
+<meta name="description" content="Starwatch maps public posts by candidates in the 2026 Czech municipal elections in ten cities, linked to the people and party lists behind them. A snapshot collected 8–9 October 2026 by Daniel Večeřa.">
+<meta name="author" content="Daniel Večeřa">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#0C1413">
+<link rel="canonical" href="https://starwatch.agenticanalytics.cz/">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-32 -32 64 64'%3E%3Cpath fill='%230E6E6B' d='M-30,0L-10.06,8.55L-6.77,-1.31L-5.21,-0.79L-0.91,-5.09L-10.59,-8.32ZM0,30L8.55,10.06L-1.31,6.77L-0.79,5.21L-5.09,0.91L-8.32,10.59ZM30,0L10.06,-8.55L6.77,1.31L5.21,0.79L0.91,5.09L10.59,8.32ZM0,-30L-8.55,-10.06L1.31,-6.77L0.79,-5.21L5.09,-0.91L8.32,-10.59Z'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Starwatch">
+<meta property="og:locale" content="en_GB">
+<meta property="og:url" content="https://starwatch.agenticanalytics.cz/">
+<meta property="og:title" content="Starwatch · Who’s being heard. Not just who’s talking.">
+<meta property="og:description" content="Public posts by candidates in the 2026 Czech municipal elections in ten cities, linked to the people and party lists behind them. A snapshot collected 8–9 October 2026.">
+<meta property="og:image" content="https://starwatch.agenticanalytics.cz/og.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Starwatch: Who’s being heard. Not just who’s talking. Public posts in the 2026 Czech municipal elections, by Daniel Večeřa.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:creator" content="@1vecera">
+<meta name="twitter:title" content="Starwatch · Who’s being heard. Not just who’s talking.">
+<meta name="twitter:description" content="Public posts by candidates in the 2026 Czech municipal elections in ten cities. A snapshot collected 8–9 October 2026.">
+<meta name="twitter:image" content="https://starwatch.agenticanalytics.cz/og.png">
+<meta name="twitter:image:alt" content="Starwatch: Who’s being heard. Not just who’s talking. Public posts in the 2026 Czech municipal elections, by Daniel Večeřa.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Bricolage+Grotesque:opsz,wght@12..96,400..800&display=swap" rel="stylesheet">
 <style>
+/* Public welcome. Everything this page needs is inline or under welcome/, so the edge can keep the rest of the app private. */
 :root{
-  --ink:#0F172A; --ink3:#4F5E72; --paper:#F2F7F7; --night:#0C1413; --tile:#18211F; --teal:#0E6E6B;
-  --ease:cubic-bezier(.16,1,.3,1);
+  --ink:#0F172A; --ink2:#475569; --ink3:#4F5E72; --paper:#F2F7F7; --surface:#FFFFFF; --night:#0C1413; --tile:#18211F;
+  --teal:#0E6E6B; --teal-hover:#0B5F5C; --teal-press:#094F4C; --rule:rgba(22,37,36,.14); --rule-strong:rgba(22,37,36,.22);
+  --ease:cubic-bezier(.16,1,.3,1); --out:cubic-bezier(.25,1,.5,1);
   --font:'Schibsted Grotesk',-apple-system,'Segoe UI',system-ui,sans-serif;
   --display:'Bricolage Grotesque','Schibsted Grotesk',system-ui,sans-serif;
+  /* one stage pixel: the welcome was drawn on a 1920×1080 slide */
+  --u:min(100vw / 1920, 100vh / 1080);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:var(--night);overflow:hidden}
-body{font-family:var(--font);color:var(--ink);-webkit-font-smoothing:antialiased}
+html{background:var(--night);-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{min-height:100vh;min-height:100svh;font-family:var(--font);color:var(--ink);background:var(--night);-webkit-font-smoothing:antialiased;cursor:pointer;letter-spacing:-.005em}
 body.idle,body.idle *{cursor:none}
-.stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;margin:-540px 0 0 -960px;overflow:hidden;background:var(--night)}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--teal);outline-offset:3px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
 /* background: a wall of genuine posts, each column drifting at its own speed (the one ambient loop) */
-.feed{position:absolute;inset:0;display:grid;grid-template-columns:repeat(8,1fr);gap:14px;padding:0 14px}
+.feed{position:fixed;inset:0;display:grid;grid-template-columns:repeat(var(--cols,8),minmax(0,1fr));gap:var(--gap);padding:0 var(--gap);overflow:hidden;--gap:calc(14 * var(--u))}
 .col{overflow:hidden;opacity:0;animation:in 1.6s var(--ease) forwards}
-.track{display:flex;flex-direction:column;gap:14px;will-change:transform;animation:drift linear infinite}
+.track{display:flex;flex-direction:column;gap:var(--gap);will-change:transform;animation:drift linear infinite}
 .col:nth-child(even) .track{animation-name:drift-down}
-@keyframes drift{from{transform:translateY(0)}to{transform:translateY(calc(-50% - 7px))}}
-@keyframes drift-down{from{transform:translateY(calc(-50% - 7px))}to{transform:translateY(0)}}
+@keyframes drift{from{transform:translateY(0)}to{transform:translateY(calc(-50% - var(--gap) / 2))}}
+@keyframes drift-down{from{transform:translateY(calc(-50% - var(--gap) / 2))}to{transform:translateY(0)}}
 .tile{position:relative;aspect-ratio:4/5;border-radius:6px;overflow:hidden;background:var(--tile);flex:none}
 .tile img,.tile video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
-.tile b{position:absolute;left:8px;bottom:8px;background:var(--night);color:#fff;font:600 13px/1 var(--font);font-variant-numeric:lining-nums tabular-nums;padding:5px 7px 4px;border-radius:4px}
+.tile b{position:absolute;left:8px;bottom:8px;background:var(--night);color:#fff;font:600 max(11px,calc(13 * var(--u)))/1 var(--font);font-variant-numeric:lining-nums tabular-nums;padding:5px 7px 4px;border-radius:4px;white-space:nowrap}
+.tile b small{font-size:inherit;font-weight:450;margin-left:.3em;color:#D5DEDC}
 
-/* foreground: one solid block, three things */
-.card{position:absolute;left:112px;top:50%;width:900px;transform:translateY(-50%);background:var(--paper);border-radius:14px;padding:64px 76px 52px;color:inherit;text-decoration:none;display:block;box-shadow:0 2px 4px rgb(0 0 0/.18),0 30px 70px -20px rgb(0 0 0/.55);opacity:0;animation:in .9s var(--ease) .1s forwards}
-.card:focus-visible{outline:3px solid var(--teal);outline-offset:4px}
-.brand{display:flex;align-items:center;gap:22px}
-.mark{width:84px;height:84px;overflow:visible}
+/* foreground: one solid paper block */
+.wrap{position:relative;min-height:100vh;min-height:100svh}
+.card{position:absolute;left:calc(112 * var(--u));top:50%;width:calc(900 * var(--u));transform:translateY(-50%);background:var(--paper);border-radius:max(12px,calc(14 * var(--u)));padding:calc(60 * var(--u)) calc(72 * var(--u)) calc(44 * var(--u));box-shadow:0 2px 4px rgb(0 0 0/.18),0 30px 70px -20px rgb(0 0 0/.55);cursor:default;opacity:0;animation:in .9s var(--ease) .1s forwards}
+.brand{display:flex;align-items:center;gap:calc(20 * var(--u))}
+.mark{width:max(34px,calc(76 * var(--u)));height:max(34px,calc(76 * var(--u)));overflow:visible;flex:none}
 .mark g{animation:spin 1.6s var(--ease) .3s both}
 .mark path{fill:var(--teal);animation:join 1.6s var(--ease) .3s both}
 .mark path:nth-child(1){--dx:-26px;--dy:0}
@@ -45,22 +74,69 @@ body.idle,body.idle *{cursor:none}
 .mark path:nth-child(4){--dx:0;--dy:-26px}
 @keyframes join{from{opacity:0;transform:translate(var(--dx),var(--dy))}to{opacity:1;transform:none}}
 @keyframes spin{from{transform:rotate(-90deg)}to{transform:none}}
-.word{height:50px;width:auto;margin-top:4px}
-h1{font-family:var(--display);font-optical-sizing:auto;font-weight:720;font-size:92px;line-height:.98;letter-spacing:-.036em;margin-top:56px;text-wrap:balance}
+.word{height:max(21px,calc(46 * var(--u)));width:auto;color:var(--ink);margin-top:calc(4 * var(--u))}
+h1{font-family:var(--display);font-optical-sizing:auto;font-weight:720;font-size:max(34px,calc(84 * var(--u)));line-height:.98;letter-spacing:-.036em;margin-top:calc(48 * var(--u));text-wrap:balance}
 h1 span{color:var(--teal)}
-.credit{margin-top:44px;font-size:17px;color:var(--ink3);display:flex;justify-content:space-between;gap:24px}
-.credit kbd{font:600 14px/1 var(--font);border:1px solid rgba(15,23,42,.18);border-radius:5px;padding:4px 7px;color:var(--ink);background:#fff}
+.lede{margin-top:calc(26 * var(--u));max-width:40ch;font-size:max(15px,calc(24 * var(--u)));line-height:1.45;color:var(--ink2);text-wrap:pretty}
+.lede b{color:var(--ink);font-weight:600}
+.go{display:flex;align-items:center;flex-wrap:wrap;gap:calc(14 * var(--u)) calc(24 * var(--u));margin-top:calc(36 * var(--u))}
+.cta{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:max(46px,calc(66 * var(--u)));padding:0 max(20px,calc(30 * var(--u)));border-radius:max(10px,calc(12 * var(--u)));background:var(--teal);color:#fff;text-decoration:none;font-size:max(16px,calc(23 * var(--u)));font-weight:650;letter-spacing:-.01em;transition:background .2s var(--out),transform .2s var(--out)}
+.cta svg{width:1em;height:1em;flex:none;transition:transform .35s var(--out)}
+.cta:hover{background:var(--teal-hover)}
+.cta:hover svg{transform:translateX(4px)}
+.cta:active{background:var(--teal-press);transform:scale(.98)}
+.cta:focus-visible{outline-offset:4px}
+.signin{font-size:max(13px,calc(17 * var(--u)));color:var(--ink3);line-height:1.4}
+.by{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:calc(14 * var(--u)) calc(24 * var(--u));margin-top:calc(40 * var(--u));padding-top:calc(28 * var(--u));border-top:1px solid var(--rule)}
+.who{display:flex;flex-direction:column;gap:2px;font-size:max(14px,calc(19 * var(--u)));line-height:1.3}
+.who b{font-weight:650;color:var(--ink)}
+.who span{color:var(--ink3);font-size:.88em}
+.follow{display:flex;flex-wrap:wrap;gap:calc(12 * var(--u))}
+.fb{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:max(42px,calc(54 * var(--u)));padding:0 max(14px,calc(20 * var(--u)));border-radius:max(9px,calc(10 * var(--u)));background:var(--surface);border:1px solid var(--rule-strong);color:var(--ink);text-decoration:none;font-size:max(14px,calc(18 * var(--u)));font-weight:600;white-space:nowrap;transition:border-color .2s var(--out),background .2s var(--out),transform .2s var(--out)}
+.fb svg{width:1.05em;height:1.05em;flex:none;fill:currentColor}
+.fb:hover{border-color:var(--ink);background:#fff}
+.fb:active{transform:scale(.98)}
+.links{display:flex;flex-wrap:wrap;gap:6px 20px;margin-top:calc(22 * var(--u));font-size:max(12.5px,calc(15 * var(--u)));color:var(--ink3)}
+.links a{color:var(--ink2);text-decoration:underline;text-decoration-color:var(--rule-strong);text-underline-offset:.22em;text-decoration-thickness:1px}
+.links a:hover{color:var(--ink);text-decoration-color:currentColor}
+
 .r{opacity:0;transform:translateY(16px);animation:rise 1s var(--ease) forwards}
 @keyframes rise{to{opacity:1;transform:none}}
 @keyframes in{to{opacity:1}}
-@media (prefers-reduced-motion:reduce){.track{animation:none}.r,.col,.card,.mark g,.mark path{animation-duration:.01s;animation-delay:0s}}
-body{cursor:pointer}
+
+/* portrait and narrow screens: the wall becomes a background, the paper block sits at the bottom and scrolls */
+@media (max-width:999px),(max-aspect-ratio:5/4){
+  .feed{--cols:3;--gap:8px}
+  .tile{border-radius:5px}
+  .tile b{left:6px;bottom:6px;font-size:11px;padding:4px 6px 3px}
+  .wrap{display:flex;flex-direction:column;justify-content:flex-end;padding:max(18svh,96px) 12px calc(12px + env(safe-area-inset-bottom))}
+  .card{position:relative;left:auto;top:auto;transform:none;width:100%;max-width:600px;margin:0 auto;border-radius:18px;padding:22px 20px 18px}
+  .brand{gap:12px}
+  .mark{width:34px;height:34px}
+  .word{height:21px;margin-top:2px}
+  h1{font-size:clamp(32px,9.8vw,52px);margin-top:20px;line-height:1}
+  .lede{margin-top:12px;font-size:15.5px;line-height:1.48}
+  .go{flex-direction:column;align-items:stretch;gap:8px;margin-top:20px}
+  .cta{min-height:52px;font-size:17px;border-radius:12px}
+  .signin{text-align:center;font-size:13.5px}
+  .by{flex-direction:column;align-items:stretch;gap:12px;margin-top:18px;padding-top:16px}
+  .who{font-size:15px}
+  .follow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .fb{min-height:46px;font-size:15px;padding:0 12px}
+  .links{margin-top:14px;gap:4px 16px;font-size:13px}
+}
+@media (max-width:999px) and (min-width:600px),(max-aspect-ratio:5/4) and (min-width:600px){.feed{--cols:4;--gap:10px}}
+@media (max-width:359px){.follow{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.track{animation:none}.r,.col,.card,.mark g,.mark path{animation-duration:.01s;animation-delay:0s}.cta,.fb,.cta svg{transition:none}}
+/* hand-off to Star Atlas: fade to the Atlas canvas colour, then navigate */
+.leave{position:fixed;inset:0;z-index:10;background:var(--paper);opacity:0;pointer-events:none;transition:opacity .7s var(--out)}
+.leave.on{opacity:1}
 </style>
 </head>
 <body>
-<div class="stage" id="stage">
-  <div class="feed" id="feed" aria-label="The 48 most-viewed public posts by Czech politicians in the Starwatch data, with observed views"></div>
-  <a class="card" href="atlas.html" id="open" aria-label="Open Starwatch">
+<div class="feed" id="feed" role="img" aria-label="A wall of the most-viewed public posts by candidates in the Starwatch snapshot, with their observed views"></div>
+<div class="wrap">
+  <main class="card" id="card">
     <div class="brand">
       <svg class="mark" viewBox="-32 -32 64 64" aria-hidden="true"><g>
         <path d="M-30,0L-10.06,8.55L-6.77,-1.31L-5.21,-0.79L-0.91,-5.09L-10.59,-8.32Z"/>
@@ -68,40 +144,78 @@ body{cursor:pointer}
         <path d="M30,0L10.06,-8.55L6.77,1.31L5.21,0.79L0.91,5.09L10.59,8.32Z"/>
         <path d="M0,-30L-8.55,-10.06L1.31,-6.77L0.79,-5.21L5.09,-0.91L8.32,-10.59Z"/>
       </g></svg>
-      <img class="word r" style="animation-delay:.9s" src="brand/wordmark.svg" alt="Starwatch">
+      <svg class="word r" style="animation-delay:.9s" viewBox="0 -0.5 189.3 37.1" role="img" aria-label="Starwatch"><g transform="translate(1 27.28)"><path fill="currentColor" d="M12.19 0.68Q8.71 0.68 6.31 -0.43Q3.91 -1.55 2.65 -3.5Q1.4 -5.45 1.4 -7.96H6.41Q6.41 -6.89 6.98 -5.91Q7.56 -4.93 8.83 -4.32Q10.1 -3.71 12.19 -3.71Q14.08 -3.71 15.33 -4.24Q16.58 -4.77 17.2 -5.66Q17.82 -6.55 17.82 -7.67Q17.82 -9.05 16.63 -9.9Q15.44 -10.75 12.94 -10.96L10.64 -11.16Q6.86 -11.48 4.61 -13.52Q2.36 -15.55 2.36 -18.9Q2.36 -21.4 3.55 -23.22Q4.73 -25.04 6.88 -26.04Q9.02 -27.04 11.9 -27.04Q14.89 -27.04 17.05 -25.99Q19.22 -24.95 20.4 -23.06Q21.58 -21.17 21.58 -18.61H16.58Q16.58 -19.67 16.06 -20.59Q15.55 -21.51 14.52 -22.08Q13.48 -22.64 11.9 -22.64Q10.39 -22.64 9.38 -22.13Q8.37 -21.62 7.87 -20.76Q7.36 -19.91 7.36 -18.9Q7.36 -17.68 8.26 -16.76Q9.16 -15.84 11.11 -15.68L13.41 -15.48Q16.24 -15.25 18.35 -14.27Q20.47 -13.3 21.64 -11.65Q22.82 -10.01 22.82 -7.67Q22.82 -5.18 21.52 -3.29Q20.21 -1.4 17.83 -0.36Q15.44 0.68 12.19 0.68Z M35.23 0.25Q32.53 0.25 30.78 -0.45Q29.03 -1.15 28.18 -2.82Q27.32 -4.48 27.32 -7.33L27.34 -25.06H32.02L32 -7.02Q32 -5.58 32.78 -4.81Q33.55 -4.03 34.99 -4.03H38.05V0.25ZM24.23 -15.88V-19.55H38.05V-15.88Z M53.73 0V-5.8H52.9V-12.24Q52.9 -13.91 52.07 -14.75Q51.25 -15.59 49.54 -15.59Q48.64 -15.59 47.38 -15.55Q46.12 -15.52 44.84 -15.46Q43.56 -15.41 42.55 -15.34V-19.58Q43.38 -19.66 44.41 -19.72Q45.45 -19.78 46.56 -19.81Q47.66 -19.84 48.64 -19.84Q51.64 -19.84 53.65 -19.03Q55.66 -18.23 56.67 -16.54Q57.69 -14.85 57.69 -12.11V0ZM47.43 0.5Q45.31 0.5 43.71 -0.24Q42.12 -0.99 41.24 -2.4Q40.36 -3.82 40.36 -5.8Q40.36 -7.94 41.41 -9.31Q42.46 -10.69 44.39 -11.37Q46.31 -12.04 48.91 -12.04H53.44V-9.05H48.83Q47.12 -9.05 46.21 -8.22Q45.29 -7.38 45.29 -6.03Q45.29 -4.7 46.21 -3.88Q47.12 -3.06 48.83 -3.06Q49.88 -3.06 50.77 -3.44Q51.66 -3.82 52.24 -4.72Q52.83 -5.63 52.9 -7.24L54.13 -5.83Q53.95 -3.78 53.14 -2.38Q52.33 -0.97 50.9 -0.23Q49.48 0.5 47.43 0.5Z M62.71 0V-19.55H66.67V-11.27H66.56Q66.56 -15.46 68.36 -17.63Q70.16 -19.8 73.66 -19.8H74.38V-15.44H73.01Q70.47 -15.44 69.09 -14.08Q67.72 -12.73 67.72 -10.17V0Z M84.06 0 87.77 -18.9H93.53L97.81 0H93.85L89.5 -18.79H91.58L87.71 0ZM82.57 0 82.55 -4.1H86.53L86.54 0ZM80.57 0 75.24 -19.55H80.1L85.16 0ZM95.09 0 95.11 -4.1H99.09L99.07 0ZM96.7 0 101.18 -19.55H105.73L101 0Z M121.12 0V-5.8H120.29V-12.24Q120.29 -13.91 119.47 -14.75Q118.64 -15.59 116.93 -15.59Q116.03 -15.59 114.77 -15.55Q113.51 -15.52 112.23 -15.46Q110.95 -15.41 109.94 -15.34V-19.58Q110.77 -19.66 111.81 -19.72Q112.84 -19.78 113.95 -19.81Q115.06 -19.84 116.03 -19.84Q119.03 -19.84 121.04 -19.03Q123.05 -18.23 124.06 -16.54Q125.08 -14.85 125.08 -12.11V0ZM114.82 0.5Q112.7 0.5 111.1 -0.24Q109.51 -0.99 108.63 -2.4Q107.75 -3.82 107.75 -5.8Q107.75 -7.94 108.8 -9.31Q109.85 -10.69 111.78 -11.37Q113.71 -12.04 116.3 -12.04H120.83V-9.05H116.23Q114.52 -9.05 113.6 -8.22Q112.68 -7.38 112.68 -6.03Q112.68 -4.7 113.6 -3.88Q114.52 -3.06 116.23 -3.06Q117.27 -3.06 118.16 -3.44Q119.05 -3.82 119.64 -4.72Q120.22 -5.63 120.29 -7.24L121.52 -5.83Q121.34 -3.78 120.53 -2.38Q119.72 -0.97 118.3 -0.23Q116.87 0.5 114.82 0.5Z M138.58 0.25Q135.88 0.25 134.14 -0.45Q132.39 -1.15 131.53 -2.82Q130.68 -4.48 130.68 -7.33L130.7 -25.06H135.38L135.36 -7.02Q135.36 -5.58 136.13 -4.81Q136.91 -4.03 138.35 -4.03H141.41V0.25ZM127.58 -15.88V-19.55H141.41V-15.88Z M153.92 0.68Q151.38 0.68 149.52 -0.17Q147.65 -1.03 146.42 -2.47Q145.19 -3.92 144.58 -5.72Q143.96 -7.52 143.96 -9.4V-10.08Q143.96 -12.04 144.59 -13.86Q145.22 -15.68 146.47 -17.11Q147.73 -18.54 149.58 -19.39Q151.43 -20.23 153.88 -20.23Q156.46 -20.23 158.46 -19.24Q160.47 -18.25 161.68 -16.49Q162.88 -14.72 163.03 -12.38H158.17Q157.99 -13.88 156.9 -14.89Q155.81 -15.91 153.88 -15.91Q152.23 -15.91 151.14 -15.12Q150.05 -14.33 149.51 -12.94Q148.97 -11.56 148.97 -9.74Q148.97 -8.01 149.48 -6.62Q149.99 -5.22 151.09 -4.43Q152.19 -3.64 153.92 -3.64Q155.23 -3.64 156.17 -4.1Q157.1 -4.57 157.66 -5.39Q158.22 -6.21 158.35 -7.27H163.21Q163.08 -4.88 161.84 -3.1Q160.6 -1.31 158.55 -0.31Q156.51 0.68 153.92 0.68Z M166.86 0V-26.28H171.86V-10.94H171Q171 -13.88 171.75 -15.94Q172.49 -18 174 -19.08Q175.5 -20.16 177.79 -20.16H178Q181.35 -20.16 183.09 -17.85Q184.82 -15.53 184.82 -11.14V0H179.82V-11.63Q179.82 -13.48 178.75 -14.57Q177.68 -15.66 175.95 -15.66Q174.11 -15.66 172.99 -14.45Q171.86 -13.25 171.86 -11.29V0Z"/></g></svg>
     </div>
-    <h1 class="r" style="animation-delay:1.3s">Who’s being heard. <span>Not just who’s talking.</span></h1>
-    <p class="credit r" style="animation-delay:1.8s"><span>Daniel Večeřa · DANDAPANDA · Agents 0.0.7, Prague</span><span><kbd>Enter</kbd></span></p>
-  </a>
+    <h1 class="r" style="animation-delay:1.2s">Who’s being heard. <span>Not just who’s talking.</span></h1>
+    <p class="lede r" style="animation-delay:1.4s">Public posts by candidates in the 2026 Czech municipal elections in ten cities, collected 8–9 October 2026. <b>A snapshot, not live.</b></p>
+    <div class="go r" style="animation-delay:1.6s">
+      <a class="cta" id="open" href="atlas.html">Open Star Atlas<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <p class="signin">Sign in with GitHub, Google or Facebook</p>
+    </div>
+    <div class="by r" style="animation-delay:1.8s">
+      <p class="who"><b>Made by Daniel Večeřa</b><span>Prague</span></p>
+      <div class="follow">
+        <a class="fb" href="https://www.linkedin.com/in/1vecera/" target="_blank" rel="noopener me"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.23 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>Follow on LinkedIn</a>
+        <a class="fb" href="https://x.com/1vecera" target="_blank" rel="noopener me"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.9 1.15h3.68l-8.04 9.19L24 22.85h-7.41l-5.8-7.58-6.64 7.58H.47l8.6-9.83L0 1.15h7.59l5.24 6.93zm-1.29 19.5h2.04L6.49 3.24H4.3z"/></svg>Follow on X</a>
+      </div>
+    </div>
+    <nav class="links r" style="animation-delay:1.9s" aria-label="About this site"><a href="about.html">How Starwatch works</a><a href="/privacy">Privacy</a><a href="https://github.com/1vecera/starwatch" target="_blank" rel="noopener">Open source on GitHub</a><span>Started at Agents 0.0.7, Prague</span></nav>
+  </main>
 </div>
 <script>
-const TILES=[{"i":"media/21f8c2727978c72dd2ce6e03.jpg","v":1708389},{"i":"media/86441c3817122d16a76bcfed.jpg","v":1237271},{"i":"media/4d6ea7d4bbefc67e6a22eb49.jpg","v":771502},{"i":"media/76e2e84684964b63620ffce3.jpg","v":295463},{"i":"media/c26f83b45429d10b42134008.jpg","v":264134,"m":"media/8e9161f6795f3dc7bc3a2d16.mp4"},{"i":"media/f9662a8806d03c2dacc83837.jpg","v":231666},{"i":"media/be2962a1e92a9af64c4e1796.jpg","v":220611},{"i":"media/0cac4e16e0ade598be937d12.jpg","v":220003},{"i":"media/e52e6649dd2618ee2f9ca70b.jpg","v":213990},{"i":"media/5511331484fe4e0f7f810abd.jpg","v":199026},{"i":"media/29fe9b1d64c67380f71ada4d.jpg","v":196644},{"i":"media/fd8934402c9ba8c7c67277e6.jpg","v":185300},{"i":"media/6fe423d9a3215252da0f895b.jpg","v":173166},{"i":"media/0146c4a0e2d15c3efa9b87cf.jpg","v":162089},{"i":"media/10b4a951bc8d580a739c6d5c.jpg","v":124707},{"i":"media/3fc5bda0c787b8093ef8cf5c.jpg","v":112986},{"i":"media/4853ef8c6e0a85f02cbd632a.jpg","v":109875},{"i":"media/c0ad48a189e001fc13797f81.jpg","v":107939},{"i":"media/80824153a5827b63d7fb6c99.jpg","v":107005},{"i":"media/d8a04b8abd8943cb85aafddc.jpg","v":104965},{"i":"media/6dc0cb744f5e8ed38b802fa1.jpg","v":96200},{"i":"media/669c4eec6db3f611291e5ae1.jpg","v":93518,"m":"media/a06ca4d8e0ecf933374ef9b6.mp4"},{"i":"media/9d41ad95becdcf10dcf16007.jpg","v":93366},{"i":"media/aa9ab5584f77a1f144a2735c.jpg","v":81879},{"i":"media/997293b0d537e8383f885f2e.jpg","v":79294},{"i":"media/37d1145a31dd4278f99fe436.jpg","v":71837},{"i":"media/0fc9d0e996c90853b8c5ffbd.png","v":70300},{"i":"media/496f0fc8bb068e1c7d649168.jpg","v":67815},{"i":"media/7c949ad304789a33c72586e4.jpg","v":65847},{"i":"media/3f5dd3a5b518c3c6327fea1d.png","v":61700},{"i":"media/a64d0d1bad581c67536d3ac3.jpg","v":58232,"m":"media/c915d513be033271444cfd95.mp4"},{"i":"media/05ac90aeb419bcf5d31493b6.jpg","v":57884},{"i":"media/6136cbaa81550b091ce02ddd.jpg","v":56251},{"i":"media/49f1a8777887d708403c179e.jpg","v":55009},{"i":"media/62393656f8bd1ffd8e612136.jpg","v":54655,"m":"media/e82ffea80a63b79b8e032ad1.mp4"},{"i":"media/3e9a844e88c6803c25efeae8.jpg","v":50155},{"i":"media/6f4005c316cbe32e58363123.png","v":48900},{"i":"media/0c429b121ce268fbd117e8d0.png","v":48200},{"i":"media/95b753e4939de41f028d07c3.jpg","v":47389,"m":"media/c605dde931f8ed81b66107ea.mp4"},{"i":"media/042d46db1278a3c35c158a6b.jpg","v":46329},{"i":"media/7726cbd95c756a88cbcdaff0.jpg","v":43500},{"i":"media/9e413e72c3efb5b0137077fa.jpg","v":41219},{"i":"media/42baf49cc398ddcb2ae61b1c.jpg","v":40800},{"i":"media/c4f56ce74ff4db4e99461fc8.jpg","v":39660},{"i":"media/ed1df4d0963b8a1cfb12fae0.jpg","v":36485},{"i":"media/97d4e91186fdd12170a3f7fe.jpg","v":35900},{"i":"media/c96f5f1f2bebd2c2239eef02.jpg","v":35480},{"i":"media/7d959f9299f6d3001a18167b.jpg","v":31800}];
 (function(){
-  const feed=document.getElementById('feed'), N=8, cols=[...Array(N)].map(()=>[]);
-  TILES.forEach((t,i)=>cols[i%N].push(t));
-  const fmt=n=>n.toLocaleString('cs-CZ');
-  const speeds=[150,118,172,132,160,124,146,138], phase=[0,.37,.62,.18,.81,.44,.07,.55];
-  const tile=t=>`<figure class="tile"><img src="${t.i}" alt="" decoding="async">${t.m?`<video src="${t.m}" poster="${t.i}" muted autoplay loop playsinline preload="auto" aria-hidden="true"></video>`:''}<b>${fmt(t.v)}</b></figure>`;
+"use strict";
+/* The 48 most-viewed posts with a retained image (5 also play as video), with their observed views. */
+const TILES=[{"i":"welcome/21f8c2727978c72dd2ce6e03.jpg","v":1708389},{"i":"welcome/86441c3817122d16a76bcfed.jpg","v":1237271},{"i":"welcome/4d6ea7d4bbefc67e6a22eb49.jpg","v":771502},{"i":"welcome/76e2e84684964b63620ffce3.jpg","v":295463},{"i":"welcome/c26f83b45429d10b42134008.jpg","v":264134,"m":"welcome/8e9161f6795f3dc7bc3a2d16.mp4"},{"i":"welcome/f9662a8806d03c2dacc83837.jpg","v":231666},{"i":"welcome/be2962a1e92a9af64c4e1796.jpg","v":220611},{"i":"welcome/0cac4e16e0ade598be937d12.jpg","v":220003},{"i":"welcome/e52e6649dd2618ee2f9ca70b.jpg","v":213990},{"i":"welcome/5511331484fe4e0f7f810abd.jpg","v":199026},{"i":"welcome/29fe9b1d64c67380f71ada4d.jpg","v":196644},{"i":"welcome/fd8934402c9ba8c7c67277e6.jpg","v":185300},{"i":"welcome/6fe423d9a3215252da0f895b.jpg","v":173166},{"i":"welcome/0146c4a0e2d15c3efa9b87cf.jpg","v":162089},{"i":"welcome/10b4a951bc8d580a739c6d5c.jpg","v":124707},{"i":"welcome/3fc5bda0c787b8093ef8cf5c.jpg","v":112986},{"i":"welcome/4853ef8c6e0a85f02cbd632a.jpg","v":109875},{"i":"welcome/c0ad48a189e001fc13797f81.jpg","v":107939},{"i":"welcome/80824153a5827b63d7fb6c99.jpg","v":107005},{"i":"welcome/d8a04b8abd8943cb85aafddc.jpg","v":104965},{"i":"welcome/6dc0cb744f5e8ed38b802fa1.jpg","v":96200},{"i":"welcome/669c4eec6db3f611291e5ae1.jpg","v":93518,"m":"welcome/a06ca4d8e0ecf933374ef9b6.mp4"},{"i":"welcome/9d41ad95becdcf10dcf16007.jpg","v":93366},{"i":"welcome/aa9ab5584f77a1f144a2735c.jpg","v":81879},{"i":"welcome/997293b0d537e8383f885f2e.jpg","v":79294},{"i":"welcome/37d1145a31dd4278f99fe436.jpg","v":71837},{"i":"welcome/0fc9d0e996c90853b8c5ffbd.png","v":70300},{"i":"welcome/496f0fc8bb068e1c7d649168.jpg","v":67815},{"i":"welcome/7c949ad304789a33c72586e4.jpg","v":65847},{"i":"welcome/3f5dd3a5b518c3c6327fea1d.png","v":61700},{"i":"welcome/a64d0d1bad581c67536d3ac3.jpg","v":58232,"m":"welcome/c915d513be033271444cfd95.mp4"},{"i":"welcome/05ac90aeb419bcf5d31493b6.jpg","v":57884},{"i":"welcome/6136cbaa81550b091ce02ddd.jpg","v":56251},{"i":"welcome/49f1a8777887d708403c179e.jpg","v":55009},{"i":"welcome/62393656f8bd1ffd8e612136.jpg","v":54655,"m":"welcome/e82ffea80a63b79b8e032ad1.mp4"},{"i":"welcome/3e9a844e88c6803c25efeae8.jpg","v":50155},{"i":"welcome/6f4005c316cbe32e58363123.png","v":48900},{"i":"welcome/0c429b121ce268fbd117e8d0.png","v":48200},{"i":"welcome/95b753e4939de41f028d07c3.jpg","v":47389,"m":"welcome/c605dde931f8ed81b66107ea.mp4"},{"i":"welcome/042d46db1278a3c35c158a6b.jpg","v":46329},{"i":"welcome/7726cbd95c756a88cbcdaff0.jpg","v":43500},{"i":"welcome/9e413e72c3efb5b0137077fa.jpg","v":41219},{"i":"welcome/42baf49cc398ddcb2ae61b1c.jpg","v":40800},{"i":"welcome/c4f56ce74ff4db4e99461fc8.jpg","v":39660},{"i":"welcome/ed1df4d0963b8a1cfb12fae0.jpg","v":36485},{"i":"welcome/97d4e91186fdd12170a3f7fe.jpg","v":35900},{"i":"welcome/c96f5f1f2bebd2c2239eef02.jpg","v":35480},{"i":"welcome/7d959f9299f6d3001a18167b.jpg","v":31800}];
+const feed=document.getElementById('feed');
+const fmt=n=>n.toLocaleString('cs-CZ');
+const speeds=[150,118,172,132,160,124,146,138], phase=[0,.37,.62,.18,.81,.44,.07,.55];
+const wide=matchMedia('(min-width:1000px) and (min-aspect-ratio:5/4)');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)');
+const saveData=!!(navigator.connection&&navigator.connection.saveData);
+function build(){
+  const W=wide.matches, N=W?8:(innerWidth>=600?4:3), n=W?TILES.length:N*8, video=W&&!saveData&&!reduce.matches;
+  const cols=[...Array(N)].map(()=>[]);
+  TILES.slice(0,n).forEach((t,i)=>cols[i%N].push(t));
+  const tile=t=>`<figure class="tile"><img src="${t.i}" alt="" decoding="async">${video&&t.m?`<video src="${t.m}" poster="${t.i}" muted autoplay loop playsinline preload="auto" aria-hidden="true"></video>`:''}<b>${fmt(t.v)}<small>views</small></b></figure>`;
+  feed.textContent='';
   cols.forEach((c,k)=>{
-    const html=c.map(tile).join('');
-    const col=document.createElement('div'); col.className='col'; col.style.animationDelay=(k*.08)+'s';
-    col.innerHTML=`<div class="track" style="animation-duration:${speeds[k]}s;animation-delay:-${(phase[k]*speeds[k]).toFixed(1)}s">${html}${html}</div>`;
+    const html=c.map(tile).join(''), sp=speeds[k%8]*(W?1:1.15);
+    const col=document.createElement('div');col.className='col';col.style.animationDelay=(k*.08)+'s';
+    col.innerHTML=`<div class="track" style="animation-duration:${sp}s;animation-delay:-${(phase[k%8]*sp).toFixed(1)}s">${html}${html}</div>`;
     feed.appendChild(col);
   });
-  feed.querySelectorAll('video').forEach(v=>{v.muted=true;const p=v.play();if(p)p.catch(()=>{});});
-  feed.querySelectorAll('img').forEach(img=>img.addEventListener('error',()=>img.closest('.tile').remove()));
-  const stage=document.getElementById('stage');
-  const fit=()=>{stage.style.transform=`scale(${Math.min(innerWidth/1920,innerHeight/1080)})`};
-  addEventListener('resize',fit); fit();
-  addEventListener('click',e=>{e.preventDefault();swGo();});  /* a click anywhere opens the map */
-  addEventListener('keydown',e=>{
-    if(e.key==='Enter'||e.key==='ArrowRight'){e.preventDefault();swGo();}
-    else if(e.key==='f'||e.key==='F'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{});}
-  });
-  let t; const wake=()=>{document.body.classList.remove('idle');clearTimeout(t);t=setTimeout(()=>document.body.classList.add('idle'),2000)};
-  addEventListener('mousemove',wake); wake();
+  feed.querySelectorAll('video').forEach(v=>{v.muted=true;const p=v.play();if(p)p.catch(()=>{})});
+  feed.querySelectorAll('img').forEach(img=>img.addEventListener('error',()=>{const f=img.closest('.tile');f&&f.remove()}));
+}
+build();
+wide.addEventListener('change',build);
+
+/* hand-off: fade into the Atlas canvas colour, then open the map (the edge asks for sign-in first when needed) */
+let leaving=false;
+function go(){
+  if(leaving)return;leaving=true;
+  const v=document.createElement('div');v.className='leave';document.body.appendChild(v);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>v.classList.add('on')));
+  setTimeout(()=>{location.href='atlas.html'},reduce.matches?0:600);
+}
+/* a click anywhere opens the map; other links (follow, privacy, source) keep their own destination */
+addEventListener('click',e=>{
+  const a=e.target.closest('a');
+  if(a&&a.id!=='open')return;
+  if(e.metaKey||e.ctrlKey||e.shiftKey||e.button)return;
+  e.preventDefault();go();
+});
+addEventListener('pageshow',e=>{if(e.persisted){leaving=false;document.querySelectorAll('.leave').forEach(x=>x.remove())}});
+addEventListener('keydown',e=>{
+  const a=document.activeElement;
+  if(e.key==='Enter'||e.key==='ArrowRight'){if(a&&a.closest&&a.closest('a,button')&&a.id!=='open')return;e.preventDefault();go()}
+  else if((e.key==='f'||e.key==='F')&&wide.matches&&!e.metaKey&&!e.ctrlKey){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>{})}
+});
+/* presenter mode: in full screen the pointer hides after two idle seconds */
+let t;const wake=()=>{document.body.classList.remove('idle');clearTimeout(t);if(document.fullscreenElement)t=setTimeout(()=>document.body.classList.add('idle'),2000)};
+addEventListener('mousemove',wake);document.addEventListener('fullscreenchange',wake);
 })();
 </script>
-<script src="fx/welcome-go.js"></script>
 </body>
 </html>

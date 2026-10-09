@@ -125,13 +125,18 @@ body{overflow:hidden;background:var(--space)}
 .topics{display:flex;flex-wrap:wrap;gap:5px}
 .tchip{display:inline-flex;align-items:center;gap:5px;height:25px;padding:0 9px;border-radius:13px;font-size:12px;font-weight:550;background:var(--surface);border:1px solid var(--hairline-strong);color:var(--label)}
 .tchip em{font-style:normal;color:var(--label3);font-weight:500;font-variant-numeric:tabular-nums}
-.tchip.on{background:var(--brand);border-color:var(--brand);color:#fff}.tchip.on em{color:rgba(255,255,255,.8)}
+.tchip.on{background:var(--brand);border-color:var(--brand);color:#fff}.tchip.on em{color:rgba(255,255,255,.85)}
+.tchip.iss{border-style:dashed}
 .crow{display:grid;grid-template-columns:1fr auto;gap:8px;width:100%;padding:7px 6px;text-align:left;font-size:13.5px;align-items:center;border-radius:7px;background:none;border:0}
 .crow b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .crow span{text-align:right;font-variant-numeric:tabular-nums;color:var(--label2);font-size:12.5px;display:flex;align-items:center;gap:8px;justify-content:flex-end}
 .crow span i{display:block;height:3px;border-radius:2px;background:var(--brand);opacity:.55}
 .crow:hover,.crow.hl{background:rgba(241,244,248,.9)}.crow:hover b,.crow.hl b{color:var(--brand)}
 #picker.gone{display:none}
+#pFind{width:100%;justify-content:flex-start}#pFind span{flex:1;text-align:left}
+.pon{display:flex;align-items:center;gap:10px;margin-top:8px;padding:8px 8px 8px 10px;border-radius:10px;background:var(--brand-soft)}
+.pon .t{flex:1;min-width:0;font-size:12.5px;color:var(--label2);line-height:1.35}.pon .t b{display:block;font-size:13.5px;color:var(--label);font-weight:650}
+.pon button.x{width:28px;height:28px;border-radius:7px;display:grid;place-items:center;color:var(--label2);flex:none}.pon button.x:hover{background:rgba(15,23,42,.07);color:var(--label)}
 .bigc{display:flex;align-items:center;gap:8px;width:100%;padding:6px 8px 6px 4px;border-radius:9px;background:var(--brand-soft);border:1px solid color-mix(in srgb,var(--brand) 30%,transparent);font-size:12.5px;color:var(--label2);text-align:left;margin-bottom:6px}
 .bigc b{color:var(--label);font-weight:650}.bigc:hover b{color:var(--brand)}
 .rk{display:grid;grid-template-columns:16px 28px 1fr auto;gap:8px;align-items:center;width:100%;padding:5px 6px;border-radius:7px;text-align:left;font-size:13px;background:none;border:0}
@@ -181,6 +186,7 @@ body{overflow:hidden;background:var(--space)}
 .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}.acts a{text-decoration:none}
 .clm{margin:6px 0;padding:7px 10px;background:var(--sunken);border-radius:6px;font-size:13px;line-height:1.4}
 .note{font-size:12px;color:var(--label3);margin-top:8px;line-height:1.45}
+.ctxp{margin-top:18px;padding-top:14px;border-top:1px solid var(--hairline)}
 .agrid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:8px}
 .agrid .th{position:relative;aspect-ratio:1}
 .agrid .th:first-child{grid-column:span 2;grid-row:span 2}
@@ -226,8 +232,9 @@ body{overflow:hidden;background:var(--space)}
     <section><div class="sh"><span class="t-cap">Rank by</span></div><div class="seg" id="fRank"></div><div class="rnote" id="subtitle"></div>
       <div class="frow"><div class="seg" id="fWin"></div></div>
       <div class="frow"><span id="fPlat" style="display:contents"></span><button id="fBare" hidden></button></div></section>
+    <section id="partyS"><div class="sh"><span class="t-cap">Party or list</span><span class="u" id="partyU"></span></div><button class="swk-trigger" id="pFind" aria-haspopup="dialog"></button><div id="partyOn"></div></section>
     <section id="picker"><div class="sh"><span class="t-cap">City councils</span><span class="u" id="pickU"></span></div><div id="clist"></div></section>
-    <section id="topicS" hidden><div class="sh"><span class="t-cap">Topic lens</span></div><div class="topics" id="topics"></div></section>
+    <section id="topicS" hidden><div class="sh"><span class="t-cap">Topics</span><span class="u" id="topicU"></span></div><div class="topics" id="topics"></div><div class="rnote" id="topicN"></div></section>
     <section id="candS" hidden><div class="sh"><span class="t-cap">Top candidates</span><span class="u" id="candU"></span></div><button class="bigc" id="bigc" hidden></button><div id="topc"></div></section>
     <section id="listS" hidden><div class="sh"><span class="t-cap">Parties and lists</span><span class="u" id="listU"></span></div><div id="lists"></div></section>
     <div class="meth" id="meth"></div>
@@ -241,8 +248,13 @@ body{overflow:hidden;background:var(--space)}
 <div class="tip" id="tip"></div>
 <script src="data/real.js"></script>
 <script src="data/issue-topics.js"></script>
+<script src="data/topic-labels.js"></script>
 <script src="mock.js"></script>
 <script src="sw-real.js"></script>
+<script src="sw-picker.js"></script>
+<script src="data/programs.js"></script>
+<script src="data/articles.js"></script>
+<script src="sw-panels.js"></script>
 <script src="geo/cz.js"></script>
 <script src="geo/cz-border.js"></script>
 <script src="vendor/maplibre-gl-4.7.1.js"></script>
@@ -267,15 +279,18 @@ const RANKS={reach:{b:'Reach',long:'reach',unit:'reach',phrase:'reach: views whe
   views:{b:'Views',long:'views',unit:'views',phrase:'reported views'},
   eng:{b:'Likes + comments',long:'likes + comments',unit:'likes + comments',phrase:'likes + comments'},
   posts:{b:'Posts',long:'posts',unit:'posts',phrase:'number of verified posts'}};
-const S={city:-1,list:-1,cand:-1,asset:-1,rank:RANKS[q.get('rank')]?q.get('rank'):'reach',win:999,plats:new Set(),topic:-1,bare:!REAL};
+const S={city:-1,list:-1,cand:-1,asset:-1,rank:RANKS[q.get('rank')]?q.get('rank'):'reach',win:999,plats:new Set(),topic:-1,bare:!REAL,party:null,pset:null};
+function setParty(g){S.party=g?g.key:null;S.pset=g?new Set(g.lists):null}
 const U=()=>RANKS[S.rank];
+const TOPIC_NOTE=SW.TOPIC_NOTE||'Topic labels may be wrong.';
+const mlab=(a,t)=>{const m=SW.topicMeta?SW.topicMeta(a,t):{};return m.machine?`<span class="sw-mlab" title="Machine label${m.evidence?` · “${esc(m.evidence)}”`:''}">machine</span>`:''};
 
 /* ---------- metric and filters ---------- */
 const eng=a=>(a.na&&a.na.likes?0:a.likes)+(a.na&&a.na.comments?0:a.comments);
 const aval=a=>S.rank==='reach'?a.reach:S.rank==='views'?(a.na&&a.na.views?0:a.views):S.rank==='eng'?eng(a):1;
 const tval=a=>S.rank==='posts'?a.reach:aval(a);
 const hasMedia=a=>!!(a.img||a.vsrc);
-const base=a=>a.age<=S.win&&(S.plats.size===0||S.plats.has(a.plat))&&(S.topic<0||a.topics.includes(S.topic));
+const base=a=>a.age<=S.win&&(S.plats.size===0||S.plats.has(a.plat))&&(S.topic<0||a.topics.includes(S.topic))&&(!S.pset||S.pset.has(a.list));
 const visible=a=>base(a)&&(S.bare||hasMedia(a));
 const listAssets=L=>{const ids=[...L.assets];L.cands.forEach(k=>ids.push(...cands[k].assets));return ids.filter(i=>visible(assets[i]))};
 const sum=ids=>ids.reduce((s,i)=>s+aval(assets[i]),0);
@@ -290,9 +305,6 @@ const logoSrc=L=>L.logos&&L.logos[0]&&L.logos[0].path?L.logos[0].path:null;
 const lmark=L=>`<span class="lg" style="--gc:${col(L)}">${logoSrc(L)?`<img src="${esc(logoSrc(L))}" alt="" loading="lazy">`:'<i></i>'}</span>`;
 const avatar=(C,gc)=>`<span class="av" aria-hidden="true" style="--gc:${gc}">${C.photo?`<img src="${esc(C.photo)}" alt="" loading="lazy">`:ini(C.name)}</span>`;
 const pct=v=>(+v).toLocaleString('en-GB',{maximumFractionDigits:1})+' %';
-const fcFirst=x=>x&&x.forecast&&x.forecast.length?x.forecast[0]:null;
-const fcVal=f=>f.unit==='%'||f.unit==='pct'?pct(f.value):fmtN(f.value)+(f.unit?' '+f.unit:'');
-const fcBy=f=>[f.publisher,f.date?new Date(f.date).toLocaleDateString('en-GB',{day:'numeric',month:'short'}):null].filter(Boolean).join(', ');
 const r22=L=>L.result2022&&L.result2022.pct!=null?L.result2022:null;
 const r22line=L=>{const r=r22(L);return r?`2022 · <b>${pct(r.pct)}</b>${r.votes!=null?` · ${fmtN(r.votes)} votes`:''}${r.seats!=null?` · ${fmtN(r.seats)} seat${r.seats===1?'':'s'}`:''}`:''};
 const pv=C=>C.pref2022&&C.pref2022.votes!=null?C.pref2022.votes:-1;
@@ -417,9 +429,9 @@ function mosaic(L,ids,cols,rowsCap,CELL,GAP,focus){
     const a=assets[p.i],val=S.rank==='posts'?a.reach:p.v,un=S.rank==='posts'||S.rank==='reach'?(a.reachKind==='views'?'views':'likes + comments'):u.unit;
     return tileBtn(p.i,`th s${p.s}`,st,p.s>1&&val>0?`<span class="bd" title="${fmtN(val)} ${un}">${cf(val)}${un==='views'&&w>=78?' views':''}</span>`:'')}).join('')+`</div>`;
   return {html,h:Math.max(0,h)}}
-function isleHead(g,gi,focus){const L=g.L,n=g.ids.length,r=r22(L),f=fcFirst(L);
+function isleHead(g,gi,focus){const L=g.L,n=g.ids.length,r=r22(L);
   const bits=n?[`<em>${mv(g.m)}</em> ${esc(U().unit)}`]:['No verified posts yet'];if(n&&S.rank!=='posts')bits.push(`${fmtN(n)} post${n===1?'':'s'}`);
-  if(r&&!focus)bits.push(`2022: ${pct(r.pct)}`);if(f)bits.push(`expected ${fcVal(f)} (${esc(fcBy(f))})`);
+  if(r&&!focus)bits.push(`2022: ${pct(r.pct)}`);
   return `<button class="ih" data-l="${L.i}" aria-label="${esc(L.name)}: ${fmtN(g.m)} ${esc(U().unit)}, rank ${gi+1}">${lmark(L)}<span class="nm"><b title="${esc(L.name)}">${esc(lname(L))}</b><small>${bits.join(' · ')}</small></span>${n?`<span class="rkn">${gi+1}</span>`:''}</button>`+
     (focus?`<div class="iact"><button class="pill primary" data-spot="list:${L.i}">Open in Spotlight</button><button class="pill" data-go="pulse.html?list=${L.i}">Compare in Pulse</button><button class="hide x" data-unfocus="1" aria-label="Close party">✕</button></div>`:'')}
 function measure(html,w){let m=$('#isMeasure');if(!m){m=document.createElement('div');m.id='isMeasure';m.className='isl';m.style.cssText='visibility:hidden;left:-9999px;top:0;pointer-events:none';$('#isles').appendChild(m)}
@@ -482,41 +494,51 @@ const thumbBtn=i=>tileBtn(i,'th','','');
 function segs(){
   $('#fRank').innerHTML=Object.entries(RANKS).map(([k,r])=>`<button data-k="${k}" class="${S.rank===k?'on':''}" title="Size and order = ${r.phrase}">${r.b}</button>`).join('');
   $('#subtitle').innerHTML=`Size and order = <b>${esc(U().phrase)}</b>`;
-  $('#fWin').innerHTML=[[7,'7 days'],[14,'14 days'],[30,'30 days'],[999,'All time']].map(([k,l])=>`<button data-k="${k}" class="${S.win===k?'on':''}">${l}</button>`).join('');
+  $('#fWin').innerHTML=[[7,'7 days'],[14,'14 days'],[30,'30 days'],[999,'All posts']].map(([k,l])=>`<button data-k="${k}" class="${S.win===k?'on':''}" title="${k<999?`Published in the ${k} days before collection`:'Every collected post'}">${l}</button>`).join('');
   $('#fPlat').innerHTML=COVD.length>1?`<button class="pchip ${S.plats.size===0?'on':''}" data-p="all">All</button>`+COVD.map(p=>{const i=PLAT.findIndex(x=>x.k===p.platform);
     return `<button class="pchip ${S.plats.has(i)?'on':''}" data-p="${i}" title="${fmtN(p.verified_assets)} verified posts${p.playable_videos?' · '+p.playable_videos+' playable videos':''}">${glyph(i)}${esc(p.name)}<em>${cf(p.verified_assets)}</em></button>`}).join(''):'';
   const pool=S.city>=0?cities[S.city].assets:assets.map(a=>a.i);const nb=pool.filter(i=>{const a=assets[i];return base(a)&&!hasMedia(a)}).length;
   const b=$('#fBare');b.hidden=!nb;b.classList.toggle('on',S.bare);b.textContent=S.bare?`Hide ${nb} without preview`:`+${nb} without preview`;
-  $('#meth').textContent=`Verified accounts only${COVN.length?`; ${COVN.map(p=>p.name).join(', ')} not collected yet`:''}. Engagement measures attention, not support.`}
+  $('#meth').innerHTML=`Verified accounts only${COVN.length?`; ${esc(COVN.map(p=>p.name).join(', '))} not collected`:''}. Counts were observed once, at collection (${esc(SW.snapshot.short)}). Engagement measures attention, not support. <a href="about.html#atlas">How to read the Atlas</a>`}
 function renderSide(){
   const cr=[['Czechia',()=>showPicker(true),S.city<0]];
   if(S.city>=0)cr.push([cities[S.city].name,()=>{S.list=S.cand=S.asset=-1;update()},S.list<0&&S.cand<0&&S.asset<0]);
   const L=S.list>=0?lists[S.list]:S.cand>=0?lists[cands[S.cand].list]:S.asset>=0?lists[assets[S.asset].list]:null;
-  if(L)cr.push([L.short||L.name,()=>{S.list=L.i;S.cand=S.asset=-1;update()},S.list===L.i&&S.cand<0&&S.asset<0]);
+  if(L)cr.push([L.name,()=>{S.list=L.i;S.cand=S.asset=-1;update()},S.list===L.i&&S.cand<0&&S.asset<0]);
   const C=S.cand>=0?cands[S.cand]:S.asset>=0&&assets[S.asset].owner>=0?cands[assets[S.asset].owner]:null;
   if(C)cr.push([C.name,()=>{S.cand=C.i;S.list=-1;S.asset=-1;update()},S.cand===C.i&&S.asset<0]);
   if(S.asset>=0)cr.push(['Post',()=>{},true]);
   $('#crumbs').innerHTML=cr.map((c,i)=>`${i?'<span aria-hidden="true">›</span>':''}<button class="${c[2]?'cur':''}" data-cr="${i}" ${i===0?'id="home"':''}>${esc(c[0])}</button>`).join('');
   $('#crumbs').onclick=e=>{const b=e.target.closest('[data-cr]');if(b){e.stopPropagation();cr[+b.dataset.cr][1]()}};
   $('#sideOpenL').textContent=S.city>=0?cities[S.city].name:'Atlas';
-  const city=S.city>=0;$('#picker').classList.toggle('gone',city);['#topicS','#candS','#listS'].forEach(s=>$(s).hidden=!city);
+  const city=S.city>=0;$('#picker').classList.toggle('gone',city);['#candS','#listS'].forEach(s=>$(s).hidden=!city);
   $('#pickU').textContent='by '+U().long;$('#candU').textContent=$('#listU').textContent='by '+U().long;
+  // party or list finder: the shared picker; a national party becomes a lens across every city
+  const g=S.party&&window.SWPicker?SWPicker.group(S.party):null;
+  if(window.SWPicker){$('#pFind').innerHTML=SWPicker.trigger(g?'Change party or list':'Find a party or list');
+    $('#partyU').textContent=g?'':`${SWPicker.groups.length} parties · ${fmtN(lists.length)} lists`;
+    const inCity=g&&city?g.lists.filter(i=>lists[i].city===S.city):[];
+    $('#partyOn').innerHTML=g?`<div class="pon">${SWPicker.logo(g,32)}<span class="t"><b>${esc(g.label)}</b>${city?(inCity.length?`${inCity.length} list${inCity.length>1?'s':''} in ${esc(cities[S.city].name)}`:`No list in ${esc(cities[S.city].name)}`):`${g.lists.length} lists in ${g.cities.length} cit${g.cities.length>1?'ies':'y'}`} · only its posts are shown</span><button class="x" data-party-x aria-label="Show all parties" title="Show all parties"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2.5 2.5l7 7M9.5 2.5l-7 7"/></svg></button></div>`:''}
+  else $('#partyS').hidden=true;
+  // topics: machine labels, counted over what the other filters show; the lens keeps only labelled posts
+  const pool=city?cities[S.city].assets:assets.map(a=>a.i);const tc=new Array(TOP.length).fill(0);let nPool=0,nLab=0,nMach=0;
+  pool.forEach(i=>{const a=assets[i];if(a.age<=S.win&&(S.plats.size===0||S.plats.has(a.plat))&&(S.bare||hasMedia(a))&&(!S.pset||S.pset.has(a.list))){nPool++;if(a.topics.length){nLab++;if(a.topicStatus==='machine')nMach++}a.topics.forEach(t=>tc[t]++)}});
+  const order=TOP.map((t,i)=>i).filter(i=>tc[i]>0).sort((a,b)=>(TOP[b][4]==='issue')-(TOP[a][4]==='issue')||tc[b]-tc[a]);if(S.topic>=0&&!order.includes(S.topic))order.push(S.topic);
+  $('#topicS').hidden=!order.length;
+  $('#topicU').textContent=nLab?`${fmtN(nLab)} of ${fmtN(nPool)} posts labelled`:'';
+  $('#topics').innerHTML=`<button class="tchip ${S.topic<0?'on':''}" data-t="-1" aria-pressed="${S.topic<0}">All posts<em>${fmtN(nPool)}</em></button>`+order.map(i=>`<button class="tchip ${S.topic===i?'on':''}${TOP[i][4]==='issue'?' iss':''}" data-t="${i}" aria-pressed="${S.topic===i}" title="${fmtN(tc[i])} posts labelled ${esc(TOP[i][0])}${TOP[i][4]==='issue'?' (named local issue, reviewed from captions)':''}">${esc(TOP[i][0])}<em>${fmtN(tc[i])}</em></button>`).join('');
+  $('#topicN').textContent=TOPIC_NOTE+(nMach?` Here: ${fmtN(nLab-nMach)} reviewed, ${fmtN(nMach)} machine.`:'');
   if(!city){const rows=cities.map((c,i)=>({c,i,p:cityVal(c)})).sort((a,b)=>b.p-a.p);const pm=Math.max(1,...rows.map(r=>r.p));
     $('#clist').innerHTML=rows.map(({c,i,p})=>`<button class="crow" data-c="${i}"><b>${esc(c.name)}</b><span>${p>0?`<i style="width:${Math.max(2,Math.round(40*p/pm))}px"></i>${mv(p)}`:'—'}</span></button>`).join('');return}
   const c=cities[S.city];const cc=cityCands(c);
-  // topic lens
-  const tc=new Array(TOP.length).fill(0);c.assets.forEach(i=>{const a=assets[i];if(a.age<=S.win&&(S.plats.size===0||S.plats.has(a.plat))&&(S.bare||hasMedia(a)))a.topics.forEach(t=>tc[t]++)});
-  const order=TOP.map((t,i)=>i).filter(i=>tc[i]>0).sort((a,b)=>(TOP[b][4]==='issue')-(TOP[a][4]==='issue')||tc[b]-tc[a]).slice(0,8);if(S.topic>=0&&!order.includes(S.topic))order.push(S.topic);
-  $('#topicS').hidden=!order.length;
-  $('#topics').innerHTML=`<button class="tchip ${S.topic<0?'on':''}" data-t="-1" aria-pressed="${S.topic<0}">All</button>`+order.map(i=>`<button class="tchip ${S.topic===i?'on':''}" data-t="${i}" aria-pressed="${S.topic===i}" title="${fmtN(tc[i])} posts on ${esc(TOP[i][0])}">${esc(TOP[i][0])}<em>${fmtN(tc[i])}</em></button>`).join('');
   const top=cc[0],bc=$('#bigc');bc.hidden=!top;if(top){bc.dataset.k=top.C.i;bc.innerHTML=`${avatar(top.C,col(lists[top.C.list]))}<span style="min-width:0;flex:1">Biggest: <b>${esc(top.C.name)}</b></span><span class="n">${mv(top.v)}</span>`}
   $('#topc').innerHTML=cc.slice(0,6).map(({C,v},j)=>{const Lc=lists[C.list];return `<button class="rk ${j===0?'top':''} ${S.cand===C.i?'on':''}" data-k="${C.i}" title="#${C.k} on ${esc(Lc.name)} · ${fmtN(v)} ${esc(U().unit)}"><i>${j+1}</i>${avatar(C,col(Lc))}<span class="nm"><b>${esc(C.name)}</b><small>${esc(Lc.short||Lc.name)}${C.pref2022&&C.pref2022.votes!=null?` · 2022: ${fmtN(C.pref2022.votes)} pref.`:''}</small></span><span class="n">${mv(v)}</span></button>`}).join('')||'<div class="note">No candidate posts in the current filter.</div>';
   const sel=L?L.i:-1;
-  const rows=c.lists.map(i=>lists[i]).filter(Lx=>Lx.observed).map(Lx=>({L:Lx,v:lval(Lx)})).sort((a,b)=>b.v-a.v);const vmax=Math.max(1,...rows.map(r=>r.v));
+  const rows=c.lists.map(i=>lists[i]).filter(Lx=>Lx.observed&&(!S.pset||S.pset.has(Lx.i))).map(Lx=>({L:Lx,v:lval(Lx)})).sort((a,b)=>b.v-a.v);const vmax=Math.max(1,...rows.map(r=>r.v));
   $('#lists').innerHTML=rows.map(({L:Lx,v})=>{const r=r22(Lx);let h=`<button class="lrow ${sel===Lx.i?'on':''}" data-l="${Lx.i}" style="--gc:${col(Lx)}">${lmark(Lx)}<span style="min-width:0"><span class="nm" title="${esc(Lx.name)}">${esc(Lx.name)}</span>${v>0?`<span class="bar0" style="width:${Math.max(2,Math.round(100*v/vmax))}%"></span>`:''}</span><span class="n">${v>0?mv(v):'—'}${r?`<br><small style="color:var(--label3)">2022 ${pct(r.pct)}</small>`:''}</span></button>`;
     if(sel===Lx.i){const kids=cc.filter(x=>x.C.list===Lx.i);h+=kids.slice(0,6).map(({C,v})=>`<button class="cr2 ${S.cand===C.i?'on':''}" data-k="${C.i}">${avatar(C,col(Lx))}<span>${esc(C.name)} <small>#${C.k}</small></span><span class="n">${mv(v)}</span></button>`).join('')+(kids.length>6?`<button class="cr2" data-spot="list:${Lx.i}"><i></i><span>+${kids.length-6} more in Spotlight</span><span></span></button>`:'')}
     return h}).join('');
-  const nq=c.lists.filter(i=>!lists[i].observed).length;if(nq)$('#lists').insertAdjacentHTML('beforeend',`<div class="note">${nq} more list${nq>1?'s':''} without a verified account.</div>`)}
+  const nq=c.lists.filter(i=>!lists[i].observed&&(!S.pset||S.pset.has(i))).length;if(nq)$('#lists').insertAdjacentHTML('beforeend',`<div class="note">${nq} more list${nq>1?'s':''} without a verified account.</div>`)}
 
 /* ---------- inspector ---------- */
 function kv(rows){return `<div class="kv">${rows.map(([k,v])=>`<span>${k}</span><b>${v}</b>`).join('')}</div>`}
@@ -534,21 +556,27 @@ function inspCity(){
   <div class="k"><span>${tn?'Top posts on '+esc(tn):'Top posts'}</span><span class="x">by ${esc(S.rank==='posts'?'reach':U().long)}</span></div>${ids.length?topGrid(ids,9):'<div class="note">No posts in the current filter.</div>'}
   ${cc.length?`<div class="k"><span>${tn?'Who posts about it':'Biggest candidates'}</span><span class="x">by ${esc(U().long)}</span></div><div class="plist">${cc.slice(0,5).map(({C,v})=>`<button data-k="${C.i}">${avatar(C,col(lists[C.list]))}<b>${esc(C.name)} <small>${esc(lists[C.list].short)}</small></b><span>${mv(v)}</span></button>`).join('')}</div>`:''}
   <div class="note">${fmtN(c.n)} registered candidates on ${fmtN(c.L)} lists. Party islands are arranged by rank around the town, not by address.</div>`]}
+const P_=window.SWPanels;
+const allOf=L=>[...L.assets,...L.cands.flatMap(k=>cands[k].assets)];
+const ctx=(html,cls)=>html?`<div class="ctxp${cls?' '+cls:''}">${html}</div>`:'';
 function inspList(L){const ids=listAssets(L).sort(byT);const pp=listPeople(L);
-  const fr=(L.forecast||[]).slice(0,3).map(f=>[`Expected · ${esc(fcBy(f))}`,f.url?`<a href="${esc(f.url)}" target="_blank" rel="noopener">${fcVal(f)} ↗</a>`:fcVal(f)]);
   const row=({C,v})=>{const p=C.pref2022;return `<button data-k="${C.i}">${avatar(C,col(L))}<b>#${C.k} ${esc(C.name)}${p&&p.votes!=null?` <small>2022: ${fmtN(p.votes)} pref.${p.elected?' · elected':''}</small>`:''}</b><span>${v>0?mv(v):'—'}</span></button>`};
   return ['Party list · '+cities[L.city].name,`<h2>${logoSrc(L)?`<img class="plogo" src="${esc(logoSrc(L))}" alt="">`:''}${esc(L.name)}</h2>
   ${r22(L)?`<div class="r22">${r22line(L)}</div>`:''}
   <div class="acts" style="margin-top:12px"><button class="pill primary" data-spot="list:${L.i}">Open in Spotlight</button><button class="pill" data-go="pulse.html?list=${L.i}">Compare in Pulse</button></div>
   ${ids.length?hero(ids):'<div class="note">No verified posts from this list yet; the people and the 2022 result are below.</div>'}
-  ${fr.length?kv(fr):''}
   ${ids.length?`<div class="k"><span>Top posts</span><span class="x">by ${esc(S.rank==='posts'?'reach':U().long)}</span></div>${topGrid(ids,12)}`:''}
+  ${P_?ctx(P_.topicMix(allOf(L),{attr:'data-t',active:S.topic,max:6,emptyHidden:true})):''}
+  ${P_?ctx(P_.programs(L.i,{attr:'data-t'})):''}
+  ${P_?ctx(P_.news({list:L.i},{max:4})):''}
   ${pp.length?`<div class="k"><span>Candidates · ${fmtN(L.size||pp.length)}</span><span class="x">by ${esc(U().long)}, then 2022 votes</span></div><div class="plist">${pp.slice(0,15).map(row).join('')}</div>${pp.length>15?`<button class="pill" style="margin-top:8px" data-spot="list:${L.i}">All ${fmtN(pp.length)} in Spotlight</button>`:''}`:''}`]}
-function inspCand(C){const L=lists[C.list];const ids=cvis(C).sort(byT);const p=C.pref2022,f=fcFirst(C);
+function inspCand(C){const L=lists[C.list];const ids=cvis(C).sort(byT);const p=C.pref2022;
   return [`Candidate #${C.k} · ${L.name}`,`<h2>${avatar(C,col(L)).replace('style="--gc:','style="width:44px;height:44px;font-size:15px;--gc:')}${esc(C.name)}</h2>
   ${hero(ids)}
   ${ids.length?`<div class="k"><span>Top posts</span><span class="x">by ${esc(S.rank==='posts'?'reach':U().long)}</span></div>${topGrid(ids,9)}`:''}
-  ${kv([['List',`<button class="lnk" data-l="${L.i}">${esc(L.name)}</button>`],['City',esc(cities[C.city].name)],...(p&&p.votes!=null?[['2022 preference votes',`${fmtN(p.votes)}${p.rank_in_list!=null?`<small>#${p.rank_in_list} on the list${p.elected?' · elected':''}</small>`:''}`]]:[]),...(f?[[`Expected · ${esc(fcBy(f))}`,f.url?`<a href="${esc(f.url)}" target="_blank" rel="noopener">${fcVal(f)} ↗</a>`:fcVal(f)]]:[]),...(REAL&&C.accounts.length?[['Verified accounts',C.accounts.map(a=>esc(a.platform)+' @'+esc(a.handle||'')).join(', ')]]:[]),...(C.folKnown?[['Followers (snapshot)',fmtN(C.fol)]]:[]),...(C.about.length?[['Posts about them',fmtN(C.about.length)]]:[])])}
+  ${P_?ctx(P_.topicMix(C.assets,{attr:'data-t',active:S.topic,max:6,emptyHidden:true})):''}
+  ${P_?ctx(P_.news({cand:C.i},{max:4})):''}
+  ${kv([['List',`<button class="lnk" data-l="${L.i}">${esc(L.name)}</button>`],['City',esc(cities[C.city].name)],...(p&&p.votes!=null?[['2022 preference votes',`${fmtN(p.votes)}${p.rank_in_list!=null?`<small>#${p.rank_in_list} on the list${p.elected?' · elected':''}</small>`:''}`]]:[]),...(REAL&&C.accounts.length?[['Verified accounts',C.accounts.map(a=>esc(a.platform)+' @'+esc(a.handle||'')).join(', ')]]:[]),...(C.folKnown?[['Followers (snapshot)',fmtN(C.fol)]]:[]),...(C.about.length?[['Posts about them',fmtN(C.about.length)]]:[])])}
   ${C.photo_source?`<div class="note">Portrait: <a href="${esc(C.photo_source)}" target="_blank" rel="noopener">source ↗</a></div>`:''}
   <div class="acts"><button class="pill primary" data-spot="cand:${C.i}">Open in Spotlight</button><button class="pill" data-go="pulse.html?cand=${C.i}">Compare in Pulse</button><button class="pill" data-go="radar.html?cand=${C.i}">Watch on Radar</button></div>`]}
 function inspAsset(a){const L=lists[a.list],P=PLAT[a.plat];const by=a.owner>=0?cands[a.owner]:null;
@@ -567,7 +595,7 @@ function inspAsset(a){const L=lists[a.list],P=PLAT[a.plat];const by=a.owner>=0?c
   <div class="k">Provenance</div>
   ${kv([...(acct?[['Account',`${esc(P.n)} @${esc(acct.handle||'')}`]]:[]),...(a.url?[['Source',`<a href="${esc(a.url)}" target="_blank" rel="noopener">${esc(host||'link')} ↗</a>`]]:[]),...(obs?[['Observed',obs]]:[]),['Dataset',esc(SW.source.label||'—')]])}
   ${a.mention!=null?`<div class="k">Mentions</div><div class="plist"><button data-k="${a.mention}">${avatar(cands[a.mention],col(lists[cands[a.mention].list]))}<b>${esc(cands[a.mention].name)}</b><span>${esc(lists[cands[a.mention].list].short)}</span></button></div>`:''}
-  ${a.topics.length?`<div class="k">Topics</div><div style="display:flex;gap:6px;flex-wrap:wrap">${a.topics.map(t=>`<button class="chip" data-t="${t}">${esc(TOP[t][0])}</button>`).join('')}</div>`:''}
+  ${a.topics.length?`<div class="k"><span>Topics</span><span class="x">${a.topicStatus==='machine'?'machine labels':a.topicStatus==='admitted'?'reviewed sample':''}</span></div><div style="display:flex;gap:6px;flex-wrap:wrap">${a.topics.map(t=>`<button class="chip" data-t="${t}">${esc(TOP[t][0])}${mlab(a,t)}</button>`).join('')}</div>${a.topicStatus==='machine'?`<div class="note">${a.topics.map(t=>{const m=SW.topicMeta(a,t);return m.evidence?`${esc(m.label)}: “${esc(m.evidence)}”`:''}).filter(Boolean).join(' · ')}</div>`:''}`:''}
   ${a.issueEvidence&&a.issueEvidence.length?`<div class="k">Why this issue matches</div>${a.issueEvidence.map(e=>`<div class="clm"><b>${esc(e.label)}</b><br>„${esc(e.quote)}“</div>`).join('')}<div class="note">Topic membership reviewed from this caption. The quoted statement is not independently verified; issue coverage is partial.</div>`:''}
   ${a.claims&&a.claims.length?`<div class="k">Quoted statements · ${a.claims.length}</div>${a.claims.slice(0,3).map(c=>`<div class="clm">„${esc(c.quote||c.text)}“</div>`).join('')}<div class="note">Statements quoted from the post, not verified facts.</div>`:''}
   <div class="acts">${a.url?`<a class="pill primary" href="${esc(a.url)}" target="_blank" rel="noopener">Open source ↗</a>`:''}<button class="pill" data-spot="asset:${a.i}">Open in Spotlight</button></div>`]}
@@ -586,9 +614,9 @@ function scene(){const vk=[S.city,S.rank,S.topic,S.win,[...S.plats].join(','),S.
   if(SCENE!==S.city){SCENE=S.city;const go=S.city;$('#isles').querySelectorAll('.isl').forEach(e=>e.classList.add('gone'));
     camGo(cities[go].bb,1700).then(()=>{if(S.city===go){ISL.city=-1;layoutIsles(true)}});return}
   layoutIsles(reveal)}
-function syncURL(){const u=new URLSearchParams();if(S.city>=0)u.set('city',S.city);if(S.list>=0)u.set('list',S.list);if(S.cand>=0)u.set('cand',S.cand);if(S.asset>=0)u.set('asset',S.asset);if(S.rank!=='reach')u.set('rank',S.rank);if(S.topic>=0)u.set('topic',S.topic);const d=q.get('data');if(d)u.set('data',d);history.replaceState(null,'','?'+u.toString())}
+function syncURL(){const u=new URLSearchParams();if(S.city>=0)u.set('city',S.city);if(S.list>=0)u.set('list',S.list);if(S.cand>=0)u.set('cand',S.cand);if(S.asset>=0)u.set('asset',S.asset);if(S.rank!=='reach')u.set('rank',S.rank);if(S.topic>=0)u.set('topic',S.topic);if(S.party)u.set('party',S.party);const d=q.get('data');if(d)u.set('data',d);history.replaceState(null,'','?'+u.toString())}
 function renderLegend(){const el=$('#legend');const sd=$('#side');el.style.left=((!narrow()&&!sd.classList.contains('shut'))?sd.getBoundingClientRect().right+12:16)+'px';
-  const u=esc(U().long);const live=REAL?'<span><i class="dot"></i>Live data</span>':'<span>Simulated data</span>';
+  const u=esc(U().long);const live=REAL?`<span><b>Snapshot</b> ${esc(SW.snapshot.short)}</span>`:'<span>Simulated data</span>';
   el.innerHTML=S.city<0?`${live}<span><b>Marker size</b> = ${u}</span><span>Click a city to fly in</span>`:
     `${live}<span><b>Island order and tile size</b> = ${u}</span><span><svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="6" fill="rgba(15,23,42,.66)"/><path d="M4.6 3.6v4.8L8.6 6z" fill="#fff"/></svg>video plays in the inspector</span><span>Islands sit around the town by rank, not by address</span>`}
 function update(){segs();renderSide();renderInsp();renderMarks();renderLegend();scene();syncURL()}
@@ -601,6 +629,10 @@ document.addEventListener('click',e=>{const t=e.target;let b;if(!t.closest||t.cl
   if(t.closest('#inspX')){setPane('insp',true,true);return}if(t.closest('#inspOpen')){setPane('insp',false,true);return}
   if(t.closest('#zback')){if(S.list>=0||S.cand>=0||S.asset>=0){S.list=S.cand=S.asset=-1;update()}else showPicker(true);return}
   if(t.closest('[data-unfocus]')){S.list=-1;update();return}
+  if(t.closest('#pFind')){SWPicker.open({anchor:$('#pFind'),title:'Find a party or list',city:S.city,onPick(p){
+      if(p.type==='party'){setParty(p.group);S.list=S.cand=S.asset=-1;const here=S.city>=0?p.group.lists.filter(i=>lists[i].city===S.city):[];if(here.length===1)S.list=here[0];update()}
+      else{const L=lists[p.list];if(S.pset&&!S.pset.has(L.i))setParty(null);S.list=L.i;S.city=L.city;S.cand=S.asset=-1;update()}}});return}
+  if(t.closest('[data-party-x]')){setParty(null);update();return}
   if((b=t.closest('#fRank button'))){S.rank=b.dataset.k;update();return}
   if((b=t.closest('#fWin button'))){S.win=+b.dataset.k;update();return}
   if(t.closest('#fBare')){S.bare=!S.bare;update();return}
@@ -633,6 +665,7 @@ addEventListener('resize',()=>{clearTimeout(window.__rz);window.__rz=setTimeout(
   else if(g('list')>=0&&lists[g('list')]){S.list=g('list');S.city=lists[S.list].city}
   else if(g('city')>=0&&cities[g('city')])S.city=g('city');
   if(g('topic')>=0&&TOP[g('topic')])S.topic=g('topic');
+  if(window.SWPicker&&SWPicker.party(q))setParty(SWPicker.party(q));
   if(narrow()){setPane('side',true,false);setPane('insp',true,false)}
   svgBuild();
   // start on the destination without a fly-in, so nothing pops in from blank
