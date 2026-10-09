@@ -61,7 +61,8 @@ def _alternation(forms: set[str]) -> str:
 def person_pattern(full_name: str) -> re.Pattern | None:
     """First name(s) then surname, each in any case form; tokens separated by whitespace."""
     tokens = [token for token in re.split(r"\s+", full_name.strip()) if token]
-    tokens = [token for token in tokens if not re.fullmatch(r"(?:Ing|Mgr|Bc|MUDr|JUDr|PhDr|RNDr|Dr|doc|prof)\.?", token)]
+    titles = r"(?:Ing|Mgr|Bc|MUDr|JUDr|PhDr|RNDr|Dr|doc|prof)\.?"
+    tokens = [token for token in tokens if not re.fullmatch(titles, token)]
     if len(tokens) < 2:
         return None
     pieces = [_alternation(word_forms(token)) for token in tokens]

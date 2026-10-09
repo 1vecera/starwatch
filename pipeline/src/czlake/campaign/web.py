@@ -80,7 +80,7 @@ class Fetcher:
     def fetch_many(self, urls: list[str]) -> dict[str, dict]:
         unique = sorted(set(urls))
         with ThreadPoolExecutor(self.workers) as pool:
-            return dict(zip(unique, pool.map(self.meta, unique)))
+            return dict(zip(unique, pool.map(self.meta, unique), strict=True))
 
     def document(self, url: str) -> Document | None:
         """Parsed document for a fetched URL, or the Apify-rendered text if one exists."""

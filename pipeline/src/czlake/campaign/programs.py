@@ -2,13 +2,18 @@
 
 Phases (each cached, so an interrupted run resumes where it stopped):
 
-1. discover: two Exa searches per list; drop social, news and registry hosts.
+1. discover: two Exa searches per list; drop social, news, city-hall and third-party guide hosts.
 2. fetch: plain HTTP GET of every candidate, plus "programme" links found on those pages.
 3. render: candidates that look like a programme but yield almost no text over HTTP go to one
    batched Apify Website Content Crawler run.
 4. triage: a small model picks which candidates are this list's programme for this city.
-5. extract: a strong model writes a neutral summary and proposes promises with Czech quotes;
+5. ownership: the picked pages must name the city or a leading candidate and point to this list
+   (its candidates, brand or parties); two lists in one city cannot share a page.
+6. extract: a strong model writes a neutral summary and proposes promises with Czech quotes;
    a promise survives only if its quote is found in the fetched text (see ``text.find_quote``).
+
+Lists still without a programme are searched again with broader queries, then on party-wide
+sites that host the same party's programmes in other cities.
 """
 
 from __future__ import annotations
@@ -16,11 +21,14 @@ from __future__ import annotations
 import re
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
+from urllib.parse import urlsplit
+
+from unidecode import unidecode
 
 from .common import BudgetExceeded, OfflineMiss, digest
 from .exa import Exa
-from .llm import LLM, LLMError
-from .names import city_pattern, distinctive_name, parties_in, person_pattern
+from .llm import LLM
+from .names import brand_pattern, city_pattern, distinctive_name, parties_in, party_pattern, person_pattern
 from .snapshot import ElectionList, Snapshot
 from .text import Document, find_quote, registered_domain
 from .web import Fetcher, Renderer, canonical
@@ -56,6 +64,7 @@ NEWS_DOMAINS = {
 PROGRAM_HINT = re.compile(
     r"program|priorit|krok[ůu]|vize|vizi|plán|chceme|slib|řešení|reseni|tem[ay]|pro-[a-z]+|\.pdf", re.I)
 PROGRAMME_WORD = re.compile(r"program|priorit|100.krok|vize", re.I)
+OTHER_ELECTION = re.compile(r"parlament|sněmov|snemov|krajsk|senát|senat|evrop|20(?:1\d|2[0-5])", re.I)
 TOPIC_LABELS = {
     "culture_sport": "culture, sport, leisure, events, heritage",
     "economy_work": "local economy, jobs, business, tourism",
@@ -110,6 +119,8 @@ class ListRun:
     entry: dict = field(default_factory=dict)
     stats: dict = field(default_factory=dict)
     error: str | None = None
+    ownership: int = 0
+    lost_to: str | None = None
 
 
 def _query_name(lst: ElectionList) -> str:
@@ -158,11 +169,13 @@ class ProgramCollector:
         self.log = log
 
     # Phase 1 ---------------------------------------------------------------------------------
-    def discover(self, run: ListRun, deep: bool = False) -> None:
+    def discover(self, run: ListRun, deep: bool = False, sites: list[str] | None = None) -> None:
         seen: dict[str, Candidate] = {}
         times = []
-        for query in search_queries(run.lst) + (deep_queries(run.lst) if deep else []):
-            record = self.exa.search(query, num_results=10)
+        searches = [(query, None) for query in search_queries(run.lst) + (deep_queries(run.lst) if deep else [])]
+        searches += [(f"{run.lst.city} program komunální volby 2026", [site]) for site in sites or []]
+        for query, domains in searches:
+            record = self.exa.search(query, num_results=6 if domains else 10, include_domains=domains)
             times.append(record["searched_at"])
             for rank, item in enumerate(record["results"]):
                 url = canonical(item["url"])
@@ -174,7 +187,8 @@ class ProgramCollector:
                 else:
                     seen[url].rank = min(seen[url].rank, rank)
         run.searched_at = max(times)
-        run.candidates = sorted(seen.values(), key=lambda c: (c.rank, c.url))[:12 if deep else 8]
+        keep = (12 if deep else 8) + 6 * len(sites or [])
+        run.candidates = sorted(seen.values(), key=lambda c: (c.rank, c.url))[:keep]
 
     # Phase 2 ---------------------------------------------------------------------------------
     def fetch(self, runs: list[ListRun]) -> None:
@@ -280,7 +294,9 @@ class ProgramCollector:
         for index in answer.get("selected", []):
             if isinstance(index, int) and 1 <= index <= len(usable) and usable[index - 1] not in picked:
                 picked.append(usable[index - 1])
-        run.selected = picked[:3]
+        # One publisher per programme: drop picks from other sites than the first (most complete) one.
+        run.selected = [c for c in picked if registered_domain(c.url) == registered_domain(picked[0].url)][:3] \
+            if picked else []
 
     # Phase 5 ---------------------------------------------------------------------------------
     def extract(self, run: ListRun) -> None:
@@ -291,6 +307,11 @@ class ProgramCollector:
         documents = [c.document for c in run.selected]
         if not any(names_city_or_leader(lst, document) for document in documents):
             run.triage_reason = "rejected: the selected pages name neither the city nor a leading candidate"
+            run.entry = self._missing(run)
+            return
+        run.ownership, evidence = ownership(lst, documents)
+        if not run.ownership:
+            run.triage_reason = "rejected: the selected pages name neither this list, its parties nor its candidates"
             run.entry = self._missing(run)
             return
         per_doc = MODEL_CHARS // len(documents)
@@ -352,18 +373,16 @@ class ProgramCollector:
             "required": ["is_program", "reason", "program_title", "summary", "promises"],
             "additionalProperties": False,
         }
-        try:
-            answer = self.extract_llm.json(system=EXTRACT_SYSTEM, prompt=prompt, schema=schema, max_tokens=6000,
-                                           tag=f"extract {lst.id}")
-        except LLMError as error:
-            run.entry = self._missing(run, note=f"extraction failed: {error}")
-            return
+        # Throttling or a truncated answer raises; the list is then left out rather than marked not found.
+        answer = self.extract_llm.json(system=EXTRACT_SYSTEM, prompt=prompt, schema=schema, max_tokens=6000,
+                                       tag=f"extract {lst.id}")
         if not answer.get("is_program"):
             run.triage_reason = f"rejected at extraction: {answer.get('reason', '')}"
             run.entry = self._missing(run)
             return
         promises, stats = verify_promises(answer.get("promises", []), documents, self.snapshot.topics)
         stats["model_input_truncated"] = truncated
+        stats["ownership"] = {"score": run.ownership, "evidence": evidence[:12]}
         first = documents[0]
         run.stats = stats
         run.entry = {
@@ -383,8 +402,14 @@ class ProgramCollector:
     def _missing(self, run: ListRun, note: str | None = None) -> dict:
         """``unreachable`` when a programme-looking page could not be read, else ``not_found``."""
         for candidate in run.candidates:
-            named = PROGRAMME_WORD.search(candidate.url.split("/", 3)[-1]) or PROGRAMME_WORD.search(candidate.title)
-            if named and candidate.document is None and candidate.error and candidate.origin == "search":
+            if candidate.document is not None or not candidate.error or candidate.origin != "search":
+                continue
+            label = f"{candidate.url.split('/', 3)[-1]} {candidate.title}"
+            if not PROGRAMME_WORD.search(label) or OTHER_ELECTION.search(label):
+                continue
+            # Without page text, the search title and snippet must point to this list and city.
+            stub = Document(candidate.url, "html", candidate.title, [candidate.snippet], "")
+            if names_city_or_leader(run.lst, stub) and ownership(run.lst, [stub])[0]:
                 meta = self.fetcher.meta(candidate.url)
                 return {"status": "unreachable", "program_url": candidate.url, "error": candidate.error,
                         "fetched_at": meta.get("fetched_at"), "checked_at": run.searched_at,
@@ -413,23 +438,33 @@ class ProgramCollector:
         """
         runs = [ListRun(lst) for lst in lists]
         self._pass(runs, deep=False)
+        resolve_shared_pages(runs)
         retry = [run for run in runs if not run.error and run.entry.get("status") != "found"]
         if retry:
             self._pass(retry, deep=True)
+            resolve_shared_pages(runs)
+        sites = party_sites(runs)
+        retry = [run for run in runs if not run.error and run.entry.get("status") != "found"
+                 and any(sites.get(party) for party in parties_in(run.lst.name))]
+        if retry:
+            self._pass(retry, deep=True, sites=sites)
+            resolve_shared_pages(runs)
         return runs
 
-    def _pass(self, runs: list[ListRun], deep: bool) -> None:
+    def _pass(self, runs: list[ListRun], deep: bool, sites: dict[str, list[str]] | None = None) -> None:
         previous = {id(run): (run.entry, run.stats, run.triage_reason) for run in runs}
         for run in runs:
-            run.selected, run.entry, run.stats = [], {}, {}
+            run.selected, run.entry, run.stats, run.ownership, run.lost_to = [], {}, {}, 0, None
 
         def discover(run: ListRun) -> None:
-            self.discover(run, deep=deep)
+            own = sorted({site for party in parties_in(run.lst.name) for site in (sites or {}).get(party, [])})
+            self.discover(run, deep=deep, sites=own)
 
         with ThreadPoolExecutor(self.workers) as pool:
             list(pool.map(self._safe(discover), runs))
         active = [run for run in runs if not run.error]
-        self.log(f"pass {2 if deep else 1}: {sum(len(r.candidates) for r in active)} search candidates "
+        label = "3 (party sites)" if sites else 2 if deep else 1
+        self.log(f"pass {label}: {sum(len(r.candidates) for r in active)} search candidates "
                  f"for {len(active)} lists")
         self.fetch(active)
         self.render(active)
@@ -442,7 +477,7 @@ class ProgramCollector:
                 run.entry, run.stats, run.triage_reason = previous[id(run)]
                 self.log(f"{run.lst.id}: keeping first-pass result after {run.error}")
                 run.error = None
-        self.log(f"pass {2 if deep else 1}: {sum(1 for r in runs if r.entry.get('status') == 'found')} "
+        self.log(f"pass {label}: {sum(1 for r in runs if r.entry.get('status') == 'found')} "
                  f"of {len(runs)} lists found")
 
 
@@ -452,6 +487,91 @@ def names_city_or_leader(lst: ElectionList, document: Document) -> bool:
     if city_pattern(lst.city).search(text):
         return True
     return any((pattern := person_pattern(cand.name)) and pattern.search(text) for cand in lst.leaders(5))
+
+
+PARTY_HOST = {
+    "ANO": "ano", "ODS": "ods", "SPD": "spd", "Piráti": "pirati", "STAN": "starost", "KDU-ČSL": "lidovci|kdu",
+    "TOP 09": "top09", "Motoristé": "motorist", "Zelení": "zelen", "Trikolora": "trikolor", "Svobodní": "svobodn",
+    "Přísaha": "prisaha", "Stačilo!": "stacilo", "KSČM": "kscm", "SOCDEM": "socdem|cssd", "SPOLU": "spolu",
+}
+
+
+def _slug(text: str) -> str:
+    return re.sub(r"[^a-z0-9]", "", unidecode(text).lower())
+
+
+def ownership(lst: ElectionList, documents: list[Document]) -> tuple[int, list[str]]:
+    """How strongly the pages point to this list: its candidates, brand, abbreviation or parties.
+
+    Candidates named in the text weigh most, then the list's brand or abbreviation in the host name,
+    the brand in the text, a party in the host name and a party in the text.
+    """
+    text = "\n".join(f"{d.title}\n" + "\n".join(d.pages) for d in documents)
+    hosts = [(urlsplit(d.url).hostname or "").lower().removeprefix("www.") for d in documents]
+    host_tokens = {token for host in hosts for token in re.split(r"[.-]", host)}
+    host_joined = "".join(_slug(host) for host in hosts)
+    score, evidence = 0, []
+    for cand in lst.leaders(10):
+        pattern = person_pattern(cand.name)
+        if pattern and pattern.search(text):
+            score += 3
+            evidence.append(cand.name)
+    brand = distinctive_name(lst.name)
+    aliases = re.findall(r"\(([^()]{2,12})\)", lst.name)
+    if brand and brand_pattern(brand).search(text):
+        score += 2
+        evidence.append(f"brand {brand}")
+    for alias in ([brand] if brand else []) + aliases:
+        slug = _slug(alias)
+        if (len(slug) >= 6 and slug in host_joined) or (2 <= len(slug) < 6 and slug in host_tokens):
+            score += 3
+            evidence.append(f"host {alias}")
+    for party in parties_in(lst.name):
+        if party_pattern(party).search(text):
+            score += 1
+            evidence.append(f"party {party}")
+        if any(re.search(PARTY_HOST[party], host) for host in hosts):
+            score += 2
+            evidence.append(f"host {party}")
+    return score, evidence
+
+
+def party_sites(runs: list["ListRun"]) -> dict[str, list[str]]:
+    """Party-wide domains: sites named after a party that host its programmes in two or more cities.
+
+    A list whose own programme was not found is searched once more on these sites only.
+    """
+    cities: dict[tuple[str, str], set[str]] = {}
+    for run in runs:
+        if run.entry.get("status") != "found":
+            continue
+        for party in parties_in(run.lst.name):
+            for source in run.entry["sources"]:
+                domain = registered_domain(source["url"])
+                if re.search(PARTY_HOST[party], domain):
+                    cities.setdefault((party, domain), set()).add(run.lst.city_id)
+    sites: dict[str, list[str]] = {}
+    for (party, domain), seen in sorted(cities.items()):
+        if len(seen) >= 2:
+            sites.setdefault(party, []).append(domain)
+    return sites
+
+
+def resolve_shared_pages(runs: list["ListRun"]) -> None:
+    """Two lists in one city cannot share a programme page: the list it points to more strongly keeps it."""
+    found = [run for run in runs if run.entry.get("status") == "found"]
+    for run in found:
+        urls = {source["url"] for source in run.entry["sources"]}
+        rivals = [other for other in found if other is not run and other.lst.city_id == run.lst.city_id
+                  and urls & {source["url"] for source in other.entry["sources"]}]
+        best = max((other.ownership for other in rivals), default=-1)
+        if rivals and best > run.ownership:
+            winner = max(rivals, key=lambda other: other.ownership)
+            run.lost_to = winner.lst.name
+    for run in found:
+        if run.lost_to:
+            run.entry = {"status": "not_found", "checked_at": run.searched_at,
+                         "note": f"the selected page is the programme of another list ({run.lost_to})"}
 
 
 def _distinct(candidates: list[Candidate]) -> list[Candidate]:

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 
 from .common import Cache, Ledger, digest, utcnow
 
@@ -57,6 +58,25 @@ class LLM:
         price_in, price_out = PRICES[self.model]
         return (input_tokens * price_in + output_tokens * price_out) / 1_000_000
 
+    def _create(self, system: str, prompt: str, schema: dict, max_tokens: int):
+        """Messages call; on throttling, wait longer than the SDK's own short retries do."""
+        import anthropic
+
+        for attempt in range(6):
+            try:
+                return self._client_or_create().messages.create(
+                    model=self.model,
+                    max_tokens=max_tokens,
+                    system=system,
+                    messages=[{"role": "user", "content": prompt}],
+                    output_config={"format": {"type": "json_schema", "schema": schema}},
+                )
+            except (anthropic.RateLimitError, anthropic.InternalServerError) as error:
+                if attempt == 5:
+                    raise LLMError(f"throttled after retries: {type(error).__name__}") from error
+                time.sleep(15 * (attempt + 1))
+        raise LLMError("unreachable")
+
     def json(self, *, system: str, prompt: str, schema: dict, max_tokens: int = 4000, tag: str = "") -> dict:
         key = digest({"model": self.model, "system": system, "prompt": prompt, "schema": schema,
                       "max_tokens": max_tokens})
@@ -66,13 +86,7 @@ class LLM:
         self.cache.miss(f"llm {tag}")
         # Czech text runs at roughly 2.5 characters per token; budget the worst case.
         self.ledger.check("bedrock", self.cost(int(len(system + prompt) / 2.5), max_tokens))
-        response = self._client_or_create().messages.create(
-            model=self.model,
-            max_tokens=max_tokens,
-            system=system,
-            messages=[{"role": "user", "content": prompt}],
-            output_config={"format": {"type": "json_schema", "schema": schema}},
-        )
+        response = self._create(system, prompt, schema, max_tokens)
         usage = response.usage
         cost = self.cost(usage.input_tokens, usage.output_tokens)
         self.ledger.record("bedrock", cost, {"model": self.model, "tag": tag, "input_tokens": usage.input_tokens,

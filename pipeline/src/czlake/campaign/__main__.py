@@ -43,9 +43,9 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--cache", type=Path, required=True,
                         help="directory for raw responses, fetched pages and the spend ledger (keep out of Git)")
     parser.add_argument("--offline", action="store_true", help="use cached responses only; never call a service")
-    parser.add_argument("--max-exa-usd", type=float, default=DEFAULT_CAPS["exa"])
-    parser.add_argument("--max-bedrock-usd", type=float, default=DEFAULT_CAPS["bedrock"])
-    parser.add_argument("--max-apify-usd", type=float, default=DEFAULT_CAPS["apify"])
+    for service, label in (("exa", "Exa"), ("bedrock", "Bedrock"), ("apify", "Apify")):
+        parser.add_argument(f"--max-{service}-usd", type=float, default=DEFAULT_CAPS[service],
+                            help=f"hard cap on cumulative {label} spend in USD (default {DEFAULT_CAPS[service]:g})")
     parser.add_argument("--aws-env-prefix", default="",
                         help="read AWS keys from <prefix>AWS_ACCESS_KEY_ID etc. instead of the default chain")
     commands = parser.add_subparsers(dest="command", required=True)
@@ -60,11 +60,13 @@ def _parser() -> argparse.ArgumentParser:
     programs.add_argument("--no-render", action="store_true", help="never call Apify for JavaScript-only pages")
     programs.add_argument("--triage-model", default=None, help="Bedrock model id for candidate triage")
     programs.add_argument("--extract-model", default=None, help="Bedrock model id for summaries and promises")
-    programs.add_argument("--workers", type=int, default=4)
+    programs.add_argument("--workers", type=int, default=4,
+                          help="parallel lists per phase; lower it if Bedrock throttles (default 4)")
 
     articles = commands.add_parser("articles", help="find news articles naming lists or leading candidates")
-    articles.add_argument("--lists", choices=["relevant", "rest", "all"], default="relevant")
-    articles.add_argument("--ids", nargs="*")
+    articles.add_argument("--lists", choices=["relevant", "rest", "all"], default="relevant",
+                          help="which snapshot lists to search for (default: relevant)")
+    articles.add_argument("--ids", nargs="*", help="explicit list ids instead of --lists")
     articles.add_argument("--out", type=Path, required=True, help="articles.js to write (window.SW_ARTICLES)")
     articles.add_argument("--programs", type=Path,
                           help="programs.js; its programme domains are excluded from news results")

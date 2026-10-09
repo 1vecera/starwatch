@@ -17,7 +17,7 @@ from .common import sha1
 from .exa import Exa
 from .names import (brand_pattern, city_pattern, distinctive_name, parties_in, party_pattern,
                     person_pattern)
-from .programs import EXCLUDED_DOMAINS
+from .programs import CITY_HALL_DOMAINS, EXCLUDED_DOMAINS
 from .snapshot import ElectionList, Snapshot
 from .text import registered_domain
 from .web import canonical
@@ -51,10 +51,9 @@ PARTY_DOMAINS = {
     "top09.cz", "zeleni.cz", "svobodni.cz", "motoriste.cz", "motoristesobe.cz", "trikolora.cz", "stacilo.cz",
     "kscm.cz", "socdem.cz", "cssd.cz", "prisaha.cz", "spolu.cz",
 }
-CITY_HALL_DOMAINS = {
-    "praha.eu", "brno.cz", "ostrava.cz", "plzen.eu", "usti-nad-labem.cz", "pardubice.eu", "liberec.cz",
-    "hradeckralove.org", "c-budejovice.cz", "olomouc.eu", "volby.cz",
-}
+# Press-release wires, company, school and voter-guide sites seen in the October 2026 run: not news coverage.
+NOT_NEWS = {"protext.cz", "mzf.cz", "coopdevelopment.cz", "dekonta.cz", "filbec.cz", "benesovka.cz",
+            "volimprahu.cz", "programydovoleb.cz"}
 # Aggregators republish other outlets' stories under new URLs; the original outlet is kept instead.
 AGGREGATORS = {"media24.cz", "globe24.cz", "seznam.cz", "newsbeezer.com", "novinky.sk", "zpravy.cz"}
 OUTLETS = {
@@ -192,10 +191,11 @@ def allowed_outlet(url: str, extra_excluded: set[str]) -> bool:
     """Czech news pages only: no party, list, candidate, city-hall, aggregator or listing pages."""
     host = (urlsplit(url).hostname or "").lower()
     domain = registered_domain(url)
-    if not host.endswith(".cz") or LISTING_URL.search(urlsplit(url).path) or PARTY_DOMAIN.match(domain):
+    if not host.endswith(".cz") or LISTING_URL.search(urlsplit(url).path) or PARTY_DOMAIN.match(domain) \
+            or host.startswith("tiskov"):
         return False
     return not ({domain, host.removeprefix("www.")} & (EXCLUDED_DOMAINS | PARTY_DOMAINS | CITY_HALL_DOMAINS
-                                                       | AGGREGATORS | extra_excluded))
+                                                       | AGGREGATORS | NOT_NEWS | extra_excluded))
 
 
 def campaign_domains(snapshot: Snapshot) -> set[str]:

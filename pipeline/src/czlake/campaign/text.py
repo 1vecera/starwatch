@@ -15,7 +15,6 @@ from dataclasses import dataclass, field
 from urllib.parse import urljoin, urlsplit
 
 import trafilatura
-from lxml import html as lxml_html
 from pypdf import PdfReader
 
 logging.getLogger("pypdf").setLevel(logging.ERROR)

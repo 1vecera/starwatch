@@ -37,7 +37,8 @@ def snapshot(tmp_path):
             {"id": "kv2026:582786:768", "city_id": "582786", "name": "ANO 2011", "short": "ANO", "relevant": False},
         ],
         "cands": [
-            {"id": "c1", "name": "Adam Scheinherr", "list_id": "kv2026:554782:1373", "city_id": "554782", "position": 1},
+            {"id": "c1", "name": "Adam Scheinherr", "list_id": "kv2026:554782:1373", "city_id": "554782",
+             "position": 1},
             {"id": "c2", "name": "Jan Hušbauer", "list_id": "kv2026:554782:768", "city_id": "554782", "position": 1},
             {"id": "c3", "name": "Václav Trojan", "list_id": "kv2026:582786:768", "city_id": "582786", "position": 1},
         ],
@@ -240,3 +241,21 @@ def test_generic_party_text_without_city_or_candidate_is_rejected(tmp_path, snap
     [run] = collector.run(snapshot.select(ids=["kv2026:554782:1373"]))
     assert run.entry["status"] == "not_found"
     assert "name neither the city" in run.entry["note"]
+
+
+def test_ownership_and_shared_pages(snapshot):
+    from czlake.campaign.programs import ListRun, ownership, resolve_shared_pages
+
+    praha_sobe, ano = snapshot.select(ids=["kv2026:554782:1373", "kv2026:554782:768"])
+    page = Document("https://prahasobe.cz/program", "html", "Program PRAHA SOBĚ",
+                    ["Adam Scheinherr a PRAHA SOBĚ: postavíme byty."], SEARCHED)
+    assert ownership(praha_sobe, [page])[0] > ownership(ano, [page])[0] == 0
+    runs = []
+    for lst, score in ((praha_sobe, 8), (ano, 1)):
+        run = ListRun(lst, searched_at=SEARCHED, ownership=score)
+        run.entry = {"status": "found", "sources": [{"url": page.url}]}
+        runs.append(run)
+    resolve_shared_pages(runs)
+    assert runs[0].entry["status"] == "found"
+    assert runs[1].entry == {"status": "not_found", "checked_at": SEARCHED,
+                             "note": "the selected page is the programme of another list (PRAHA SOBĚ)"}

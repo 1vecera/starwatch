@@ -22,7 +22,7 @@ class Exa:
 
     def search(self, query: str, *, num_results: int = 10, category: str | None = None,
                start: str | None = None, end: str | None = None, highlight_query: str | None = None,
-               sentences: int = 2, per_url: int = 1) -> dict:
+               sentences: int = 2, per_url: int = 1, include_domains: list[str] | None = None) -> dict:
         """Run (or replay) one search. Returns ``{request, searched_at, results, cost_usd}``."""
         body: dict = {
             "query": query,
@@ -39,6 +39,8 @@ class Exa:
             body["startPublishedDate"] = start
         if end:
             body["endPublishedDate"] = end
+        if include_domains:
+            body["includeDomains"] = sorted(include_domains)
         key = digest(body)
         cached = self.cache.get("exa", key)
         if cached is not None:
