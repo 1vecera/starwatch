@@ -51,6 +51,7 @@ Everything under `web/data/`, `web/media/` and `web/welcome/` stays out of Git.
 | `data/issue-topics.js` | Named local issues, reviewed from captions | Behind sign-in |
 | `data/topic-labels.js` | Optional machine topic labels (`window.SW_TOPIC_LABELS`). They never override a reviewed label, and each carries the phrase it rests on. | Behind sign-in |
 | `data/programs.js`, `data/articles.js` | Optional party programs and news mentions (`window.SW_PROGRAMS`, `window.SW_ARTICLES`) | Behind sign-in |
+| `data/results2026.js` | Optional official 2026 council results (`window.SW_RESULTS2026`, `tools/export_results2026.py`) | Behind sign-in |
 | `media/` | Retained post images, videos, portraits and logos | Behind sign-in |
 | `welcome/` | Copies of the 53 files on the welcome wall (`tools/copy_welcome_media.py`) | Public |
 
@@ -72,6 +73,20 @@ node tools/check-launch.mjs http://127.0.0.1:5173   # every screen at 1440x900 a
 node tools/check-atlas-c.mjs http://127.0.0.1:5173  # Star Atlas behaviour: city fly-in, islands, rank by, topic lens, playback
 node tools/walkthrough.mjs http://127.0.0.1:5173    # screenshots of the main path at desktop and phone size
 ```
+
+## 2026 results
+
+Polls close on Saturday 10 October 2026 at 14:00; the Czech Statistical Office then publishes council results while the votes are counted. The app shows them as soon as `web/data/results2026.js` exists, with no code change:
+
+```sh
+uv run --offline python tools/export_results2026.py --snapshot web/data/real.js --out web/data/results2026.js
+(cd tools && uv run --offline python -m unittest test_export_results2026)   # importer test with a synthetic CSU-shaped file
+```
+
+- **Matching:** the importer matches lists by their official code (`VSTRANA`, the number in the snapshot list id), never by ballot position, which differs for every snapshot list. Elected members match by list and position and must agree on the name. Anything unmatched stays in the file as `unmatched:<ballot number>`.
+- **Where results appear:** Spotlight list and person headers show the 2026 share, seats and elected or not with personal votes. The Atlas islands and inspectors show the 2026 share and seats, and each city's count status. Pulse adds a 2026 column next to 2022 and attention, on separate scales and never combined. By the numbers lists turnout, precincts and seats per city. The Radar watchlist shows the 2026 result too.
+- **Count status:** a partial count always reads "Partial count · N% of precincts · as of HH:MM" with the source link, and a finished one "Final count". 2022 stays visible.
+- **No causal claims:** results and attention are separate measures, and no screen explains one by the other.
 
 ## What the snapshot covers
 

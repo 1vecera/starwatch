@@ -15,6 +15,8 @@ python3 tools/export_stats.py >/dev/null 2>&1 || true
 [ -f web/data/programs.js ] || echo "window.SW_PROGRAMS=null;" > web/data/programs.js
 [ -f web/data/articles.js ] || echo "window.SW_ARTICLES=null;" > web/data/articles.js
 [ -f web/data/topic-labels.js ] || echo "window.SW_TOPIC_LABELS=null;" > web/data/topic-labels.js
+# official 2026 results (tools/export_results2026.py, once counting starts); the app shows them only when present
+[ -f web/data/results2026.js ] || echo "window.SW_RESULTS2026=null;" > web/data/results2026.js
 PORT="${PORT:-5173}"
 echo "Starwatch → http://127.0.0.1:${PORT}/"
 exec uv run --offline python tools/serve.py --port "${PORT}"

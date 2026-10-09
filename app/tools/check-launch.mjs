@@ -18,7 +18,7 @@ const PUBLIC = [/^\/$/, /^\/index\.html$/, /^\/welcome\.html$/, /^\/about\.html$
   /^\/ds\.css$/, /^\/nav\.js$/, /^\/data\/stats\.js$/, /^\/robots\.txt$/, /^\/(welcome|brand|fx|img|fonts)\//];
 const BANNED = [/\bstudio\b/i, /\bforecast/i, /\bexpected\b/i, /\breal-time\b/i, /\bmonitoring now\b/i, /\blive (data|alerts?|feed|stream|monitoring)\b/i];
 
-async function visit(path, { viewport = { width: 1440, height: 900 }, name, wait: ms = 3500, publicOnly = false, run } = {}) {
+async function visit(path, { viewport = { width: 1440, height: 900 }, name, wait: ms = 3500, publicOnly = false, run, setup } = {}) {
   const ctx = await browser.newContext({ viewport, isMobile: viewport.width < 600, hasTouch: viewport.width < 600 });
   const page = await ctx.newPage();
   const errs = [], offPublic = [];
@@ -26,6 +26,7 @@ async function visit(path, { viewport = { width: 1440, height: 900 }, name, wait
   page.on("console", m => { if (m.type() === "error") errs.push("console " + m.text().slice(0, 300)); });
   page.on("response", r => { if (r.status() >= 400) errs.push(`http ${r.status()} ${r.url()}`); });
   page.on("request", r => { const u = new URL(r.url()); if (publicOnly && u.origin === new URL(base).origin && !PUBLIC.some(p => p.test(u.pathname))) offPublic.push(u.pathname); });
+  if (setup) await setup(page);
   await page.goto(base + path, { waitUntil: "load" });
   await wait(ms);
   const info = await page.evaluate(BANNED_SRC => {
@@ -86,6 +87,28 @@ for (const w of [360, 390, 430]) for (const q of ["", "?party=ods"]) {
     return { ok: bs.length === 10 && R.length === 10 && !ov && !clipped, visible: R.length, overlaps: ov, clipped };
   }) });
 }
+// 2026 results: absent (null file) shows nothing; present shows status-labelled results next to 2022. The present case
+// serves an in-memory synthetic payload built from real snapshot ids (never written to disk): Praha partial, Olomouc final.
+const R26_NULL = p => p.route("**/data/results2026.js", r => r.fulfill({ contentType: "text/javascript", body: "window.SW_RESULTS2026=null;" }));
+let R26_BODY = null;
+{ const ctx = await browser.newContext(); const p = await ctx.newPage(); await R26_NULL(p); await p.goto(base + "/data.html"); await wait(1500);
+  R26_BODY = await p.evaluate(() => { const raw = window.SW_RAW; if (!raw) return null; const out = { generated_at: "2026-10-10T17:00:00Z", source: "synthetic check payload", cities: {}, elected: {} };
+    const mk = (cid, counted, prec) => { const ls = raw.lists.filter(l => l.city_id === cid); const lists = {};
+      ls.forEach((l, i) => { const k = Math.max(1, 12 - i); lists[l.id] = { name: l.name, votes: 1000 * k, pct: k, seats: i < 4 ? 4 - i : 0, matched: true }; const c = raw.cands.find(c => c.list_id === l.id && c.position === 1); if (c && i < 4) out.elected[c.id] = { votes: 500, pct: 2 }; });
+      out.cities[cid] = { counted, observed_at: "2026-10-10T16:42:00", precincts_pct: prec, turnout_pct: 41.2, valid_votes: 10000, seats_total: 10, source_url: "https://volby.gov.cz/", lists }; };
+    mk("554782", false, 62.4); mk("500496", true, 100); return "window.SW_RESULTS2026=" + JSON.stringify(out) + ";"; });
+  await ctx.close(); }
+const R26_ON = p => p.route("**/data/results2026.js", r => r.fulfill({ contentType: "text/javascript", body: R26_BODY || "window.SW_RESULTS2026=null;" }));
+const praha32 = "/spotlight.html?list=32";
+await visit(praha32, { name: "results-absent-spotlight", wait: 4000, setup: R26_NULL, run: p => p.evaluate(() => ({ ok: !/2026 municipal election|Partial count|Final count/.test(document.body.innerText) })) });
+await visit("/data.html", { name: "results-absent-data", wait: 2500, setup: R26_NULL, run: p => p.evaluate(() => ({ ok: document.querySelector("#r26S").hidden })) });
+await visit(praha32, { name: "results-present-spotlight", wait: 4000, setup: R26_ON, run: p => p.evaluate(() => { const t = document.querySelector(".vote") ? document.querySelector(".vote").innerText : "";
+  return { ok: !!window.SW_RESULTS2026 && /2026 municipal election/.test(t) && /Partial count · 62(\.4)?% of precincts · as of 16:42/.test(t) && /volby\.gov\.cz/.test(t) && /Attention is still not support/.test(t) } }) });
+await visit("/data.html", { name: "results-present-data", wait: 2500, setup: R26_ON, run: p => p.evaluate(() => { const s = document.querySelector("#r26S");
+  return { ok: !s.hidden && /Final count/.test(s.innerText) && /Partial count/.test(s.innerText) && /Not published yet/.test(s.innerText) } }) });
+await visit("/atlas.html?list=32", { name: "results-present-atlas", wait: 5000, setup: R26_ON, run: p => p.evaluate(() => ({ ok: /2026 · /.test(document.querySelector("#inspB").innerText) && /partial/.test(document.querySelector("#inspB").innerText) })) });
+await visit("/pulse.html?mode=party&lists=32,33", { name: "results-present-pulse", wait: 5000, setup: R26_ON, run: p => p.evaluate(() => { const t = document.querySelector("#then").innerText;
+  return { ok: /2026 election/.test(t) && /does not explain one by the other/.test(t) && !/\b(because|caused|drove|led to|thanks to)\b/i.test(t) } }) });
 // Radar is purely observational: no reply drafts anywhere, including inside an opened item
 await visit("/radar.html?city=1", { name: "radar-no-drafts", wait: 4500, run: async p => {
   const txt = async () => p.evaluate(() => document.body.innerText);

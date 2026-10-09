@@ -183,6 +183,8 @@ html,body{background:#EEF2F6}
 .wl-row .n{font-size:13.5px}.wl-row .s{margin-top:3px}
 .wl-row .r22{display:flex;flex-wrap:wrap;gap:4px 8px;margin-top:5px;font-size:12px;color:var(--label2)}.wl-row .r22 b{color:var(--label);font-weight:650;font-variant-numeric:tabular-nums}
 .wl-row .r22 .el{color:var(--brand);font-weight:600}
+.r6t{display:inline-flex;align-items:center;height:18px;padding:0 6px;border-radius:5px;font-size:12px;font-weight:650;color:var(--orange);background:color-mix(in srgb,var(--orange) 10%,var(--surface))}
+.r6t.fin{color:var(--green);background:color-mix(in srgb,var(--green) 10%,var(--surface))}
 .tag{background:rgba(15,23,42,.05)}
 .tgl{background:#CBD5E1}
 /* feed */
@@ -293,6 +295,7 @@ html,body{background:#EEF2F6}
 <script src="data/topic-labels.js"></script>
 <script src="geo/cz.js"></script>
 <script src="mock.js"></script>
+<script src="data/results2026.js"></script>
 <script src="sw-real.js" data-min-assets="0"></script>
 <script src="sw-picker.js"></script>
 <script>
@@ -394,6 +397,11 @@ function r22(e){if(e.kind==='list'){const r=e.L.result2022;if(!r||r.votes==null&
     return `<span class="r22">2022${r.pct!=null?` <b>${pct(r.pct)}</b>`:''}${r.votes!=null?` <span>${fmtN(r.votes)} votes</span>`:''}${r.seats!=null?` <span>${fmtN(r.seats)} seat${r.seats===1?'':'s'}</span>`:''}</span>`}
   const r=e.c.pref2022;if(!r||r.votes==null)return '';
   return `<span class="r22">2022 <b>${fmtN(r.votes)}</b> <span>preference votes</span>${r.rank_in_list!=null?` <span>#${r.rank_in_list} on list</span>`:''}${r.elected?' <span class="el">elected</span>':''}</span>`}
+// 2026 official result next to 2022 in the watchlist (optional data/results2026.js), with the count status
+function r26(e){const R=SW.r26;if(!R||!R.on)return '';const ci=e.kind==='list'?e.L.city:e.c.city,st=R.status(ci);if(!st)return '';
+  const tag=`<span class="r6t${st.final?' fin':''}" title="${esc(st.text)}">${st.final?'final':'partial'}</span>`;
+  if(e.kind==='list'){const r=R.list(e.L.i);return r?`<span class="r22">2026 <b>${pct(r.pct)}</b> <span>${fmtN(r.seats)} seat${r.seats===1?'':'s'}</span>${tag}</span>`:''}
+  const k=R.cand(e.c.i);return k?`<span class="r22">2026 <b>${k.elected?'elected':'not elected'}</b>${k.elected&&k.votes!=null?` <span>${fmtN(k.votes)} personal votes</span>`:''}${tag}</span>`:''}
 const platN=a=>PLAT[a.plat].n, kindN=a=>a.video?'video':'post';
 const topicOf=a=>a.topics.length?a.topics[0]:null;
 
@@ -630,7 +638,7 @@ $('#bTop').disabled=!PUSH.length;$('#bReplay').disabled=!FEED.length;
 $('#bTop').onclick=()=>{if(!PUSH.length){toast('No observed posts for this watchlist in the snapshot');return}if(!$('#lock').classList.contains('gone'))unlock();setTimeout(()=>openSheet(PUSH[0].id),$('#lock').classList.contains('gone')?0:380)};
 const rows=WATCH.map(e=>{const n=e.created.length,role=e.me?`<span class="tag you">${REAL?'Focus':'You'}</span>`:e.kind==='list'?'<span class="tag">Party</span>':'<span class="tag">Rival</span>';
   return `<div class="wl-row">${av(e,42)}<div style="min-width:0"><div class="n">${esc(e.name)} ${role}</div>
-  <div class="s"><span>${esc(e.kind==='list'?P.name+' · '+e.L.size+' candidates':e.list.name)}</span>${n?`${n} posts${e.median!=null?` · typical ${fmt(e.median)}`:''}`:'No retained posts in 30 days'}</div>${r22(e)}</div><button class="tgl on" data-watch="${e.key}" aria-label="Show ${esc(e.name)} in local feed" aria-pressed="true"></button></div>`}).join('');
+  <div class="s"><span>${esc(e.kind==='list'?P.name+' · '+e.L.size+' candidates':e.list.name)}</span>${n?`${n} posts${e.median!=null?` · typical ${fmt(e.median)}`:''}`:'No retained posts in 30 days'}</div>${r26(e)}${r22(e)}</div><button class="tgl on" data-watch="${e.key}" aria-label="Show ${esc(e.name)} in local feed" aria-pressed="true"></button></div>`}).join('');
 const HIDE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>';
 $('#watch').innerHTML=`<div class="wl-h"><h2>Watching</h2><span class="t-sub">${esc(P.name)} · ${WATCH.length}</span><button class="hide" data-side="l" aria-label="Hide watchlist" title="Hide">${HIDE}</button></div>${rows}${REAL?'':'<button class="pill add">＋ Add from Atlas</button>'}
  <div class="wl-note">${REAL?'Typical = median likes + comments per retained post, last 30 days. Toggles filter this feed only; profile samples are incomplete.':'Typical = median interactions per item, 30 days, each entity compared only with itself. Follower counts become trends after a second observation.'}</div>`;

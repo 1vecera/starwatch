@@ -203,6 +203,8 @@ body{overflow:hidden;background:var(--space)}
 .clm{margin:6px 0;padding:7px 10px;background:var(--sunken);border-radius:6px;font-size:13px;line-height:1.4}
 .note{font-size:12px;color:var(--label3);margin-top:8px;line-height:1.45}
 .ctxp{margin-top:18px;padding-top:14px;border-top:1px solid var(--hairline)}
+.r6t{display:inline-flex;align-items:center;height:20px;padding:0 7px;border-radius:6px;font-size:12px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--orange);background:color-mix(in srgb,var(--orange) 10%,var(--surface))}
+.r6t.fin{color:var(--green);background:color-mix(in srgb,var(--green) 10%,var(--surface))}
 .agrid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:8px}
 .agrid .th{position:relative;aspect-ratio:1}
 .agrid .th:first-child{grid-column:span 2;grid-row:span 2}
@@ -266,6 +268,7 @@ body{overflow:hidden;background:var(--space)}
 <script src="data/issue-topics.js"></script>
 <script src="data/topic-labels.js"></script>
 <script src="mock.js"></script>
+<script src="data/results2026.js"></script>
 <script src="sw-real.js"></script>
 <script src="sw-picker.js"></script>
 <script src="data/programs.js"></script>
@@ -323,6 +326,12 @@ const avatar=(C,gc)=>`<span class="av" aria-hidden="true" style="--gc:${gc}">${C
 const pct=v=>(+v).toLocaleString('en-GB',{maximumFractionDigits:1})+' %';
 const r22=L=>L.result2022&&L.result2022.pct!=null?L.result2022:null;
 const r22line=L=>{const r=r22(L);return r?`2022 · <b>${pct(r.pct)}</b>${r.votes!=null?` · ${fmtN(r.votes)} votes`:''}${r.seats!=null?` · ${fmtN(r.seats)} seat${r.seats===1?'':'s'}`:''}`:''};
+// 2026 official result (optional data/results2026.js), always with its count status; separate from attention
+const R6=SW.r26||{on:false};
+const r26=L=>R6.on?R6.list(L.i):null;
+const r26st=ci=>R6.on?R6.status(ci):null;
+const r26line=L=>{const r=r26(L),st=r26st(L.city);return r?`2026 · <b>${pct(r.pct)}</b> · ${fmtN(r.seats)} seat${r.seats===1?'':'s'}${st?` · <span class="r6t${st.final?' fin':''}">${st.final?'final count':`partial, ${esc(st.short.replace(/^partial count, /,''))}`}</span>`:''}`:''};
+const resLines=L=>(r26(L)?`<div class="r22">${r26line(L)}</div>`:'')+(r22(L)?`<div class="r22">${r22line(L)}</div>`:'');
 const pv=C=>C.pref2022&&C.pref2022.votes!=null?C.pref2022.votes:-1;
 function listPeople(L){return (L.cands||[]).map(k=>cands[k]).filter(Boolean).map(C=>({C,v:cval(C),n:cvis(C).length})).sort((a,b)=>b.v-a.v||pv(b.C)-pv(a.C)||a.C.k-b.C.k)}
 const lname=L=>L.name.length>48&&L.short?L.short:L.name;
@@ -491,6 +500,7 @@ function mosaic(L,ids,cols,rowsCap,CELL,GAP,focus){
   return {html,h:Math.max(0,h)}}
 function isleHead(g,gi,focus){const L=g.L,n=g.ids.length,r=r22(L);
   const bits=n?[`<em>${mv(g.m)}</em> ${esc(U().unit)}`]:['No verified posts yet'];if(n&&S.rank!=='posts')bits.push(`${fmtN(n)} post${n===1?'':'s'}`);
+  const r6=r26(L);if(r6&&!focus)bits.push(`2026: ${pct(r6.pct)}, ${fmtN(r6.seats)} seat${r6.seats===1?'':'s'}${r26st(L.city)&&!r26st(L.city).final?' (partial)':''}`);
   if(r&&!focus)bits.push(`2022: ${pct(r.pct)}`);
   return `<button class="ih" data-l="${L.i}" aria-label="${esc(L.name)}: ${fmtN(g.m)} ${esc(U().unit)}, rank ${gi+1}">${lmark(L)}<span class="nm"><b title="${esc(L.name)}">${esc(lname(L))}</b><small>${bits.join(' · ')}</small></span>${n?`<span class="rkn">${gi+1}</span>`:''}</button>`+
     (focus?`<div class="iact"><button class="pill primary" data-spot="list:${L.i}">Open in Spotlight</button><button class="pill" data-go="pulse.html?list=${L.i}">Compare in Pulse</button><button class="hide x" data-unfocus="1" aria-label="Close party">✕</button></div>`:'')}
@@ -532,9 +542,9 @@ function layoutIsles(reveal){
     const on=focus===L.i;if(b.skip&&!on){el.style.display='none';return}el.style.display='';el.classList.toggle('on',on);el.classList.toggle('dim',focus>=0&&!on);el.classList.remove('gone');
     if(on){const FC=n?34:Math.min(60,Math.max(44,Math.round(Fw/16))),w=Math.min(Fw-24,n?Fw-8:720),cols=Math.max(4,Math.floor((w-2*PADI+GAP)/(FC+GAP)));
       const ww=cols*(FC+GAP)-GAP+2*PADI,few=b.g.ids.length<8,perRow=Math.max(1,Math.floor((ww-2*PADI)/72)),ppl=pplHtml(L,perRow*(few?(n?2:3):1));
-      const top0=measure(isleHead(b.g,b.gi,true)+`<div class="r22">${r22line(L)}</div>`+ppl,ww);
+      const top0=measure(isleHead(b.g,b.gi,true)+`<div style="margin:-2px 2px 8px">${resLines(L)}</div>`+ppl,ww);
       const rows=Math.max(2,Math.floor((Fh-top0-2*PADI)/(FC+GAP)));const ms=mosaic(L,b.g.ids,cols,rows,FC,GAP,true);
-      const html=isleHead(b.g,b.gi,true)+(r22(L)?`<div class="r22" style="margin:-2px 2px 8px">${r22line(L)}</div>`:'')+ms.html+ppl;const hh=measure(html,ww);
+      const html=isleHead(b.g,b.gi,true)+(r22(L)||r26(L)?`<div style="margin:-2px 2px 8px">${resLines(L)}</div>`:'')+ms.html+ppl;const hh=measure(html,ww);
       const was=el.dataset.f==='1';el.dataset.f='1';el.style.left=(F.x0+(Fw-ww)/2)+'px';el.style.top=(F.y0+Math.max(4,(Fh-hh)/2))+'px';el.style.width=ww+'px';el.innerHTML=html;if(!was){el.classList.remove('grow');void el.offsetWidth;el.classList.add('grow')}}
     else{el.dataset.f='';el.classList.remove('grow');el.style.left=b.x+'px';el.style.top=b.y+'px';el.style.width=b.w+'px';el.innerHTML=isleHead(b.g,b.gi,false)+b.ms.html}
     if(reveal||fresh){el.classList.remove('rise');void el.offsetWidth;el.classList.add('rise');el.style.animationDelay=(b.gi*60)+'ms'}});
@@ -611,10 +621,12 @@ function inspCity(){
     <div class="note">Pick a city on the map. Marker size = ${esc(U().long)}. Posts appear only for accounts whose owner was independently verified.</div>`]}
   const c=cities[S.city];const ids=c.assets.filter(i=>visible(assets[i])).sort(byT);const tn=S.topic>=0?TOP[S.topic][0]:null;const cc=cityCands(c);
   const issue=S.topic>=0&&TOP[S.topic][4]==='issue';
+  const c6=R6.on?R6.city(S.city):null,s6=r26st(S.city);
   return [tn?'Topic lens · '+c.name:'City',`<h2>${esc(tn||c.name)}</h2>${hero(ids)}
   ${issue?'<div class="note">Issue topic reviewed from source captions · partial coverage. These posts discuss the same issue; membership does not imply agreement, disagreement or verified facts. Platform copies remain separate posts.</div>':''}
   <div class="k"><span>${tn?'Top posts on '+esc(tn):'Top posts'}</span><span class="x">by ${esc(S.rank==='posts'?'reach':U().long)}</span></div>${ids.length?topGrid(ids,9):'<div class="note">No posts in the current filter.</div>'}
   ${cc.length?`<div class="k"><span>${tn?'Who posts about it':'Biggest candidates'}</span><span class="x">by ${esc(U().long)}</span></div><div class="plist">${cc.slice(0,5).map(({C,v})=>`<button data-k="${C.i}">${avatar(C,col(lists[C.list]))}<b>${esc(C.name)} <small>${esc(lists[C.list].short)}</small></b><span>${mv(v)}</span></button>`).join('')}</div>`:''}
+  ${c6&&s6?`<div class="k"><span>2026 result</span><span class="x"><span class="r6t${s6.final?' fin':''}">${esc(s6.final?'final count':s6.short)}</span></span></div>${kv([['Turnout',c6.turnout_pct!=null?pct(c6.turnout_pct):'—'],['Seats',fmtN(c6.seats_total)],...(s6.final?[]:[['Precincts counted',c6.precincts_pct!=null?pct(c6.precincts_pct):'—']]),['Source',`<a href="${esc(s6.url)}" target="_blank" rel="noopener">volby.gov.cz ↗</a>${s6.when?`<small>as of ${esc(s6.when)}${s6.day?' · '+esc(s6.day):''}</small>`:''}`]])}<div class="note">${esc(R6.note)}</div>`:''}
   <div class="note">${fmtN(c.n)} registered candidates on ${fmtN(c.L)} lists. Party islands are arranged by rank around the town, not by address.</div>`]}
 const P_=window.SWPanels;
 const allOf=L=>[...L.assets,...L.cands.flatMap(k=>cands[k].assets)];
@@ -622,7 +634,7 @@ const ctx=(html,cls)=>html?`<div class="ctxp${cls?' '+cls:''}">${html}</div>`:''
 function inspList(L){const ids=listAssets(L).sort(byT);const pp=listPeople(L);
   const row=({C,v})=>{const p=C.pref2022;return `<button data-k="${C.i}">${avatar(C,col(L))}<b>#${C.k} ${esc(C.name)}${p&&p.votes!=null?` <small>2022: ${fmtN(p.votes)} pref.${p.elected?' · elected':''}</small>`:''}</b><span>${v>0?mv(v):'—'}</span></button>`};
   return ['Party list · '+cities[L.city].name,`<h2>${logoSrc(L)?`<img class="plogo" src="${esc(logoSrc(L))}" alt="">`:''}${esc(L.name)}</h2>
-  ${r22(L)?`<div class="r22">${r22line(L)}</div>`:''}
+  ${resLines(L)}${r26(L)&&r26st(L.city)&&r26st(L.city).url?`<div class="note"><a href="${esc(r26st(L.city).url)}" target="_blank" rel="noopener">2026 results: volby.gov.cz ↗</a> · ${esc(R6.note)}</div>`:''}
   <div class="acts" style="margin-top:12px"><button class="pill primary" data-spot="list:${L.i}">Open in Spotlight</button><button class="pill" data-go="pulse.html?list=${L.i}">Compare in Pulse</button></div>
   ${ids.length?hero(ids):'<div class="note">No verified posts from this list yet; the people and the 2022 result are below.</div>'}
   ${ids.length?`<div class="k"><span>Top posts</span><span class="x">by ${esc(S.rank==='posts'?'reach':U().long)}</span></div>${topGrid(ids,12)}`:''}
@@ -636,7 +648,7 @@ function inspCand(C){const L=lists[C.list];const ids=cvis(C).sort(byT);const p=C
   ${ids.length?`<div class="k"><span>Top posts</span><span class="x">by ${esc(S.rank==='posts'?'reach':U().long)}</span></div>${topGrid(ids,9)}`:''}
   ${P_?ctx(P_.topicMix(C.assets,{attr:'data-t',active:S.topic,max:6,emptyHidden:true})):''}
   ${P_?ctx(P_.news({cand:C.i},{max:4})):''}
-  ${kv([['List',`<button class="lnk" data-l="${L.i}">${esc(L.name)}</button>`],['City',esc(cities[C.city].name)],...(p&&p.votes!=null?[['2022 preference votes',`${fmtN(p.votes)}${p.rank_in_list!=null?`<small>#${p.rank_in_list} on the list${p.elected?' · elected':''}</small>`:''}`]]:[]),...(REAL&&C.accounts.length?[['Verified accounts',C.accounts.map(a=>esc(a.platform)+' @'+esc(a.handle||'')).join(', ')]]:[]),...(C.folKnown?[['Followers (snapshot)',fmtN(C.fol)]]:[]),...(C.about.length?[['Posts about them',fmtN(C.about.length)]]:[])])}
+  ${kv([['List',`<button class="lnk" data-l="${L.i}">${esc(L.name)}</button>`],['City',esc(cities[C.city].name)],...((k6,st)=>k6&&st?[['2026 result',`${k6.elected?(st.final?'Elected':'Elected on the partial count'):(st.final?'Not elected':'Not elected on the partial count')}${k6.elected&&k6.votes!=null?`<small>${fmtN(k6.votes)} personal votes</small>`:''}<small>${esc(st.text)}${st.url?` · <a href="${esc(st.url)}" target="_blank" rel="noopener">volby.gov.cz ↗</a>`:''}</small>`]]:[])(R6.on?R6.cand(C.i):null,r26st(C.city)),...(p&&p.votes!=null?[['2022 preference votes',`${fmtN(p.votes)}${p.rank_in_list!=null?`<small>#${p.rank_in_list} on the list${p.elected?' · elected':''}</small>`:''}`]]:[]),...(REAL&&C.accounts.length?[['Verified accounts',C.accounts.map(a=>esc(a.platform)+' @'+esc(a.handle||'')).join(', ')]]:[]),...(C.folKnown?[['Followers (snapshot)',fmtN(C.fol)]]:[]),...(C.about.length?[['Posts about them',fmtN(C.about.length)]]:[])])}
   ${C.photo_source?`<div class="note">Portrait: <a href="${esc(C.photo_source)}" target="_blank" rel="noopener">source ↗</a></div>`:''}
   <div class="acts"><button class="pill primary" data-spot="cand:${C.i}">Open in Spotlight</button><button class="pill" data-go="pulse.html?cand=${C.i}">Compare in Pulse</button><button class="pill" data-go="radar.html?cand=${C.i}">Watch on Radar</button></div>`]}
 function inspAsset(a){const L=lists[a.list],P=PLAT[a.plat];const by=a.owner>=0?cands[a.owner]:null;
