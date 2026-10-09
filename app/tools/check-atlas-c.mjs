@@ -7,7 +7,7 @@ const pw = await import(process.env.PLAYWRIGHT_CORE || "/home/vecera/code/daniel
 import fs from "node:fs/promises";
 const base = (process.argv[2] || "http://127.0.0.1:5173").replace(/\/$/, ""), out = process.argv[3] || "atlas-c-checks";
 await fs.mkdir(out, { recursive: true });
-const b = await pw.chromium.launch({ executablePath: process.env.CHROME || "/usr/bin/google-chrome-stable", headless: true, args: ["--no-sandbox", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"] });
+const b = await pw.chromium.launch({ executablePath: process.env.CHROME || `${process.env.HOME}/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome`, headless: true, args: ["--no-sandbox", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"] });
 const p = await b.newPage({ viewport: { width: 1600, height: 950 } });
 const errors = [], checks = {};
 p.on("pageerror", e => { if (!/Transition was skipped/.test(String(e))) errors.push(String(e)); });

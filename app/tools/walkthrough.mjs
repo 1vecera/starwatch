@@ -7,7 +7,7 @@ import fs from "node:fs/promises";
 const base = (process.argv[2] || "http://127.0.0.1:5173").replace(/\/$/, "");
 const out = process.argv[3] || "walkthrough-shots";
 await fs.mkdir(out, { recursive: true });
-const browser = await pw.chromium.launch({ executablePath: process.env.CHROME || "/usr/bin/google-chrome-stable", headless: true,
+const browser = await pw.chromium.launch({ executablePath: process.env.CHROME || `${process.env.HOME}/.cache/ms-playwright/chromium-1243/chrome-linux64/chrome`, headless: true,
   args: ["--no-sandbox", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
 const errors = [], steps = [];
 const wait = ms => new Promise(r => setTimeout(r, ms));

@@ -412,7 +412,7 @@ const ranked=(e,filt,any)=>e.ids.map(i=>assets[i]).filter(a=>valid(a)&&(any||S.m
 const nice=v=>{if(v<=0)return 1;const p=Math.pow(10,Math.floor(Math.log10(v)));const n=v/p;return(n<=1?1:n<=2?2:n<=5?5:10)*p};
 const axis=(mx,n=4)=>{const st=nice(Math.max(1,mx)/n);const top=Math.ceil(Math.max(1,mx)/st)*st;return{top,step:st,n:Math.round(top/st)}};
 const topicName=t=>TOP[t][0];
-const mlab=(a,t)=>{const m=SW.topicMeta?SW.topicMeta(a,t):{};return m.machine?`<span class="sw-mlab" title="Machine label${m.evidence?` · “${esc(m.evidence)}”`:''}">machine</span>`:''};
+const tmark=(a,t)=>{const m=SW.topicMeta?SW.topicMeta(a,t):{};return m.machine?`<span class="sw-mlab" title="Machine label${m.evidence?` · “${esc(m.evidence)}”`:''}">machine</span>`:''};
 const REAL=SW.source.kind==='real';
 const NOTOPIC=!assets.some(a=>a.topics&&a.topics.length);
 if(NOTOPIC){const t=document.getElementById('tops');if(t)t.remove();document.querySelector('.r1').style.gridTemplateColumns='minmax(0,1fr)'}
@@ -654,11 +654,11 @@ function heroCard(a,e,k,rank,max,win){const sc=score(a);
       ${win?`<span class="lead">Leads on ${esc(topicName(S.topic))}</span>`:''}
       <div class="bar"><i style="width:${Math.max(2,sc/max*100)}%"></i></div>
       <p class="cap">${esc(a.cap)}</p>
-      <div class="cm">${a.topics.map(t=>`<span class="chip">${topicName(t)}${mlab(a,t)}</span>`).join('')}<span>${dstr(a.age)} ${TODAY.getFullYear()}</span>${e.kind==='party'?`<span class="by">· ${esc(a.owner>=0?cands[a.owner].name:'party account')}</span>`:''}${srcA(a)}</div>
+      <div class="cm">${a.topics.map(t=>`<span class="chip">${topicName(t)}${tmark(a,t)}</span>`).join('')}<span>${dstr(a.age)} ${TODAY.getFullYear()}</span>${e.kind==='party'?`<span class="by">· ${esc(a.owner>=0?cands[a.owner].name:'party account')}</span>`:''}${srcA(a)}</div>
       <div class="mini" style="grid-template-columns:repeat(${a.na&&a.na.shares?3:4},1fr)">${[['views','views'],['likes','likes'],['comments','comments']].concat(a.na&&a.na.shares?[]:[['shares','shares']]).map(([k2,l])=>{const v=mval(a,k2);return `<div class="${S.metric===k2?'on':''}${v==='—'?' na':''}"><b>${v}</b>${l}</div>`}).join('')}</div></div></article>`}
 function rowCard(a,e,k,rank,max){const sc=score(a);
   return `<div class="rowc" data-a="${a.i}" style="--c:${e.col}"><div class="th">${media(a,false)}<span class="rk">#${rank}</span></div>
-    <div><div class="t">${esc(a.cap)}</div><div class="s">${fmtName(a)} · ${dstr(a.age)}${a.topics.length?' · '+topicName(a.topics[0])+mlab(a,a.topics[0]):''}${a.url?' · ':''}${srcA(a,'Source ↗')}</div></div>
+    <div><div class="t">${esc(a.cap)}</div><div class="s">${fmtName(a)} · ${dstr(a.age)}${a.topics.length?' · '+topicName(a.topics[0])+tmark(a,a.topics[0]):''}${a.url?' · ':''}${srcA(a,'Source ↗')}</div></div>
     <div class="v"><span class="num">${S.norm?n1k(a):fmt(sc)}</span><small>${S.norm?'/ 1k':mlab()}</small><div class="vb"><i style="width:${Math.max(3,sc/max*100)}%"></i></div></div></div>`}
 function renderTop(){
   const box=$('#top');const tc=topicCounts();
