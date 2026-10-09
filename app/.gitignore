@@ -27,3 +27,4 @@ dist/
 /web/data/issue-topics.js
 # Public welcome wall: a copy of collected media, published by the edge, never committed
 /web/welcome/
+launch-checks/
