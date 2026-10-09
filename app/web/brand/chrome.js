@@ -3,7 +3,7 @@
      <link rel="stylesheet" href="ds.css"><link rel="stylesheet" href="brand/chrome.css">
      <script src="mock.js"></script><script src="brand/chrome.js"></script>
      <script>SWChrome.mount(document.body,{active:'atlas',routes:true,onBack:()=>history.back()})</script>
-   Floating pills over the page: logo (+ the snapshot chip, appended to .c-brand by app.js) left, the screen dock
+   Floating pills over the page: logo + the snapshot chip (opts.snapshot:false hides it) left, the screen dock
    centred, then search, the author (Daniel Večeřa, with follow links) and the account menu (About, privacy, source, sign out) right.
    routes:true links to atlas/spotlight/pulse/radar/data/about.html; omit it to only fire the 'sw:nav' event / opts.onNav.
    Leave ~64–76px top padding (and ~92px bottom on phones, where the dock floats at the bottom).
@@ -31,6 +31,13 @@ const G_X='<svg class="sw-g" viewBox="0 0 24 24" aria-hidden="true"><path fill="
 const I_USER='<circle cx="12" cy="8.6" r="3.9"/><path d="M4.6 20.2c.9-3.6 3.9-5.7 7.4-5.7s6.5 2.1 7.4 5.7"/>';
 const I_OUT='<path d="M14 4.5h3.5a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H14"/><path d="M10 8l-4 4 4 4"/><path d="M6 12h9"/>';
 const I_EXT='<path d="M9 5H6.5A1.5 1.5 0 0 0 5 6.5v11A1.5 1.5 0 0 0 6.5 19h11a1.5 1.5 0 0 0 1.5-1.5V15"/><path d="M13 5h6v6"/><path d="M19 5l-8 8"/>';
+const CLOCK='<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 4.6V8l2.3 1.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+/* the public snapshot; screens with data pass SW.snapshot / SW.source, public pages use these defaults */
+const SNAP={short:'8–9 Oct 2026',long:'8–9 October 2026'};
+function chip(){const SW=window.SW,sn=Object.assign({},SNAP,SW&&SW.snapshot||{}),st=window.SW_STATS;
+  const ex=SW&&SW.source&&SW.source.exported_at||st&&st.public&&st.public.snapshot&&st.public.snapshot.exported_at;const d=ex?new Date(ex):null;
+  const when=d&&!isNaN(d)?'\nExported '+d.toLocaleString('en-GB',{timeZone:'Europe/Prague',day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'})+' (Prague)':'';
+  return `<a class="sw-data" href="about.html#snapshot" title="Snapshot: public posts collected ${sn.long}. Not live monitoring.${when}\nOpen About for coverage and limitations." aria-label="Snapshot of public posts collected ${sn.long}, not live. About the data">${CLOCK}<span><span class="d-k">Snapshot</span><span class="d-w"> · <span class="d-l">public posts collected </span>${sn.short}</span><span class="d-u"> · not live</span></span></a>`}
 const I_LOCK='<rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/>';
 const ALL=SCREENS.concat(EXTRA);
 const ICON=(p,cls)=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="${cls||''}" aria-hidden="true">${p}</svg>`;
@@ -47,7 +54,7 @@ const isMac=/Mac|iPhone|iPad/.test(navigator.platform||navigator.userAgent);
 function mount(host,opts){
   opts=Object.assign({active:'atlas',routes:null,mock:true},opts||{});
   const el=document.createElement('header');el.className='sw-chrome';el.setAttribute('role','banner');
-  el.innerHTML=`<div class="c-left"><div class="c-brand c-pill"><a class="c-logo" href="atlas.html" aria-label="Starwatch: Star Atlas">${mark(22)}<span class="sw-word">Starwatch</span></a></div>${opts.mock?'<span class="c-mock c-pill" title="All names, posts and metrics on screen are generated"><i></i>MOCK DATA</span>':''}</div>
+  el.innerHTML=`<div class="c-left"><div class="c-brand c-pill"><a class="c-logo" href="atlas.html" aria-label="Starwatch: Star Atlas">${mark(22)}<span class="sw-word">Starwatch</span></a>${opts.snapshot===false?'':chip()}</div>${opts.mock?'<span class="c-mock c-pill" title="All names, posts and metrics on screen are generated"><i></i>MOCK DATA</span>':''}</div>
 <nav class="c-seg c-pill" role="tablist" aria-label="Screens">${SCREENS.map((s,i)=>`<button role="tab" data-k="${s.k}" aria-selected="false" aria-label="${s.n}">${ICON(s.i,'ic')}<span class="lbl">${s.n}</span><span class="tip">${s.n}<span class="sw-kbd">${i+1}</span></span></button>`).join('')}<i class="c-div" aria-hidden="true"></i>${EXTRA.map(s=>`<button role="tab" class="c-x" data-k="${s.k}" aria-selected="false" aria-label="${s.n}">${ICON(s.i,'ic')}<span class="lbl">${s.short}</span><span class="tip">${s.n}</span></button>`).join('')}</nav>
 <div class="c-right"><button class="c-search c-pill" aria-label="Search" aria-keyshortcuts="${isMac?'Meta+K':'Control+K'}">${ICON(I_SEARCH)}<span class="s-t">Search</span><span class="sw-kbd">${isMac?'⌘K':'Ctrl K'}</span></button>
 <div class="c-author c-pill"><a class="c-by" href="${LINKS.about}#author"><span class="c-av" aria-hidden="true">DV</span><span class="c-nm"><small>Made by</small>Daniel Večeřa</span></a><a class="c-fol" href="${LINKS.linkedin}" target="_blank" rel="noopener" aria-label="Follow Daniel Večeřa on LinkedIn">${G_IN}<span>Follow</span></a><a class="c-fol" href="${LINKS.x}" target="_blank" rel="noopener" aria-label="Follow Daniel Večeřa on X">${G_X}<span>Follow</span></a></div>
@@ -134,5 +141,5 @@ let tEl,tT;
 function toast(msg){if(!tEl){tEl=document.createElement('div');tEl.className='sw-toast';tEl.setAttribute('role','status');document.body.appendChild(tEl)}
   tEl.innerHTML=msg;tEl.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>tEl.classList.remove('show'),1600)}
 
-window.SWChrome={SCREENS,EXTRA,LINKS,G_IN,G_X,mount,mark,lockup,icon:(k)=>ICON((ALL.find(s=>s.k===k)||{i:I_SEARCH}).i),star,toast,STAR_D};
+window.SWChrome={SCREENS,EXTRA,LINKS,G_IN,G_X,CLOCK,mount,mark,lockup,icon:(k)=>ICON((ALL.find(s=>s.k===k)||{i:I_SEARCH}).i),star,toast,STAR_D};
 })();
