@@ -84,8 +84,8 @@ The jury copy on the morning of 9 October went through two earlier versions of t
 
 | Directory | What it is |
 | --- | --- |
-| [collector/](../collector/) | The first-plan research engine: FastAPI, SQLite, server-sent events, live identity resolution from an anchor website, six Apify lanes, Scribe transcription and extractive briefs with quote and timecode verification. Not part of the public site. |
-| [workspace/](../workspace/) | The local control room used to run the night: Kanban from `TODO.md`, decisions, evidence, architecture diagram and an agent CLI. |
+| [collector/](../archive/collector/) | The first-plan research engine: FastAPI, SQLite, server-sent events, live identity resolution from an anchor website, six Apify lanes, Scribe transcription and extractive briefs with quote and timecode verification. Not part of the public site. |
+| [workspace/](../archive/workspace/) | The local control room used to run the night: Kanban from `TODO.md`, decisions, evidence, architecture diagram and an agent CLI. |
 | [archive/](../archive/) | Earlier prototypes, kept for completeness. |
 
 ## Running it yourself

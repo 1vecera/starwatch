@@ -31,6 +31,6 @@ Starwatch shows what candidates in the ten largest Czech cities publish in publi
 
 - [pipeline/README.md](../pipeline/README.md): running collection, building checkpoints and the local read API.
 - [app/tools/RAW_FORMAT.md](../app/tools/RAW_FORMAT.md): the snapshot format the app reads.
-- [collector/README.md](../collector/README.md): the first-plan live research engine.
+- [collector/README.md](../archive/collector/README.md): the first-plan live research engine.
 
 Questions and corrections go to [GitHub issues](https://github.com/1vecera/starwatch/issues). Daniel Večeřa, Prague: [LinkedIn](https://www.linkedin.com/in/1vecera/) and [X](https://x.com/1vecera).
