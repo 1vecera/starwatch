@@ -16,7 +16,16 @@ const TOP=()=>(SW&&SW.TOP)||[];
 const isOther=t=>/(^|:)other$/.test(String((TOP()[t]||[])[2]||''))||/^other$/i.test(String((TOP()[t]||[])[0]||''));
 const isIssue=t=>(TOP()[t]||[])[4]==='issue';
 
-const TOPIC_NOTE='Topic labels are machine-assigned from the post text, may be wrong, and most posts carry none.';
+const TOPIC_NOTE=(SW&&SW.TOPIC_NOTE)||'Reviewed labels come from a checked sample; machine labels cover the rest, each backed by a quoted phrase, and can be wrong.';
+/* per-label provenance: SW.topicMeta (sw-real.js) when present, else the asset's own status */
+function meta(a,t){
+  if(SW&&typeof SW.topicMeta==='function'){try{const m=SW.topicMeta(a,t);if(m)return {machine:!!m.machine,evidence:m.evidence||null}}catch(e){}}
+  const ev=a&&a.topicEvidence&&a.topicEvidence[t];
+  return {machine:!!a&&a.topicStatus==='machine'&&!isIssue(t),evidence:ev||null};
+}
+/* a short, safe title for one label on one post: 'Machine label · “phrase”' or 'Reviewed label' */
+function mark(a,t){const m=meta(a,t);return m.machine?`<span class="sw-mlab" title="${esc(labelTitle(a,t))}">machine</span>`:''}
+function labelTitle(a,t){const m=meta(a,t);return m.machine?`Machine label${m.evidence?` · “${String(m.evidence).replace(/\s+/g,' ').trim().slice(0,160)}”`:''}`:'Reviewed label'}
 
 /* ----- styles (ds.css tokens; no side stripes, no nested cards, no gradient text) ----- */
 const CSS=`.swp{font-family:var(--font);color:var(--label);min-width:0}
@@ -81,15 +90,19 @@ if(!document.getElementById('sw-panels-css')){const s=document.createElement('st
 /* ----- topic mix ----- */
 function topicMix(assetIdxs,opts){
   opts=opts||{};const attr=opts.attr||'data-sw-topic',max=opts.max||8,title=opts.title==null?'Topic mix':opts.title,act=opts.active==null?-1:+opts.active;
-  const A=(SW&&SW.assets)||[],T=TOP();const cnt=new Map();let M=0,N=0;
-  (assetIdxs||[]).forEach(i=>{const a=A[i];if(!a)return;M++;const ts=(a.topics||[]).filter(t=>T[t]);if(!ts.length)return;N++;ts.forEach(t=>cnt.set(t,(cnt.get(t)||0)+1))});
-  const head=title?`<div class="swp-h"><h3>${esc(title)}</h3>${N?`<span class="swp-s">${nf(N)} of ${nf(M)} post${M===1?'':'s'} carry a topic label</span>`:''}</div>`:'';
+  const A=(SW&&SW.assets)||[],T=TOP();const cnt=new Map(),mcn=new Map();let M=0,N=0,NR=0,NM=0;
+  (assetIdxs||[]).forEach(i=>{const a=A[i];if(!a)return;M++;const ts=(a.topics||[]).filter(t=>T[t]);if(!ts.length)return;N++;
+    let anyRev=false;ts.forEach(t=>{cnt.set(t,(cnt.get(t)||0)+1);if(meta(a,t).machine)mcn.set(t,(mcn.get(t)||0)+1);else anyRev=true});
+    if(anyRev)NR++;else NM++});
+  const split=NM?` · ${nf(NR)} reviewed, ${nf(NM)} machine`:'';
+  const head=title?`<div class="swp-h"><h3>${esc(title)}</h3>${N?`<span class="swp-s">${nf(N)} of ${nf(M)} post${M===1?'':'s'} labelled${split}</span>`:''}</div>`:'';
   if(!N){if(opts.emptyHidden)return '';return `<section class="swp swp-mix">${head}<p class="swp-empty">${M?`None of ${M===1?'this post':'these '+nf(M)+' posts'} carries a topic label.`:'No posts to label.'} <span class="swp-s">${esc(TOPIC_NOTE)}</span></p></section>`}
   const rows=[...cnt.entries()].sort((a,b)=>isOther(a[0])-isOther(b[0])||b[1]-a[1]||String(T[a[0]][0]).localeCompare(String(T[b[0]][0])));
   let shown=rows.slice(0,max);if(act>=0&&cnt.has(act)&&!shown.some(r=>r[0]===act))shown=[...shown.slice(0,max-1),rows.find(r=>r[0]===act)];
   const mx=Math.max(...shown.map(r=>r[1]));
-  const body=shown.map(([t,n])=>{const share=Math.round(n/N*100),iss=isIssue(t),on=t===act;
-    return `<button type="button" class="swp-tr${on?' on':''}${iss?' iss':''}" ${attr}="${t}" aria-pressed="${on}" title="${nf(n)} of ${nf(N)} labelled posts (${share} %)${on?' · click again to show all posts':' · show these posts'}"><span class="swp-tn"><span>${esc(T[t][0])}</span>${iss?'<em class="swp-iss" title="A named local issue, reviewed against the post caption">local issue</em>':''}</span><span class="swp-tv"><b>${nf(n)}</b>${n===1?'post':'posts'} · ${share} %</span><span class="swp-bar" aria-hidden="true"><i style="width:${Math.max(2,n/mx*100).toFixed(1)}%"></i></span></button>`}).join('');
+  const body=shown.map(([t,n])=>{const share=Math.round(n/N*100),iss=isIssue(t),on=t===act,mn=mcn.get(t)||0;
+    const prov=mn?(mn===n?' · all machine labels':` · ${nf(n-mn)} reviewed, ${nf(mn)} machine`):'';
+    return `<button type="button" class="swp-tr${on?' on':''}${iss?' iss':''}" ${attr}="${t}" aria-pressed="${on}" title="${nf(n)} of ${nf(N)} labelled posts (${share} %)${prov}${on?' · click again to show all posts':' · show these posts'}"><span class="swp-tn"><span>${esc(T[t][0])}</span>${iss?'<em class="swp-iss" title="A named local issue, reviewed against the post caption">local issue</em>':''}</span><span class="swp-tv"><b>${nf(n)}</b>${n===1?'post':'posts'} · ${share} %</span><span class="swp-bar" aria-hidden="true"><i style="width:${Math.max(2,n/mx*100).toFixed(1)}%"></i></span></button>`}).join('');
   const rest=rows.length-shown.length;
   return `<section class="swp swp-mix">${head}<div class="swp-rows" role="group" aria-label="${esc(title||'Topic mix')}">${body}</div>${rest>0?`<p class="swp-more">and ${rest} more topic${rest===1?'':'s'} with fewer posts</p>`:''}${opts.note===false?'':`<p class="swp-note">${esc(TOPIC_NOTE)} Shares are of labelled posts; a post can carry several topics.</p>`}</section>`;
 }
@@ -134,6 +147,6 @@ function news(ref,opts){
   return `<section class="swp swp-news"><div class="swp-h"><h3>${esc(title)}</h3><span class="swp-s">${nf(items.length)} article${items.length===1?'':'s'}</span></div><ul class="swp-nl">${items.slice(0,max).map(li).join('')}</ul>${items.length>max?`<details><summary>+${items.length-max} more</summary><ul class="swp-nl">${items.slice(max).map(li).join('')}</ul></details>`:''}<p class="swp-note"${X.method?` title="${esc(X.method)}"`:''}>Matched by name in the title or text; a mention is not endorsement. Titles and links only; the articles stay with their publishers.</p></section>`;
 }
 
-window.SWPanels={TOPIC_NOTE,topicMix,programs,news,topicIndex,
+window.SWPanels={TOPIC_NOTE,topicMix,programs,news,topicIndex,topicMeta:meta,labelTitle,machineMark:mark,
   get loaded(){return {programs:!!(window.SW_PROGRAMS&&window.SW_PROGRAMS.lists),articles:!!(window.SW_ARTICLES&&Array.isArray(window.SW_ARTICLES.items))}}};
 })();

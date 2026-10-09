@@ -376,6 +376,10 @@ body.spot .t-cap{font-size:12.5px;font-weight:600;color:var(--label2)}
 .tchips .chip b{margin-left:2px}
 .tchips .lbl{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--label3);margin-right:4px}
 
+/* topic label provenance on a post: machine labels carry the shared .sw-mlab marker and their evidence phrase */
+.tev{margin-top:8px;display:grid;gap:4px;font-size:12.5px;line-height:1.45;color:var(--label2)}
+.tev b{color:var(--label);font-weight:600}
+
 /* program and news: one panel, two columns when both exist */
 .ctx{margin-top:16px;padding:22px 28px 24px;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:28px 40px}
 .ctx.one{grid-template-columns:minmax(0,1fr)}
@@ -531,6 +535,7 @@ body.spot .t-cap{font-size:12.5px;font-weight:600;color:var(--label2)}
 
 <script src="data/real.js"></script>
 <script src="data/issue-topics.js"></script>
+<script src="data/topic-labels.js"></script>
 <script src="mock.js"></script>
 <script src="sw-real.js" data-min-assets="0"></script>
 <script src="data/programs.js"></script>
@@ -707,8 +712,8 @@ function renderRows(){
   // topic chips: counts over the current relation filter
   const tc={};let un=0;P.base.forEach(i=>{const t=A[i].topics;if(!t.length)un++;t.forEach(x=>tc[x]=(tc[x]||0)+1)});
   const tt=Object.entries(tc).sort((a,b)=>(TOP[b[0]][4]==='issue')-(TOP[a[0]][4]==='issue')||b[1]-a[1]);
-  const tn=window.SWPanels?SWPanels.TOPIC_NOTE:'Topic labels are machine-assigned from the post text and may be wrong.';
-  $('#tchips').innerHTML=tt.length?`<span class="lbl" title="${esc(tn)}">Filter by topic</span><button class="chip ${st.topic==null?'on':''}" data-t="" aria-pressed="${st.topic==null}">All <b>${P.base.length}</b></button>${tt.map(([t,c])=>`<button class="chip ${st.topic===+t?'on':''}" data-t="${t}" aria-pressed="${st.topic===+t}">${esc(TOP[t][0])} <b>${c}</b></button>`).join('')}${un?`<button class="chip ${st.topic===-1?'on':''}" data-t="-1" aria-pressed="${st.topic===-1}" title="Posts without a topic label">No label <b>${un}</b></button>`:''}<span class="tnote" title="${esc(tn)}">Machine-labelled from post text; may be wrong</span>`:'';
+  const tn=window.SWPanels?SWPanels.TOPIC_NOTE:'Reviewed labels come from a checked sample; machine labels cover the rest and can be wrong.';
+  $('#tchips').innerHTML=tt.length?`<span class="lbl" title="${esc(tn)}">Filter by topic</span><button class="chip ${st.topic==null?'on':''}" data-t="" aria-pressed="${st.topic==null}">All <b>${P.base.length}</b></button>${tt.map(([t,c])=>`<button class="chip ${st.topic===+t?'on':''}" data-t="${t}" aria-pressed="${st.topic===+t}">${esc(TOP[t][0])} <b>${c}</b></button>`).join('')}${un?`<button class="chip ${st.topic===-1?'on':''}" data-t="-1" aria-pressed="${st.topic===-1}" title="Posts without a topic label">No label <b>${un}</b></button>`:''}<span class="tnote" title="${esc(tn)}">Reviewed sample plus machine labels; may be wrong</span>`:'';
   const extra=st.nopv?P.np:[];
   $('#rows').innerHTML=show.map((i,k)=>card(i,P.rank.get(i),k%PAGE)).join('')+extra.map(i=>card(i,99,0)).join('')||'<p class="t-sub" style="grid-column:1/-1;padding:30px 4px">No posts for this filter.</p>';
   const left=P.pv.length-show.length;
@@ -890,7 +895,7 @@ function openDetail(i,order){
    <h3>${a.cap}</h3>
    <div class="dn" style="grid-template-columns:repeat(${Math.max(1,dk.length)},minmax(0,1fr))">${dk.map(([k,l])=>nb(k,l)).join('')||'<div><span>No counts reported by the platform</span></div>'}</div>
    <div class="dsec"><div class="t-cap">Created by vs about</div>${relGraph(a,i)}</div>
-   <div class="dsec"><div class="t-cap">Topics${SW.topicsPending&&a.topics.length?" · reviewed, pending promotion":""}</div><div style="display:flex;gap:6px;flex-wrap:wrap">${a.topics.map(t=>`<span class="chip">${esc(TOP[t][0])}${TOP[t][1]?` <span style="opacity:.7">${esc(TOP[t][1])}</span>`:''}</span>`).join('')||'<span class="chip">No topic label</span>'}</div><div class="cl-note" style="margin-top:6px">${esc(window.SWPanels?SWPanels.TOPIC_NOTE:'Topic labels are machine-assigned from the post text and may be wrong.')}</div></div>
+   <div class="dsec"><div class="t-cap">Topics${SW.topicsPending&&a.topics.length?" · reviewed, pending promotion":""}</div><div style="display:flex;gap:6px;flex-wrap:wrap">${a.topics.map(t=>`<span class="chip" title="${esc(window.SWPanels?SWPanels.labelTitle(a,t):'')}">${esc(TOP[t][0])}${TOP[t][1]?` <span style="opacity:.7">${esc(TOP[t][1])}</span>`:''}${window.SWPanels?SWPanels.machineMark(a,t):''}</span>`).join('')||'<span class="chip">No topic label</span>'}</div>${a.topics.some(t=>window.SWPanels&&SWPanels.topicMeta(a,t).machine&&SWPanels.topicMeta(a,t).evidence)?`<div class="tev">${a.topics.filter(t=>SWPanels.topicMeta(a,t).machine&&SWPanels.topicMeta(a,t).evidence).map(t=>`<p><b>${esc(TOP[t][0])}</b> machine label, because the post says „${esc(SWPanels.topicMeta(a,t).evidence)}“</p>`).join('')}</div>`:''}<div class="cl-note" style="margin-top:6px">${esc(window.SWPanels?SWPanels.TOPIC_NOTE:'Reviewed labels come from a checked sample; machine labels cover the rest and can be wrong.')}</div></div>
    ${a.issueEvidence&&a.issueEvidence.length?`<div class="dsec"><div class="t-cap">Why this issue matches</div>${a.issueEvidence.map(e=>`<blockquote class="clm">${e.quote.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</blockquote>`).join('')}<div class="cl-note">Issue membership reviewed from this caption. Partial coverage; source statements are not verified facts.</div></div>`:''}
    ${a.claims&&a.claims.length?`<div class="dsec"><div class="t-cap">Source statements · ${a.claims.length}</div>${a.claims.slice(0,3).map(c=>`<blockquote class="clm"><span class="qm" aria-hidden="true">“</span>${(c.quote||c.text).replace(/</g,"&lt;")}</blockquote>`).join("")}<div class="cl-note">Quoted from this post. A statement made in public, not a verified fact.</div></div>`:""}<div class="dacts"><button class="pill primary" data-loc="${i}">Locate in Atlas</button>${a.url?`<a class="pill" href="${a.url}" target="_blank" rel="noopener">Open source ↗</a>`:`<button class="pill" data-toast="Simulated item: no source link.">Open source ↗</button>`}</div>
    <div class="dfoot">${a.real?`Real public post · counts observed ${a.observed_at?new Date(a.observed_at).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"at collection"}.`:"Simulated item · counts generated."} Item ${dIdx+1} of ${dOrder.length} · ←/→ to browse · esc to close.</div></div></div>`;
