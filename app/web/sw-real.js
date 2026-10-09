@@ -15,6 +15,8 @@ SW.snapshot={short:'8–9 Oct 2026',long:'8–9 October 2026',live:false};
 SW.TOPIC_NOTE='Reviewed labels come from a checked sample; machine labels cover the rest, each backed by a quoted phrase, and can be wrong.';
 SW.topicMeta=(a,t)=>({label:(SW.TOP[t]||[])[0]||'',issue:false,machine:false,reviewed:false,evidence:null});
 SW.topicSource={reviewed:0,machine:0};
+// 2026 results (optional data/results2026.js); every screen asks SW.r26 and shows nothing when it is off
+SW.r26={on:false,note:'2026 results come from the Czech Statistical Office after voting ended. Attention is still not support.',city:()=>null,list:()=>null,cand:()=>null,status:()=>null};
 // a screen can require a minimum of verified assets before it trusts the snapshot (data-min-assets on this script tag)
 const me=document.currentScript, minA=me&&+me.dataset.minAssets||0, nReal=RAW&&RAW.assets?RAW.assets.length:0;
 if(RAW&&want!=='sim'&&nReal<minA){SW.source={kind:'sim',fallback:true,label:'Simulated universe',detail:`The snapshot has ${nReal} verified assets; this screen needs ${minA}+ to be meaningful, so it shows the simulated universe instead.`};return}
@@ -164,5 +166,29 @@ SW.topicMeta=(a,t)=>{const T=TOP[t]||[];const issue=T[4]==='issue';const machine
   return {label:T[0]||'',issue,machine:machineL,reviewed:!issue&&!machineL&&a&&a.topicStatus==='admitted',evidence:machineL&&a.topicEvidence?a.topicEvidence[t]||null:null}};
 SW.TOPIC_NOTE='Reviewed labels come from a checked sample; machine labels cover the rest, each backed by a quoted phrase, and can be wrong.';
 if(SW.topicsPending)SW.source.detail+=' · topic labels independently reviewed, pending promotion';
+
+// Official 2026 results, matched to the snapshot by the importer (lists by official code, people by list position).
+// A partial count is always labelled with the share of precincts and the time; nothing here is combined with attention.
+const R26=window.SW_RESULTS2026;
+if(R26&&R26.cities){
+
+  const info=cities.map(c=>{const r=R26.cities[c.id];return r?Object.assign({},r):null});
+  const listR=new Array(lists.length).fill(null);
+  lists.forEach(L=>{const r=info[L.city],x=r&&r.lists&&r.lists[L.id];if(x)listR[L.i]=x});
+  const el=R26.elected||{};
+  const hm=s=>{if(!s)return '';const m=/T(\d{2}:\d{2})/.exec(s);if(m&&!/[zZ]|[+-]\d{2}:?\d{2}$/.test(s))return m[1]; // CSU stamps are Prague local time
+    const d=new Date(s);return isNaN(d)?'':d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Prague'})};
+  const day=s=>{const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s||'');return m?`${+m[3]} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m[2]-1]}`:''};
+  const fmtP=v=>v==null?'?':(+v).toLocaleString('en-GB',{maximumFractionDigits:v<10?1:0});
+  SW.r26={on:info.some(Boolean),note:SW.r26.note,source:R26.source||'Czech Statistical Office',generated_at:R26.generated_at,
+    city:ci=>info[ci]||null,
+    list:li=>listR[li],
+    // a person: elected (with personal votes) or not; on a partial count both are provisional
+    cand:ki=>{const c=cands[ki];if(!c)return null;const r=info[c.city];if(!r||!listR[c.list])return null;const e=el[c.id];
+      return e?{elected:true,votes:e.votes,pct:e.pct,final:!!r.counted}:{elected:false,final:!!r.counted}},
+    status:ci=>{const r=info[ci];if(!r)return null;const when=hm(r.observed_at);
+      return r.counted?{final:true,text:'Final count',short:'final count',url:r.source_url,when,day:day(r.observed_at)}
+        :{final:false,text:`Partial count · ${fmtP(r.precincts_pct)}% of precincts${when?` · as of ${when}`:''}`,short:`partial count, ${fmtP(r.precincts_pct)}% of precincts`,url:r.source_url,when,day:day(r.observed_at)}}};
+}
 if(issueCoverage.length)SW.source.detail+=` · ${issueCoverage.length} caption-reviewed issue topics · partial topic coverage`;
 })();

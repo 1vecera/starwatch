@@ -55,6 +55,18 @@ h2{font-size:22px;font-weight:650;letter-spacing:-.02em;line-height:1.15}
 .stat .l small b{color:var(--label);font-weight:600}
 
 .g{display:grid;gap:20px;margin-top:20px}
+/* 2026 results: one row per city, count status first */
+.r26{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1.6fr) repeat(3,minmax(0,.8fr)) auto;align-items:center;column-gap:18px}
+.r26>div{padding:10px 0;border-top:1px solid var(--hairline);font-size:14px;min-width:0}
+.r26>.h{border-top:0;padding-top:0;font-size:12px;font-weight:600;color:var(--label3)}
+.r26 .c{font-weight:650}
+.r26 .n{font-variant-numeric:tabular-nums;text-align:right}
+.r26 .na{color:var(--label3)}
+.r26 a{font-size:12.5px;color:var(--brand);text-decoration:none;white-space:nowrap}.r26 a:hover{text-decoration:underline}
+.r6t{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:6px;font-size:12px;font-weight:600;color:var(--orange);background:color-mix(in srgb,var(--orange) 10%,var(--surface));white-space:nowrap}
+.r6t.fin{color:var(--green);background:color-mix(in srgb,var(--green) 10%,var(--surface))}
+.r26 .mob{display:none}
+@media (max-width:760px){.r26 .mob{display:inline}.r26{grid-template-columns:minmax(0,1fr) auto;row-gap:0}.r26>.h{display:none}.r26>.s{grid-column:1/-1;border-top:0;padding-top:0}.r26>.n{display:none}.r26>.m{grid-column:1/-1;border-top:0;padding-top:0;font-size:12.5px;color:var(--label2)}}
 .g2{grid-template-columns:minmax(0,2.1fr) minmax(0,1fr)}
 
 /* attention: three readings in one ledger, not three cards */
@@ -192,6 +204,12 @@ h2{font-size:22px;font-weight:650;letter-spacing:-.02em;line-height:1.15}
   <div class="ckey"><span><span class="sw"></span>posts available</span><span><span class="sw v"></span>of which playable video</span></div>
 </section>
 
+<section class="pane g rv" style="--i:4" id="r26S" hidden aria-labelledby="h-r26">
+  <div class="sec"><h2 id="h-r26">2026 results</h2><span class="kick lc">Czech Statistical Office · after voting ended</span></div>
+  <div class="r26" id="r26" role="table" aria-label="2026 council results by city"></div>
+  <p class="note"><span id="r26n"></span></p>
+</section>
+
 <section class="pane g rv" style="--i:4" aria-labelledby="h-party">
   <div class="sec"><h2 id="h-party">By party or list</h2><span class="kick" id="pk">posts available</span></div>
   <div class="parties" id="parties"></div>
@@ -207,6 +225,7 @@ h2{font-size:22px;font-weight:650;letter-spacing:-.02em;line-height:1.15}
 <script src="data/issue-topics.js"></script>
 <script src="data/topic-labels.js"></script>
 <script src="mock.js"></script>
+<script src="data/results2026.js"></script>
 <script src="sw-real.js" data-min-assets="0"></script>
 <script>
 (function(){
@@ -266,6 +285,17 @@ if(ex)$('exp').textContent='KV2026 municipal elections · snapshot of public pos
 const targets=[[$('posts'),nPosts,0],[$('vids'),vids,0],[$('imgs'),imgs,0],[$('hours'),dur/3600,1],[$('views'),views,0],[$('likes'),likes,0],[$('comments'),comments,0]];
 document.querySelectorAll('[data-n]').forEach(el=>targets.push([el,+el.dataset.n,0]));
 targets.forEach(([el,v,d])=>el.textContent=fmt(v,d));
+// ---- 2026 results (optional data/results2026.js): status, turnout and seats per city ----
+const R6=SW.r26;
+if(R6&&R6.on&&SW.cities&&SW.cities.length){
+  const pc=v=>v==null?'—':fmt(v,1)+'%';
+  const rows=SW.cities.map(c=>({c,r:R6.city(c.i),st:R6.status(c.i)}));
+  $('r26').innerHTML=`<div class="h">City</div><div class="h">Count</div><div class="h n">Precincts</div><div class="h n">Turnout</div><div class="h n">Seats</div><div class="h">Source</div>`+
+    rows.map(({c,r,st})=>r?`<div class="c" role="row">${esc(c.name)}</div><div class="s"><span class="r6t${st.final?' fin':''}">${st.final?'Final count':'Partial count'}</span>${st.when?` <span class="na">as of ${esc(st.when)}${st.day?', '+esc(st.day):''}</span>`:''}</div><div class="n">${pc(r.precincts_pct)}</div><div class="n">${pc(r.turnout_pct)}</div><div class="n">${fmt(r.seats_total)}</div><div class="m"><span class="mob">${pc(r.turnout_pct)} turnout · ${fmt(r.seats_total)} seats${st.final?'':' · '+pc(r.precincts_pct)+' of precincts'} · </span><a href="${esc(r.source_url)}" target="_blank" rel="noopener">volby.gov.cz ↗</a></div>`
+      :`<div class="c" role="row">${esc(c.name)}</div><div class="s na">Not published yet</div><div class="n na">—</div><div class="n na">—</div><div class="n na">—</div><div class="m na">—</div>`).join('');
+  $('r26n').textContent=R6.note+' Partial counts change as precincts report; seats on a partial count are provisional.';
+  $('r26S').hidden=false;
+}
 const run=()=>{
   document.body.classList.add('go');
   if(reduce)return;

@@ -64,6 +64,9 @@ body #sheet{position:relative;width:min(1440px,calc(100% - 64px));margin:var(--t
 .el.no i{background:var(--label3)}
 .vsrc{font-size:12px;color:var(--label3);text-decoration:none}
 .vsrc:hover{color:var(--brand);text-decoration:underline}
+.r6t{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:6px;font-size:12px;font-weight:600;color:var(--orange);background:color-mix(in srgb,var(--orange) 10%,var(--surface))}
+.r6t.fin{color:var(--green);background:color-mix(in srgb,var(--green) 10%,var(--surface))}
+.r6n{margin-top:8px;font-size:12px;line-height:1.45;color:var(--label3)}
 .take{margin-top:12px;font-size:14px;line-height:1.5;color:var(--label2);max-width:62ch}
 .take b{color:var(--label);font-weight:650}
 .rnone{padding:4px 16px 6px 64px;font-size:12px;line-height:1.45;color:var(--label3)}
@@ -537,6 +540,7 @@ body.spot .t-cap{font-size:12.5px;font-weight:600;color:var(--label2)}
 <script src="data/issue-topics.js"></script>
 <script src="data/topic-labels.js"></script>
 <script src="mock.js"></script>
+<script src="data/results2026.js"></script>
 <script src="sw-real.js" data-min-assets="0"></script>
 <script src="data/programs.js"></script>
 <script src="data/articles.js"></script>
@@ -624,16 +628,23 @@ const portrait=(c,cls,d)=>`<span class="${cls}" style="--pc:${S.css(lists[c.list
 const lmark=L=>{const p=L.logos&&L.logos[0]&&L.logos[0].path;return p?`<img src="${esc(p)}" alt="${esc(L.short)} logo" title="${esc(L.logos[0].source_url||'')}" onerror="this.remove()">`:''};
 const pref=c=>c&&c.pref2022&&c.pref2022.votes!=null?c.pref2022:null;
 const res=L=>L&&L.result2022&&(L.result2022.pct!=null||L.result2022.votes!=null)?L.result2022:null;
+// 2026 result (optional): the person's outcome and the list's share and seats, always with the count status and source
+function vote26(c,L){const R=SW.r26;if(!R||!R.on)return '';const st=R.status(L.city),r6=R.list(L.i),k6=c?R.cand(c.i):null;if(!st||(!r6&&!k6))return '';
+  const city=R.city(L.city);let h='';
+  if(k6)h+=`<div class="vrow">${k6.elected&&k6.votes!=null?`<div class="vbig">${nf(k6.votes)}<small>personal votes</small></div>`:''}<div class="vline"><span class="el${k6.elected?'':' no'}"><i></i>${k6.elected?(st.final?'Elected':'Elected on the partial count'):(st.final?'Not elected':'Not elected on the partial count')}</span></div></div>`;
+  if(r6)h+=`<div class="vrow">${c?`<div class="vline" style="margin:0 0 6px">${esc(L.short)} in ${esc(E.city.name)}</div>`:''}<div class="vbig">${r6.pct!=null?pctf(r6.pct)+' %':nf(r6.votes)}<small>${r6.pct!=null?'of the vote':'votes'}</small></div><div class="vline"><span><b>${nf(r6.votes)}</b> votes</span><span><b>${r6.seats}</b> seat${r6.seats===1?'':'s'}${city&&city.seats_total?` of ${city.seats_total}`:''}</span></div>${r6.pct!=null?`<div class="pbar" title="${pctf(r6.pct)} % of valid votes"><i style="width:${Math.min(100,+r6.pct)}%"></i></div>`:''}</div>`;
+  h+=`<div class="vline r6s"><span class="r6t${st.final?' fin':''}">${esc(st.text)}</span>${st.url?`<a class="vsrc" href="${esc(st.url)}" target="_blank" rel="noopener">volby.gov.cz ↗</a>`:''}</div><p class="r6n">${esc(R.note)}</p>`;
+  return h}
 function voteBlock(c,L){
-  const p=pref(c),r=res(L);
-  if(!p&&!r)return '';
+  const p=pref(c),r=res(L),h26=vote26(c,L);
+  if(!p&&!r&&!h26)return '';
   let h='';
   if(p)h+=`<div class="vrow"><div class="vbig">${nf(p.votes)}<small>preference votes</small></div><div class="vline">${p.rank_in_list!=null?`<span><b>#${p.rank_in_list}</b> by preference votes on ${p.list_name_2022?esc(p.list_name_2022):'its list'}</span>`:''}${p.elected!=null?`<span class="el${p.elected?'':' no'}"><i></i>${p.elected?'Elected':'Not elected'}</span>`:''}${p.source_url?`<a class="vsrc" href="${esc(p.source_url)}" target="_blank" rel="noopener">volby.gov.cz ↗</a>`:''}</div></div>`;
   if(r)h+=`<div class="vrow">${c?`<div class="vline" style="margin:0 0 6px">${esc(L.short)} in ${esc(E.city.name)}</div>`:''}<div class="vbig">${r.pct!=null?pctf(r.pct)+' %':nf(r.votes)}<small>${r.pct!=null?'of the vote':'votes'}</small></div><div class="vline">${r.pct!=null&&r.votes!=null?`<span><b>${nf(r.votes)}</b> votes</span>`:''}${r.seats!=null?`<span><b>${r.seats}</b> seat${r.seats===1?'':'s'}</span>`:''}${r.source_url?`<a class="vsrc" href="${esc(r.source_url)}" target="_blank" rel="noopener">volby.gov.cz ↗</a>`:''}</div>${r.pct!=null?`<div class="pbar" title="${pctf(r.pct)} % of valid votes"><i style="width:${Math.min(100,+r.pct)}%"></i></div>`:''}${r.seats>0&&r.seats<=40?`<div class="seats" aria-hidden="true">${Array.from({length:r.seats},(_,k)=>`<i style="animation-delay:${400+k*35}ms"></i>`).join('')}</div>`:''}</div>`;
   if(!c&&r){const tp=L.cands.map(k=>cands[k]).filter(pref).sort((a,b)=>pref(b).votes-pref(a).votes).slice(0,3);
     if(tp.length)h+=`<div class="vrow"><div class="vline" style="margin:0 0 4px">Most preference votes</div>${tp.map(x=>`<button class="vline" data-c="${x.i}" style="margin-top:4px;text-align:left"><b>${nf(pref(x).votes)}</b><span>${esc(x.name)}${pref(x).elected?' · elected':''}</span></button>`).join('')}</div>`}
-  const head='2022 municipal election';
-  return `<aside class="vote rv" style="--d:5" aria-label="${head}"><div class="t-cap">${head}</div>${h.replace('<div class="vrow">','<div class="vrow" style="margin-top:0;padding-top:0;border-top:0">')}</aside>`}
+  const head='2022 municipal election',first=x=>x.replace('<div class="vrow">','<div class="vrow" style="margin-top:0;padding-top:0;border-top:0">');
+  return `<aside class="vote rv" style="--d:5" aria-label="${h26?'2026 and 2022 municipal elections':head}">${h26?`<div class="t-cap">2026 municipal election</div>${first(h26)}`:''}${h?`<div class="t-cap"${h26?' style="margin-top:22px"':''}>${head}</div>${first(h)}`:''}</aside>`}
 const ord=n=>{const s=['th','st','nd','rd'],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0])};
 function takeaway(){
   const c=E.c,M=cityModel(E.city.i);if(!E.by.length)return `No collected posts by ${c?'them':'the list or its people'} yet: a coverage gap, not inactivity.`;

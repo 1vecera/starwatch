@@ -224,6 +224,9 @@ kbd{font:500 11px var(--mono);color:var(--label2);padding:1px 5px;border-radius:
 .tn-t.then i{background:color-mix(in srgb,var(--c) 55%,#fff)}
 .tn-t.now i{background:var(--c)}
 .tn-na{font-size:12.5px;color:var(--label2)}
+.tn-t.r26 i{background:var(--c)}
+.r6t{display:inline-flex;align-items:center;height:18px;padding:0 6px;margin-left:4px;border-radius:5px;font-size:12px;font-weight:650;color:var(--orange);background:color-mix(in srgb,var(--orange) 10%,var(--surface));vertical-align:1px}
+.r6t.fin{color:var(--green);background:color-mix(in srgb,var(--green) 10%,var(--surface))}
 @media (max-width:760px){
   .tn{grid-template-columns:repeat(var(--m),minmax(0,1fr));column-gap:14px}
   .tn-h.ms i{display:none}
@@ -353,6 +356,7 @@ footer b{color:var(--label2);font-weight:600}
 <script src="data/issue-topics.js"></script>
 <script src="data/topic-labels.js"></script>
 <script src="mock.js"></script>
+<script src="data/results2026.js"></script>
 <script src="sw-real.js" data-min-assets="0"></script>
 <script src="sw-picker.js"></script>
 <script>
@@ -523,9 +527,11 @@ function renderThen(){
   const rows=E.map(e=>{const st=stats(e),src=party?lists[e.id]:cands[e.id];
     const r=party?src.result2022:src.pref2022;
     const tv=r?(party?(r.pct!=null?+r.pct:null):(r.votes!=null?+r.votes:null)):null;
-    return{e,r,tv,now:st.tot,n:st.nv}});
-  const anyThen=rows.some(x=>x.tv!=null);
-  if(!anyThen){box.hidden=true;box.innerHTML='';return}
+    // 2026 official result (optional): a list's share and seats, or whether a person was elected, with the count status
+    const R6=SW.r26&&SW.r26.on?SW.r26:null,r6=R6?(party?R6.list(e.id):R6.cand(e.id)):null,st6=R6&&r6?R6.status(src.city):null;
+    return{e,r,tv,now:st.tot,n:st.nv,r6,st6,c6:R6?R6.city(src.city):null,v6:r6?(party?+r6.pct:(r6.elected&&r6.votes!=null?+r6.votes:null)):null}});
+  const anyThen=rows.some(x=>x.tv!=null),any26=rows.some(x=>x.r6);
+  if(!anyThen&&!any26){box.hidden=true;box.innerHTML='';return}
   box.hidden=false;
   const tmax=Math.max(1e-9,...rows.map(x=>x.tv||0)),nmax=Math.max(1,...rows.map(x=>x.now));
   const thenUnit=party?'list share':'preference votes';
@@ -539,6 +545,12 @@ function renderThen(){
     if(!party){const el=rows.filter(x=>x.r&&x.r.elected);if(el.length)txt+=` ${el.length} of ${rows.length} won a seat in 2022.`}
     txt+=' Ballots and attention are different measures; neither predicts the other here.';
   }else if(T[0])txt=`Only ${T.map(x=>who(x.e)).join(', ')} ${T.length>1?'have':'has'} a matched 2022 result in this comparison.`;
+  // 2026: stated as its own measure, with the count status; no link is drawn between attention and votes
+  if(any26){const partial=rows.some(x=>x.st6&&!x.st6.final);
+    if(party){const B=rows.filter(x=>x.v6!=null).sort((a,b)=>b.v6-a.v6)[0];if(B)txt+=` On the 2026 ${partial?'partial ':''}count, ${who(B.e)} has the largest share here (<b>${pctTxt(B.v6)}</b>, ${B.r6.seats} seat${B.r6.seats===1?'':'s'}).`}
+    else{const el=rows.filter(x=>x.r6&&x.r6.elected).length;txt+=` ${el} of ${rows.filter(x=>x.r6).length} ${partial?'are elected on the partial 2026 count':'were elected in 2026'}.`}
+    txt+=' Results and attention are separate measures; this view does not explain one by the other.'}
+  if(!txt)txt='2026 results for this comparison, shown next to the observed attention.';
 
   const thenCell=(x,k)=>{if(x.tv==null)return `<div class="tn-m"><span class="tn-na">No 2022 result matched</span></div>`;
     const r=x.r,sub=party?[r.votes!=null?`${fmt(+r.votes)} votes`:'',r.seats!=null?`${r.seats} seat${r.seats===1?'':'s'}`:''].filter(Boolean).join(' · ')
@@ -546,9 +558,16 @@ function renderThen(){
     const lnk=r.source_url?` <a class="src" href="${esc(r.source_url)}" target="_blank" rel="noopener" title="Official 2022 result">↗</a>`:'';
     return `<div class="tn-m"><div class="tn-v"><span class="num" data-cu="${x.tv}" data-f="${party?'pct':''}">0</span><span>${sub}${lnk}</span></div><div class="tn-t then" style="--c:${x.e.col}"><i style="width:${Math.max(2,x.tv/tmax*100)}%;--d:${k*60}ms"></i></div></div>`};
   const nowCell=(x,k)=>`<div class="tn-m"><div class="tn-v"><span class="num" data-cu="${x.now}">0</span><span>${x.n} post${x.n===1?'':'s'}</span></div><div class="tn-t now" style="--c:${x.e.col}"><i style="width:${Math.max(x.now?2:0,x.now/nmax*100)}%;--d:${350+k*60}ms"></i></div></div>`;
-  const ms=[['then','2022 election',thenUnit,'Ballots',thenCell],['now','At collection',`observed ${ML}, own posts`,'Attention',nowCell]];
-  const lede=[`2022 municipal ${party?'result':'preference votes'}`,`observed ${ML} on own posts in the ${DAYS} days before collection`];
-  box.innerHTML=`<header class="ph"><div><h2>2022 result and attention at collection</h2><p>${lede.join(' · ')} · separate scales, never combined</p></div></header>${ai(txt,'observed posts and official 2022 results')}
+  const m6max=Math.max(1e-9,...rows.map(x=>x.v6||0));
+  const r26Cell=(x,k)=>{if(!x.r6)return `<div class="tn-m"><span class="tn-na">${x.c6?'No matched 2026 result':'No 2026 result for this city yet'}</span></div>`;
+    const tag=x.st6?`<span class="r6t${x.st6.final?' fin':''}" title="${esc(x.st6.text)}">${x.st6.final?'final':'partial'}</span>`:'';
+    const lnk=x.st6&&x.st6.url?` <a class="src" href="${esc(x.st6.url)}" target="_blank" rel="noopener" title="Official 2026 result">↗</a>`:'';
+    if(party)return `<div class="tn-m"><div class="tn-v"><span class="num">${pctTxt(x.r6.pct)}</span><span>${x.r6.seats} seat${x.r6.seats===1?'':'s'} ${tag}${lnk}</span></div><div class="tn-t r26" style="--c:${x.e.col}"><i style="width:${Math.max(2,x.v6/m6max*100)}%;--d:${700+k*60}ms"></i></div></div>`;
+    return `<div class="tn-m"><div class="tn-v"><span class="num">${x.r6.elected?'Elected':'Not elected'}</span><span>${x.r6.elected&&x.r6.votes!=null?`${fmt(x.r6.votes)} personal votes `:''}${tag}${lnk}</span></div></div>`};
+  const st6=rows.map(x=>x.st6).filter(Boolean),stText=!st6.length?'':st6.every(s=>s.final)?'final count':st6.length===1||st6.every(s=>s.text===st6[0].text)?st6[0].text.toLowerCase():'count status per row';
+  const ms=[anyThen&&['then','2022 election',thenUnit,'Ballots',thenCell],['now','At collection',`observed ${ML}, own posts`,'Attention',nowCell],any26&&['r26','2026 election',`${party?'list share and seats':'elected or not'} · ${stText}`,'Ballots',r26Cell]].filter(Boolean);
+  const lede=[anyThen?`2022 municipal ${party?'result':'preference votes'}`:'',`observed ${ML} on own posts in the ${DAYS} days before collection`,any26?'official 2026 result from the Czech Statistical Office':''].filter(Boolean);
+  box.innerHTML=`<header class="ph"><div><h2>${any26?'2022 result, attention at collection and the 2026 result':'2022 result and attention at collection'}</h2><p>${lede.join(' · ')} · separate scales, never combined${any26?' · attention is not support':''}</p></div></header>${ai(txt,any26?'observed posts and official 2022 and 2026 results':'observed posts and official 2022 results')}
   <div class="tn" style="--tc:minmax(0,1.4fr) repeat(${ms.length},minmax(0,2fr));--m:${ms.length}">
     <div class="tn-h en0">${party?'Party list':'Candidate'}</div>
     ${ms.map(m=>`<div class="tn-h ms"><div>${m[1]}<small>${m[2]}</small></div><i>${m[3]}</i></div>`).join('')}
