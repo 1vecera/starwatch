@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://starwatch.agenticanalytics.cz"><img src="app/web/img/og.png" alt="Starwatch: who's being heard, not just who's talking" width="760"></a>
+  <a href="https://starwatch.agenticanalytics.cz"><img src="app/web/og.png" alt="Starwatch: who's being heard, not just who's talking" width="760"></a>
 </p>
 
 <h1 align="center">Starwatch</h1>
