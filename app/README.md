@@ -80,7 +80,7 @@ Polls close on Saturday 10 October 2026 at 14:00; the Czech Statistical Office t
 
 ```sh
 uv run --offline python tools/export_results2026.py --snapshot web/data/real.js --out web/data/results2026.js
-uv run --offline python -m unittest tools/test_export_results2026.py   # run from app/tools: python -m unittest test_export_results2026
+(cd tools && uv run --offline python -m unittest test_export_results2026)   # importer test with a synthetic CSU-shaped file
 ```
 
 - **Matching:** the importer matches lists by their official code (`VSTRANA`, the number in the snapshot list id), never by ballot position, which differs for every snapshot list. Elected members match by list and position and must agree on the name. Anything unmatched stays in the file as `unmatched:<ballot number>`.
