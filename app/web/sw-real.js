@@ -12,6 +12,9 @@ try{if(want)localStorage.setItem('sw-data',want);else want=localStorage.getItem(
 SW.available={real:!!RAW,sim:true};
 // the public snapshot: posts collected by the production run on 8–9 October 2026; nothing here updates live
 SW.snapshot={short:'8–9 Oct 2026',long:'8–9 October 2026',live:false};
+SW.TOPIC_NOTE='Reviewed labels come from a checked sample; machine labels cover the rest, each backed by a quoted phrase, and can be wrong.';
+SW.topicMeta=(a,t)=>({label:(SW.TOP[t]||[])[0]||'',issue:false,machine:false,reviewed:false,evidence:null});
+SW.topicSource={reviewed:0,machine:0};
 // a screen can require a minimum of verified assets before it trusts live data (data-min-assets on this script tag)
 const me=document.currentScript, minA=me&&+me.dataset.minAssets||0, nReal=RAW&&RAW.assets?RAW.assets.length:0;
 if(RAW&&want!=='sim'&&nReal<minA){SW.source={kind:'sim',fallback:true,label:'Simulated universe',detail:`Live data has ${nReal} verified assets so far; this screen needs ${minA}+ to be meaningful, so it shows the simulated universe instead.`};return}
@@ -45,6 +48,18 @@ if(issueCatalog&&Array.isArray(issueCatalog.topics)){
 }
 SW.issueTopicCoverage=issueCoverage;
 
+// Machine topic labels (optional overlay, data/topic-labels.js): they fill posts the reviewed sample did not label.
+// A reviewed ('admitted') label is never overridden; each machine label carries the verbatim phrase it rests on.
+const machine=window.SW_TOPIC_LABELS, known=new Set((RAW.topics||[]).map(t=>t.id));
+let nReviewed=0,nMachine=0;
+(RAW.assets||[]).forEach(a=>{
+  if(a.topic_status==='admitted'&&(a.topics||[]).some(t=>known.has(t)&&!String(t).startsWith('issue:'))){nReviewed++;return}
+  const m=machine&&machine.labels&&machine.labels[a.id];if(!m||!Array.isArray(m.topics))return;
+  const add=m.topics.filter(t=>known.has(t)&&!String(t).startsWith('issue:'));if(!add.length)return;
+  a.topics=[...new Set([...(a.topics||[]),...add])];a.topic_status='machine';a.topic_evidence=m.evidence||{};nMachine++;
+});
+SW.topicSource={reviewed:nReviewed,machine:nMachine,model:machine&&machine.model||null,generated_at:machine&&machine.generated_at||null,method:machine&&machine.method||null};
+
 const {cities,lists,cands,assets,PLAT,TOP,PARTY,proj,rng}=SW;
 cities.length=0;lists.length=0;cands.length=0;assets.length=0;TOP.length=0;
 const exported=RAW.source&&RAW.source.exported_at?new Date(RAW.source.exported_at):new Date();
@@ -56,7 +71,8 @@ const fold=s=>(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
 const PI=Object.fromEntries(PLAT.map((p,i)=>[p.k,i]));
 
 const tCount={};(RAW.assets||[]).forEach(a=>(a.topics||[]).forEach(t=>tCount[t]=(tCount[t]||0)+1));
-const pretty=l=>{const x=String(l||'').replace(/_/g,' ').replace(/\s+/g,' ').trim();return x.charAt(0).toUpperCase()+x.slice(1)};
+const NICE={culture_sport:'Culture and sport',economy_work:'Economy and work',health_social:'Health and social care',election_process:'Election process',public_finance:'Public finance',public_space:'Public space'};
+const pretty=l=>{if(NICE[l])return NICE[l];const x=String(l||'').replace(/_/g,' ').replace(/\s+/g,' ').trim();return x.charAt(0).toUpperCase()+x.slice(1)};
 const usedTopics=(RAW.topics||[]).filter(t=>tCount[t.id]).sort((a,b)=>(a.id==='other')-(b.id==='other')||tCount[b.id]-tCount[a.id]);
 usedTopics.forEach(t=>TOP.push([pretty(t.label),'',t.id,t.status||'admitted',t.kind||'category']));
 const topicIx=Object.fromEntries(usedTopics.map((t,i)=>[t.id,i]));
@@ -114,7 +130,7 @@ const typeVideo={video:1,reel:1};
   const pub=r.published_at?new Date(r.published_at):null, age=pub?Math.max(0,(exported-pub)/864e5):45;
   const n=v=>v==null?0:v;
   const a={i:assets.length,id:r.id,owner,list:li,city:L.city,plat:pi,video,rel:'created',about:-1,mention:null,
-    topics:(r.topics||[]).map(t=>topicIx[t]).filter(x=>x!=null),topicStatus:r.topic_status||null,age,published_at:r.published_at,
+    topics:(r.topics||[]).map(t=>topicIx[t]).filter(x=>x!=null),topicStatus:r.topic_status||null,topicEvidence:r.topic_status==='machine'?Object.fromEntries(Object.entries(r.topic_evidence||{}).filter(([k])=>topicIx[k]!=null).map(([k,v])=>[topicIx[k],String(v)])):null,age,published_at:r.published_at,
     views:n(r.views),likes:n(r.likes),comments:n(r.comments),shares:n(r.shares),na:{views:r.views==null,likes:r.likes==null,comments:r.comments==null,shares:r.shares==null},
     cap:(r.text||'').replace(/\s+/g,' ').trim()||'(no caption)',ar:pi===2||(pi===0&&video)?.5625:pi===0?1:PLAT[pi].ar,outlet:null,
     url:r.url,img:r.image||null,vsrc:r.video||null,vmime:r.video_mime||null,dur:r.duration_s?Math.round(r.duration_s):0,claims:r.claims||[],issueEvidence:r.issue_topic_evidence||[],observed_at:r.observed_at,real:true};
@@ -143,6 +159,10 @@ assets.forEach(a=>{const k=PLAT[a.plat].k;PC[k].verified_assets++;if(a.vsrc)PC[k
 Object.values(PC).forEach(p=>{if(!RAW.platform_coverage)p.status=p.verified_assets?'observed':p.verified_accounts?'accounts_only':'not_collected'});
 SW.platformCoverage=PLAT.map(p=>PC[p.k]);
 SW.topicsPending=TOP.length>0&&TOP.every(t=>t[3]!=='admitted');
+// how a topic label on one post should be shown: reviewed sample, machine label (with its phrase) or a named local issue
+SW.topicMeta=(a,t)=>{const T=TOP[t]||[];const issue=T[4]==='issue';const machineL=!issue&&a&&a.topicStatus==='machine';
+  return {label:T[0]||'',issue,machine:machineL,reviewed:!issue&&!machineL&&a&&a.topicStatus==='admitted',evidence:machineL&&a.topicEvidence?a.topicEvidence[t]||null:null}};
+SW.TOPIC_NOTE='Reviewed labels come from a checked sample; machine labels cover the rest, each backed by a quoted phrase, and can be wrong.';
 if(SW.topicsPending)SW.source.detail+=' · topic labels independently reviewed, pending promotion';
 if(issueCoverage.length)SW.source.detail+=` · ${issueCoverage.length} caption-reviewed issue topics · partial topic coverage`;
 })();

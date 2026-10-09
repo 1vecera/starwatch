@@ -11,9 +11,10 @@ python3 tools/export_stats.py >/dev/null 2>&1 || true
 [ -f web/data/real.js ] || echo "window.SW_RAW=null;" > web/data/real.js
 [ -f web/data/issue-topics.js ] || echo "window.SW_ISSUES=null;" > web/data/issue-topics.js
 [ -f web/data/stats.js ] || echo "window.SW_STATS=null;" > web/data/stats.js
-# optional enrichments (party programs, news mentions); the app hides their panels when they are null
+# optional enrichments (party programs, news mentions, machine topic labels); the app works without them
 [ -f web/data/programs.js ] || echo "window.SW_PROGRAMS=null;" > web/data/programs.js
 [ -f web/data/articles.js ] || echo "window.SW_ARTICLES=null;" > web/data/articles.js
+[ -f web/data/topic-labels.js ] || echo "window.SW_TOPIC_LABELS=null;" > web/data/topic-labels.js
 PORT="${PORT:-5173}"
 echo "Starwatch → http://127.0.0.1:${PORT}/"
 exec uv run --offline python tools/serve.py --port "${PORT}"

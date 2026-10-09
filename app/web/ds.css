@@ -132,3 +132,5 @@ img.ld{opacity:0}
 .metric .d.down{color:var(--red)}
 :focus-visible{outline:var(--ring-w) solid var(--ring-color);outline-offset:var(--ring-offset)}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.001s!important;transition-duration:.001s!important}}
+/* machine topic label marker: shown next to a label that a model assigned (title = the quoted phrase it rests on) */
+.sw-mlab{display:inline-flex;align-items:center;height:16px;margin-left:5px;padding:0 5px;border-radius:4px;border:1px dashed currentColor;font:600 11px/1 var(--font);letter-spacing:.01em;text-transform:lowercase;opacity:.85;cursor:help;vertical-align:1px;white-space:nowrap}
