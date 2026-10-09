@@ -157,7 +157,7 @@ h2{font-size:22px;font-weight:650;letter-spacing:-.02em;line-height:1.15}
 <section class="pane lead rv" style="--i:0">
   <div class="eyebrow">
     <span class="kick">By the numbers</span>
-    <span class="kick lc" id="exp">Live production data</span>
+    <span class="kick lc" id="exp">Snapshot · public posts collected 8–9 Oct 2026</span>
   </div>
   <div>
     <div class="n big" id="posts">10,697</div>
@@ -259,7 +259,7 @@ $('plats').innerHTML=pl.map(([k,n])=>`<div class="pf"><div class="pfh"><b>${PN[k
 // ---- headline and supporting figures ----
 $('nviews').textContent=fmt(nv);$('ncity').textContent=fmt(cities.length);$('nparty').textContent=fmt(parties.length);
 const ex=(R&&R.source&&R.source.exported_at)||S.exported_at;
-if(ex)$('exp').textContent='KV2026 municipal elections · live data exported '+new Date(ex).toLocaleString('en-GB',{timeZone:'Europe/Prague',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})+' Prague';
+if(ex)$('exp').textContent='KV2026 municipal elections · snapshot of public posts collected '+((window.SW&&SW.snapshot&&SW.snapshot.short)||'8–9 Oct 2026')+' · exported '+new Date(ex).toLocaleString('en-GB',{timeZone:'Europe/Prague',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})+' Prague · not live';
 
 // ---- count-up: tabular numerals, text only, exponential ease-out ----
 const targets=[[$('posts'),nPosts,0],[$('vids'),vids,0],[$('imgs'),imgs,0],[$('hours'),dur/3600,1],[$('views'),views,0],[$('likes'),likes,0],[$('comments'),comments,0]];
