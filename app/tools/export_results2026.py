@@ -71,7 +71,7 @@ def parse(xml_bytes: bytes, city_id: str, lists_by_code: dict, cands_by_list_pos
     turnout = result.find("kv:UCAST", NS) if result is not None else None
     t = turnout.attrib if turnout is not None else {}
     out = {
-        "counted": obec.get("JE_SPOCTENO") == "true",
+        "counted": obec.get("JE_SPOCTENO") in ("true", "1"),  # xs:boolean; the live feed sends 0/1
         "observed_at": root.get("DATUM_CAS_GENEROVANI"),
         "precincts_pct": num(t.get("OKRSKY_ZPRAC_PROC")),
         "turnout_pct": num(t.get("UCAST_PROC")),

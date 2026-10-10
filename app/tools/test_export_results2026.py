@@ -35,6 +35,12 @@ class ResultsImportTest(unittest.TestCase):
         self.assertEqual((city["precincts_pct"], city["turnout_pct"], city["valid_votes"], city["seats_total"]), (50.0, 44.1, 123456, 65))
         self.assertIn("vysledky_obec_554782.xml", city["source_url"])
 
+    def test_counted_flag_reads_xml_boolean(self) -> None:
+        for raw, expected in (("1", True), ("true", True), ("0", False), ("false", False)):
+            xml = self.xml.replace(b'JE_SPOCTENO="false"', f'JE_SPOCTENO="{raw}"'.encode())
+            city, _ = parse(xml, "554782", {}, {})
+            self.assertIs(city["counted"], expected, raw)
+
     def test_lists_match_by_official_code_not_ballot_position(self) -> None:
         lists = {"1": "kv2026:554782:1", "9": "kv2026:554782:9"}
         city, _ = parse(self.xml, "554782", lists, {})
