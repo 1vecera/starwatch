@@ -30,7 +30,7 @@ Each step is idempotent:
 | `keys` | Creates the private origin key in AWS Secrets Manager once. |
 | `cert` | Requests the CloudFront certificate for `host` and validates it through a DNS record in the Cloudflare zone. |
 | `cloudflare` | Points `host` at CloudFront (proxied) and sets the origin-header and strict-TLS rules. |
-| `cloudfront` | Publishes the gate and makes `host` the distribution's only alias, with the new certificate. |
+| `cloudfront` | Publishes the gate, makes `host` the distribution's only alias with the new certificate, and keeps responses cacheable and indexable (no `private, no-store` or `noindex` headers). |
 | `redirects` | Adds a 301 for every `redirect_hosts` entry, removes their Worker routes, Starwatch rules and Access applications, and deletes the Workers listed in `retire_workers`. |
 | `site` | Uploads changed files (SHA-256 in object metadata), removes `retire` paths and invalidates them. `media/` is uploaded separately once. |
 | `verify` | Checks that every page and data file is public, the retired sign-in paths redirect, direct CloudFront access is refused, video ranges work and each earlier hostname redirects. |

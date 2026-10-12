@@ -137,6 +137,17 @@ class Deploy:
             config["Comment"] = "Starwatch: public app on a private S3 bucket, behind Cloudflare"
             cfront.update_distribution(Id=self.cfg["distribution_id"], IfMatch=result["ETag"], DistributionConfig=config)
             print("cloudfront: alias set to", self.host, "(was", aliases, ")")
+        # Public pages may be cached and indexed: drop the private, no-store and noindex headers of the signed-in setup.
+        policy_id = config["DefaultCacheBehavior"].get("ResponseHeadersPolicyId")
+        if policy_id:
+            policy = cfront.get_response_headers_policy(Id=policy_id)
+            pconf = policy["ResponseHeadersPolicy"]["ResponseHeadersPolicyConfig"]
+            custom = pconf.get("CustomHeadersConfig", {"Quantity": 0, "Items": []})
+            kept = [h for h in custom.get("Items", []) if h["Header"].lower() not in ("cache-control", "x-robots-tag")]
+            if len(kept) != custom.get("Quantity", 0):
+                pconf["CustomHeadersConfig"] = {"Quantity": len(kept), "Items": kept}
+                cfront.update_response_headers_policy(Id=policy_id, IfMatch=policy["ETag"], ResponseHeadersPolicyConfig=pconf)
+                print("cloudfront: private and noindex headers removed from", pconf["Name"])
         self.state["cloudfront_domain"] = cfront.get_distribution(Id=self.cfg["distribution_id"])["Distribution"]["DomainName"]
         self.save()
 
