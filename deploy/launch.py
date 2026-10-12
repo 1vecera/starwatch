@@ -146,6 +146,9 @@ class Deploy:
             kept = [h for h in custom.get("Items", []) if h["Header"].lower() not in ("cache-control", "x-robots-tag")]
             if len(kept) != custom.get("Quantity", 0):
                 pconf["CustomHeadersConfig"] = {"Quantity": len(kept), "Items": kept}
+                # the read returns unset security headers as empty objects, which the update refuses
+                pconf["SecurityHeadersConfig"] = {k: v for k, v in pconf.get("SecurityHeadersConfig", {}).items() if v}
+                pconf = {k: v for k, v in pconf.items() if v != {}}
                 cfront.update_response_headers_policy(Id=policy_id, IfMatch=policy["ETag"], ResponseHeadersPolicyConfig=pconf)
                 print("cloudfront: private and noindex headers removed from", pconf["Name"])
         self.state["cloudfront_domain"] = cfront.get_distribution(Id=self.cfg["distribution_id"])["Distribution"]["DomainName"]
