@@ -82,7 +82,7 @@
 @media (max-width:860px){.sw-data{margin-left:2px;padding:6px 10px 6px 8px}}
 @media (max-width:340px){.sw-data .d-w{display:none}}
 
-/* the author, on every screen: name + follow links; the account menu holds About, privacy, source and sign out */
+/* the author, on every screen: name + follow links; the menu holds the award, About, privacy and source */
 .c-author{display:flex;align-items:center;gap:2px;height:var(--chrome-h);padding:4px}
 .c-by{display:flex;align-items:center;gap:8px;height:calc(var(--chrome-h) - 8px);padding:0 10px 0 4px;border-radius:var(--pill);color:var(--label);text-decoration:none;white-space:nowrap}
 .c-by:hover{background:rgba(15,23,42,.06)}
@@ -114,7 +114,7 @@
 .c-menu a.m-btn:hover,.c-menu a.m-btn:focus-visible{background:var(--brand-hover)}
 .c-menu a.m-btn:focus-visible{outline:2px solid var(--label);outline-offset:2px}
 .c-menu hr{border:0;height:1px;background:var(--hairline);margin:6px 4px}
-.c-menu .m-out{color:var(--label)}
+.c-menu .m-award svg{color:#B7791F}
 @media (max-width:1560px){.c-search{width:var(--chrome-h);padding:0;justify-content:center}.c-search .s-t,.c-search .sw-kbd{display:none}}
 @media (max-width:1380px){.c-fol span{display:none}.c-fol{width:calc(var(--chrome-h) - 8px);padding:0;justify-content:center}}
 @media (max-width:1180px){.c-nm{display:none}.c-by{padding:0 4px}}

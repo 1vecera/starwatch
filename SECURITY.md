@@ -10,7 +10,7 @@ Please include what you found, how to reproduce it and what an attacker could re
 
 ## Scope
 
-- The live site at <https://starwatch.agenticanalytics.cz>: the Cloudflare sign-in Worker (`/login`, `/auth/*`), the CloudFront gate in front of the app, and the static app itself.
+- The live site at <https://starwatch.danielvecera.com>: the Cloudflare configuration, the CloudFront gate in front of the app, and the static app itself.
 - The code on the `main` branch: `app/`, `pipeline/` and `deploy/`.
 
 The `archive/` directory and the `hackathon-freeze` tag are historical and not maintained; report issues there only if they affect the live site or `main`.

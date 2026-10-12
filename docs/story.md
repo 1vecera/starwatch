@@ -116,18 +116,27 @@ On stage I had about ten seconds for an opener. Of three variants I chose a wall
 
 ## What changed for the public launch
 
-The hackathon ended at 07:14; the launch work started around noon. Starwatch is now public at [starwatch.agenticanalytics.cz](https://starwatch.agenticanalytics.cz). Code, Apify recipes, learnings and these documents are open source under the MIT licence.
+The hackathon ended at 07:14; the launch work started around noon. Starwatch is now public at [starwatch.danielvecera.com](https://starwatch.danielvecera.com). Code, Apify recipes, learnings and these documents are open source under the MIT licence.
 
 - **Studio is gone.** It was meant as an evidence workspace for drafting, but it never became a clear, supported workflow, and it is unrelated to what Starwatch does well. It may come back as separate work.
-- **Social sign-in only.** The welcome page is public. Everything else requires signing in with GitHub, Google or Facebook, handled by my own OAuth flow on a Cloudflare Worker. No passwords and no email codes, which also keeps load off the servers.
+- **Social sign-in first, then fully public.** At launch the welcome page was public and everything else required signing in with GitHub, Google or Facebook through my own OAuth flow on a Cloudflare Worker. On 12 October I removed the sign-in: the whole app is open to everyone.
 - **It is a snapshot.** The app says clearly that it shows public posts collected on 8–9 October 2026. It is not live monitoring, and Radar shows activity inside that snapshot, not new alerts.
 - **Election silence.** Czech law bans publishing poll results from 7 October until voting ends on Saturday 10 October at 14:00. During the night an agent had collected published polls, seat projections and betting odds for the ten cities; all of that was removed from the snapshot before launch. 2026 results are added only after the polls close.
-- **Data stays out of Git.** The collected snapshot is served only behind sign-in and links back to every original post. The raw scraped datasets are deleted after the launch.
+- **Data stays out of Git.** The collected snapshot is served only on the Starwatch site and links back to every original post. The raw scraped datasets are deleted after the launch.
 - **More context.** Party programmes and news articles about candidates were added for the launch; see [collection/programs-and-articles.md](collection/programs-and-articles.md).
+
+## The result
+
+At the awards on 9 October Starwatch was named **Overall champion** of Agents 0.0.7 Hackathon #01 and won the **Social Media Deep Research** topic, out of 38 projects across three topics. The jury's [public results page](https://hq.agents007.ai/results) lists every project; the [90-second demo](https://www.youtube.com/watch?v=1XVAQxxXz10) is the video the jury saw.
+
+## After the win
+
+- **Open to everyone.** On 12 October the sign-in was removed. The app, the snapshot and the media are public at [starwatch.danielvecera.com](https://starwatch.danielvecera.com); the earlier hostnames redirect there.
+- **The official results.** The elections ended on Saturday 10 October at 14:00. Starwatch now shows the Czech Statistical Office's final 2026 results for every list and every covered candidate, next to the attention each one got in the snapshot, and never merged with it.
 
 ## What is live, cached or missing
 
-**Live:** the website, sign-in, and the app serving the 9 October snapshot: ten cities, 127 lists, 5,405 candidacies, 110 verified accounts and 12,595 verified posts with dated metrics, 2,178 playable videos, 306 candidate photos, logos for 77 lists and 2022 results where the match is exact.
+**Live:** the website and the app serving the 9 October snapshot: ten cities, 127 lists, 5,405 candidacies, 110 verified accounts and 12,595 verified posts with dated metrics, 2,178 playable videos, 306 candidate photos, logos for 77 lists and 2022 results where the match is exact.
 
 **Cached:** everything in the app is cached. Metrics were observed on 9 October between 04:49 and 06:18. The live collector and its research briefs from the first plan are in the repository but are not part of the public site.
 

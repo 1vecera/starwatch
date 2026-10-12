@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://starwatch.agenticanalytics.cz"><img src="app/web/og.png" alt="Starwatch: who's being heard, not just who's talking" width="760"></a>
+  <a href="https://starwatch.danielvecera.com"><img src="app/web/og.png" alt="Starwatch: who's being heard, not just who's talking" width="760"></a>
 </p>
 
 <h1 align="center">Starwatch</h1>
@@ -7,19 +7,20 @@
 <p align="center"><strong>Who's being heard. Not just who's talking.</strong></p>
 
 <p align="center">
-  <a href="https://starwatch.agenticanalytics.cz"><img alt="Open Starwatch" src="https://img.shields.io/badge/Open_Starwatch-starwatch.agenticanalytics.cz-0E6E6B"></a>
+  <a href="https://starwatch.danielvecera.com"><img alt="Open Starwatch" src="https://img.shields.io/badge/Open_Starwatch-starwatch.danielvecera.com-0E6E6B"></a>
   <a href="https://www.linkedin.com/in/1vecera/"><img alt="Daniel Večeřa on LinkedIn" src="https://img.shields.io/badge/LinkedIn-Daniel_Ve%C4%8De%C5%99a-0A66C2"></a>
   <a href="https://x.com/1vecera"><img alt="Daniel Večeřa on X" src="https://img.shields.io/badge/X-%401vecera-0F172A"></a>
+  <a href="https://hq.agents007.ai/results"><img alt="Overall champion, Agents 0.0.7 hackathon" src="https://img.shields.io/badge/Agents_0.0.7-Overall_champion-B7791F"></a>
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-0F172A"></a>
 </p>
 
 Starwatch maps what candidates in the 2026 Czech municipal elections publish on social media and how much attention it gets. It covers the city-council races in the ten largest Czech cities: Praha, Brno, Ostrava, Plzeň, Liberec, Olomouc, České Budějovice, Hradec Králové, Pardubice and Ústí nad Labem, with 5,405 registered candidacies on 127 lists. Every post is attributed only after the account's owner was checked independently, and every post links back to the original.
 
-**Live: [starwatch.agenticanalytics.cz](https://starwatch.agenticanalytics.cz).** The welcome page is public; sign in with any GitHub, Google or Facebook account to open the app.
+**Live: [starwatch.danielvecera.com](https://starwatch.danielvecera.com).** Open to everyone, no sign-in.
 
 > **A snapshot, not live monitoring.** The app shows public posts collected on 8–9 October 2026, just before the vote: over 12,000 posts from more than 100 verified candidate and party accounts on Instagram, Facebook, TikTok and X. Engagement is a dated observation of attention, not a measure of support. Following the Czech pre-election ban on publishing polls, Starwatch shows no polls, forecasts or betting odds.
 
-Built by [Daniel Večeřa](#author) in one night at [Agents 0.0.7](https://agents007.ai) in Prague (8–9 October 2026) as team DANDAPANDA in the Social Media Deep Research track, then cleaned up for public release. The tag [`hackathon-freeze`](https://github.com/1vecera/starwatch/tree/hackathon-freeze) marks the state that was judged.
+Built solo by [Daniel Večeřa](#author) in one night at [Agents 0.0.7](https://agents007.ai) in Prague (8–9 October 2026) as team DANDAPANDA in the Social Media Deep Research track. **Starwatch won Overall champion and the Social Media Deep Research topic** out of 38 projects ([results](https://hq.agents007.ai/results), [90-second demo](https://www.youtube.com/watch?v=1XVAQxxXz10)). It was then cleaned up for public release and now shows the official 2026 results next to the attention data. The tag [`hackathon-freeze`](https://github.com/1vecera/starwatch/tree/hackathon-freeze) marks the state that was judged.
 
 ## Screens
 
@@ -40,7 +41,7 @@ flowchart LR
   A["Apify Actors<br/>public posts, profiles, media"] --> P
   P["pipeline/<br/>ownership review, capped collection,<br/>DuckDB evidence graph"] --> E["app/tools/export_real.py<br/>snapshot + media"]
   E --> W["app/web<br/>static HTML, CSS, JS"]
-  W --> H["deploy/<br/>S3 + CloudFront behind<br/>Cloudflare sign-in"]
+  W --> H["deploy/<br/>S3 + CloudFront<br/>behind Cloudflare"]
 ```
 
 1. **Universe.** The official registry of 2026 candidacies and the 2022 results for the ten cities come from Czech Statistical Office open data.
@@ -48,7 +49,7 @@ flowchart LR
 3. **Evidence graph.** [`pipeline/`](pipeline/) attributes a post only when the account owner was confirmed by an independent public anchor, keeps uncertain matches as unknown, and writes immutable DuckDB checkpoints with dated metrics, reviewed topic labels and quoted statements.
 4. **Export.** [`app/tools/export_real.py`](app/tools/export_real.py) turns one checkpoint into the snapshot file and retained media that the screens load.
 5. **Static app.** [`app/web`](app/web/) is plain HTML, CSS and JavaScript with MapLibre and ECharts. There is no build step.
-6. **Hosting.** [`deploy/`](deploy/) holds everything that runs in production. The site is a private S3 bucket behind CloudFront, fronted by Cloudflare. A Cloudflare Worker ([`deploy/edge`](deploy/edge/)) handles GitHub, Google and Facebook sign-in and serves the privacy and data-deletion pages; it stores no user data, only a signed seven-day session cookie. A CloudFront Function ([`deploy/aws/gate.js`](deploy/aws/gate.js)) lets visitors without a session reach only the public welcome pages, and an idempotent script ([`deploy/launch.py`](deploy/launch.py)) sets up keys, certificate, CloudFront, Cloudflare, the Worker and the upload. The collected snapshot never enters Git.
+6. **Hosting.** [`deploy/`](deploy/) holds everything that runs in production. The site is a private S3 bucket behind CloudFront, fronted by Cloudflare, and open to everyone without an account. A CloudFront Function ([`deploy/aws/gate.js`](deploy/aws/gate.js)) accepts only requests that came through Cloudflare, and an idempotent script ([`deploy/launch.py`](deploy/launch.py)) sets up the key, certificate, CloudFront, Cloudflare rules, redirects from earlier hostnames and the upload. The collected snapshot never enters Git.
 
 The full write-up is in [docs/architecture.md](docs/architecture.md), [docs/methodology.md](docs/methodology.md) and [deploy/README.md](deploy/README.md).
 
@@ -71,10 +72,10 @@ To collect your own data, set `APIFY_TOKEN` in your environment and follow [the 
 ```sh
 (cd pipeline && uv sync && uv run --with pytest pytest)
 (cd app && uv run --with pytest pytest tools/test_serve.py)
-(cd deploy/edge && npm ci && npm test)
+node --test deploy/aws/gate.test.mjs
 ```
 
-The edge tests need Node.js. All suites use local fixtures only and call no outside service. The archived components keep their own tests; see [archive/README.md](archive/README.md).
+The gate test needs Node.js. All suites use local fixtures only and call no outside service. The archived components keep their own tests; see [archive/README.md](archive/README.md).
 
 ## Repository map
 
@@ -82,7 +83,7 @@ The edge tests need Node.js. All suites use local fixtures only and call no outs
 | --- | --- |
 | [`app/`](app/) | The static app, the snapshot exporter and a small local server with HTTP range support for video. |
 | [`pipeline/`](pipeline/) | The evidence pipeline (`czlake`): official data, account discovery and ownership review, capped Apify collection, media retention, topic labels, DuckDB checkpoints and a read-only local API. |
-| [`deploy/`](deploy/) | Production hosting: the Cloudflare sign-in Worker, the CloudFront gate and the idempotent deploy script. See [deploy/README.md](deploy/README.md). |
+| [`deploy/`](deploy/) | Production hosting: the CloudFront gate and the idempotent deploy script. See [deploy/README.md](deploy/README.md). |
 | [`docs/`](docs/) | The story, method, architecture, Apify recipes, learnings and the privacy and ethics notes. |
 | [`recipes/`](recipes/) | Reusable Apify Actor inputs described in the recipes guide. |
 | [`archive/`](archive/) | Earlier hackathon code: the first research engine, prototypes and the project control room. Not needed to run Starwatch. |
@@ -100,7 +101,7 @@ The edge tests need Node.js. All suites use local fixtures only and call no outs
 
 ## Principles
 
-Starwatch covers public politicians and public sources only. It does not collect comments, commenters or follower lists, does not profile voters, does not infer sensitive traits, and does not score anyone's character or trustworthiness. Account ownership, authorship, mentions and quoted speakers are kept as separate questions, and unknowns stay unknown. Candidate vote totals from 2022 include whole-list allocation and are not preference-only votes. The app links to original posts; the collected snapshot is served only behind sign-in and is not part of this repository.
+Starwatch covers public politicians and public sources only. It does not collect comments, commenters or follower lists, does not profile voters, does not infer sensitive traits, and does not score anyone's character or trustworthiness. Account ownership, authorship, mentions and quoted speakers are kept as separate questions, and unknowns stay unknown. Candidate vote totals from 2022 include whole-list allocation and are not preference-only votes. Candidate vote totals from 2026 include whole-list votes in the same way. The app links to original posts; the collected snapshot is served only on the Starwatch site and is not part of this repository.
 
 Corrections and removal requests are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md). Security issues: see [SECURITY.md](SECURITY.md).
 

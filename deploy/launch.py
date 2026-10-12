@@ -1,20 +1,17 @@
-"""Deploy Starwatch: static app on S3 + CloudFront, sign-in and edge rules on Cloudflare.
+"""Deploy Starwatch: a public static app on S3 + CloudFront, fronted by Cloudflare.
 
 Every step is idempotent and records resource handles in a local, Git-ignored state file.
-Secrets come only from environment variables and go straight to AWS Secrets Manager or
-Cloudflare Worker secrets; nothing secret is printed or written to disk.
+Secrets come only from environment variables or AWS Secrets Manager; nothing secret is printed or written to disk.
 
-    uv run --with boto3 python deploy/launch.py --config <config.json> keys cert cloudfront cloudflare worker site verify
+    uv run --with boto3 python deploy/launch.py --config <config.json> keys cert cloudfront cloudflare redirects site verify
 """
 
 import argparse
 import hashlib
-import hmac
 import json
 import mimetypes
 import os
 import secrets
-import subprocess
 import time
 import urllib.error
 import urllib.request
@@ -25,17 +22,11 @@ import boto3
 
 HERE = Path(__file__).resolve().parent
 HEADER = "x-starwatch-cloudflare-origin"
-PROVIDER_ENV = {
-    "GITHUB_ID": ["STARWATCH_GITHUB_ID", "GITHUB_CLIENT_ID"],
-    "GITHUB_SECRET": ["STARWATCH_GITHUB_SECRET", "GITHUB_CLIENT_SECRET"],
-    "GOOGLE_ID": ["STARWATCH_GOOGLE_ID", "GOOGLE_CLIENT_ID"],
-    "GOOGLE_SECRET": ["STARWATCH_GOOGLE_SECRET", "GOOGLE_CLIENT_SECRET"],
-    "FACEBOOK_ID": ["STARWATCH_FACEBOOK_ID", "FACEBOOK_APP_ID"],
-    "FACEBOOK_SECRET": ["STARWATCH_FACEBOOK_SECRET", "FACEBOOK_APP_SECRET"],
-}
 # Files that must never be published even if they sit in the web folder.
 SKIP = {".DS_Store"}
 SKIP_PREFIXES = ("tmp/", "walkthrough-shots/")
+# Rules from the signed-in setup that the public site no longer needs.
+RETIRED_RULES = {"http_request_cache_settings": "starwatch_no_edge_cache", "http_ratelimit": "starwatch_auth_rate"}
 
 
 class Deploy:
@@ -83,23 +74,16 @@ class Deploy:
 
     # ---------- keys ----------
     def keys(self):
-        """Session-signing and origin keys live in Secrets Manager; generated once."""
+        """The private origin key lives in Secrets Manager; generated once."""
         sm = self.aws.client("secretsmanager")
         name = self.cfg["secret_name"]
         try:
             values = json.loads(sm.get_secret_value(SecretId=name)["SecretString"])
         except sm.exceptions.ResourceNotFoundException:
-            values = {"session": secrets.token_hex(32), "origin": secrets.token_hex(32)}
+            values = {"origin": secrets.token_hex(32)}
             sm.create_secret(Name=name, SecretString=json.dumps(values), Tags=[{"Key": "Project", "Value": "Starwatch"}])
             print("keys: created", name)
         return values
-
-    def legacy_origin(self):
-        arn = self.cfg.get("legacy_secret_arn")
-        if not arn:
-            return ""
-        values = json.loads(self.aws.client("secretsmanager").get_secret_value(SecretId=arn)["SecretString"])
-        return values.get("cloudflare_origin", "")
 
     # ---------- certificate ----------
     def cert(self):
@@ -134,41 +118,52 @@ class Deploy:
         keys = self.keys()
         cfront = self.aws.client("cloudfront")
         name = self.cfg["cloudfront_function"]
-        code = ((HERE / "aws/gate.js").read_text().replace("__SESSION_KEY__", keys["session"]).replace("__ORIGIN_KEY__", keys["origin"]))
-        legacy = self.legacy_origin()
-        if legacy:
-            code = code.replace("__LEGACY_ORIGIN_KEY__", legacy)
+        code = (HERE / "aws/gate.js").read_text().replace("__ORIGIN_KEY__", keys["origin"])
         described = cfront.describe_function(Name=name, Stage="DEVELOPMENT")
         updated = cfront.update_function(Name=name, IfMatch=described["ETag"], FunctionCode=code.encode(),
-                                         FunctionConfig={"Comment": "Starwatch: Cloudflare-only origin, public welcome, signed session",
+                                         FunctionConfig={"Comment": "Starwatch: public app, Cloudflare-only origin",
                                                          "Runtime": "cloudfront-js-2.0"})
         cfront.publish_function(Name=name, IfMatch=updated["ETag"])
-        print("cloudfront: gate published", "(legacy host kept)" if legacy else "")
+        print("cloudfront: gate published")
         result = cfront.get_distribution_config(Id=self.cfg["distribution_id"])
         config = result["DistributionConfig"]
-        aliases = set(config.get("Aliases", {}).get("Items", []))
+        aliases = config.get("Aliases", {}).get("Items", [])
         cert_arn = self.state.get("cert_arn")
-        if self.host not in aliases and cert_arn:
-            aliases.add(self.host)
-            config["Aliases"] = {"Quantity": len(aliases), "Items": sorted(aliases)}
+        # The distribution answers only for the current host; earlier hosts are redirected at Cloudflare.
+        if cert_arn and (aliases != [self.host] or config["ViewerCertificate"].get("ACMCertificateArn") != cert_arn):
+            config["Aliases"] = {"Quantity": 1, "Items": [self.host]}
             config["ViewerCertificate"] = {"ACMCertificateArn": cert_arn, "SSLSupportMethod": "sni-only",
                                            "MinimumProtocolVersion": "TLSv1.2_2021", "Certificate": cert_arn, "CertificateSource": "acm"}
-            config["Comment"] = "Starwatch: private S3 app behind Cloudflare sign-in"
+            config["Comment"] = "Starwatch: public app on a private S3 bucket, behind Cloudflare"
             cfront.update_distribution(Id=self.cfg["distribution_id"], IfMatch=result["ETag"], DistributionConfig=config)
-            print("cloudfront: alias", self.host, "added")
+            print("cloudfront: alias set to", self.host, "(was", aliases, ")")
         self.state["cloudfront_domain"] = cfront.get_distribution(Id=self.cfg["distribution_id"])["Distribution"]["DomainName"]
         self.save()
 
     # ---------- Cloudflare rules ----------
-    def ruleset(self, phase, ref, rule):
-        """Create or replace one rule (matched by ref) in a zone phase entrypoint."""
+    def zone_of(self, host):
+        """The zone id for a hostname, by its longest matching zone name."""
+        parts = host.split(".")
+        for i in range(len(parts) - 1):
+            found = self.cf(f"/zones?name={'.'.join(parts[i:])}")
+            if found:
+                return found[0]["id"]
+        raise RuntimeError(f"no Cloudflare zone for {host}")
+
+    def ruleset(self, phase, ref, rule, zone=None):
+        """Create or replace one rule (matched by ref) in a zone phase entrypoint; rule=None removes it."""
+        zone = zone or self.zone
         try:
-            entry = self.cf(f"/zones/{self.zone}/rulesets/phases/{phase}/entrypoint")
-            rules = [r for r in entry.get("rules", []) if r.get("ref") != ref]
+            entry = self.cf(f"/zones/{zone}/rulesets/phases/{phase}/entrypoint")
+            rules = entry.get("rules", [])
         except RuntimeError:
             rules = []
-        keep = [{k: v for k, v in r.items() if k in ("action", "action_parameters", "expression", "description", "enabled", "ref", "ratelimit")} for r in rules]
-        self.cf(f"/zones/{self.zone}/rulesets/phases/{phase}/entrypoint", "PUT", {"rules": keep + [dict(rule, ref=ref)]})
+        if rule is None and not any(r.get("ref") == ref for r in rules):
+            return False
+        keep = [{k: v for k, v in r.items() if k in ("action", "action_parameters", "expression", "description", "enabled", "ref", "ratelimit")}
+                for r in rules if r.get("ref") != ref]
+        self.cf(f"/zones/{zone}/rulesets/phases/{phase}/entrypoint", "PUT", {"rules": keep + ([dict(rule, ref=ref)] if rule else [])})
+        return True
 
     def cloudflare(self):
         keys = self.keys()
@@ -176,7 +171,7 @@ class Deploy:
         target = self.state.get("cloudfront_domain") or self.cfg["cloudfront_domain"]
         records = self.cf(f"/zones/{self.zone}/dns_records?name={self.host}")
         record = {"type": "CNAME", "name": self.host, "content": target, "proxied": True, "comment": "Starwatch app (CloudFront origin)"}
-        if records and (records[0]["type"] != "CNAME" or records[0]["content"] != target):
+        if records and (records[0]["type"] != "CNAME" or records[0]["content"] != target or not records[0]["proxied"]):
             self.cf(f"/zones/{self.zone}/dns_records/{records[0]['id']}", "DELETE")
             records = []
         if not records:
@@ -185,63 +180,42 @@ class Deploy:
         self.ruleset("http_request_late_transform", "starwatch_origin_header", {
             "description": "Starwatch: private origin header for CloudFront", "expression": host_expr, "action": "rewrite",
             "action_parameters": {"headers": {HEADER: {"operation": "set", "value": keys["origin"]}}}})
-        self.ruleset("http_request_cache_settings", "starwatch_no_edge_cache", {
-            "description": "Starwatch: never cache signed-in content at Cloudflare", "expression": host_expr,
-            "action": "set_cache_settings", "action_parameters": {"cache": False}})
         self.ruleset("http_config_settings", "starwatch_strict_tls", {
             "description": "Starwatch: strict TLS to CloudFront", "expression": host_expr,
             "action": "set_config", "action_parameters": {"ssl": "strict"}})
-        try:
-            self.ruleset("http_ratelimit", "starwatch_auth_rate", {
-                "description": "Starwatch: slow down sign-in floods",
-                "expression": f'{host_expr} and starts_with(http.request.uri.path, "/auth/")', "action": "block",
-                "ratelimit": {"characteristics": ["ip.src", "cf.colo.id"], "period": 10, "requests_per_period": 20, "mitigation_timeout": 10}})
-        except RuntimeError as exc:
-            print("cloudflare: rate limit rule skipped:", str(exc)[:160])
-        print("cloudflare: transform, cache, TLS and rate rules set")
+        for phase, ref in RETIRED_RULES.items():
+            if self.ruleset(phase, ref, None):
+                print("cloudflare: removed", ref)
+        print("cloudflare: origin header and strict TLS set; static files use Cloudflare's default cache")
 
-    # ---------- Worker ----------
-    def worker(self):
-        keys = self.keys()
-        subprocess.run(["npm", "run", "--silent", "build"], cwd=HERE / "edge", check=True)
-        source = (HERE / "edge/dist/worker.mjs").read_text()
-        account, script = self.cfg["cloudflare_account"], self.cfg["worker_name"]
-        boundary = "----starwatch" + secrets.token_hex(8)
-        meta = {"main_module": "worker.mjs", "compatibility_date": "2026-09-01", "keep_bindings": ["secret_text"],
-                "observability": {"enabled": True},
-                "bindings": [{"type": "plain_text", "name": "PUBLIC_HOST", "text": self.host},
-                             {"type": "plain_text", "name": "SESSION_TTL", "text": "604800"}]}
-        body = b""
-        for name, ctype, content, filename in (("metadata", "application/json", json.dumps(meta), None),
-                                               ("worker.mjs", "application/javascript+module", source, "worker.mjs")):
-            disposition = f'form-data; name="{name}"' + (f'; filename="{filename}"' if filename else "")
-            body += f"--{boundary}\r\nContent-Disposition: {disposition}\r\nContent-Type: {ctype}\r\n\r\n".encode() + content.encode() + b"\r\n"
-        body += f"--{boundary}--\r\n".encode()
-        self.cf(f"/accounts/{account}/workers/scripts/{script}", "PUT", body, f"multipart/form-data; boundary={boundary}")
-        self.cf(f"/accounts/{account}/workers/scripts/{script}/subdomain", "POST", {"enabled": False, "previews_enabled": False})
-        self.put_secret("SESSION_KEY", keys["session"])
-        pushed = []
-        for binding, names in PROVIDER_ENV.items():
-            value = next((os.environ[n] for n in names if os.environ.get(n)), None)
-            if value:
-                self.put_secret(binding, value.strip())
-                pushed.append(binding)
-        present = sorted(s["name"] for s in self.cf(f"/accounts/{account}/workers/scripts/{script}/secrets"))
-        print("worker: deployed; secrets pushed now:", pushed, "present:", present)
-        wanted = [f"{self.host}/{p}" for p in ("login*", "auth/*", "privacy*", "data-deletion*")]
-        routes = self.cf(f"/zones/{self.zone}/workers/routes")
-        for route in routes:
-            if route["pattern"].startswith(self.host + "/") and route["pattern"] not in wanted:
-                self.cf(f"/zones/{self.zone}/workers/routes/{route['id']}", "DELETE")
-        existing = {r["pattern"] for r in routes}
-        for pattern in wanted:
-            if pattern not in existing:
-                self.cf(f"/zones/{self.zone}/workers/routes", "POST", {"pattern": pattern, "script": script})
-        print("worker: routes", wanted)
-
-    def put_secret(self, name, value):
-        self.cf(f"/accounts/{self.cfg['cloudflare_account']}/workers/scripts/{self.cfg['worker_name']}/secrets", "PUT",
-                {"name": name, "text": value, "type": "secret_text"})
+    # ---------- earlier hostnames ----------
+    def redirects(self):
+        """Send every earlier hostname to the current one (301, path and query kept) and retire its edge pieces."""
+        account = self.cfg["cloudflare_account"]
+        for old in self.cfg.get("redirect_hosts", []):
+            zone = self.zone_of(old)
+            expr = f'(http.host eq "{old}")'
+            self.ruleset("http_request_dynamic_redirect", "starwatch_moved", {
+                "description": f"Starwatch moved to {self.host}", "expression": expr, "action": "redirect",
+                "action_parameters": {"from_value": {"status_code": 301, "preserve_query_string": True,
+                                                     "target_url": {"expression": f'concat("https://{self.host}", http.request.uri.path)'}}}}, zone)
+            for route in self.cf(f"/zones/{zone}/workers/routes"):
+                if route["pattern"].startswith(old + "/"):
+                    self.cf(f"/zones/{zone}/workers/routes/{route['id']}", "DELETE")
+                    print("redirects: route removed", route["pattern"])
+            for phase, ref in [("http_request_late_transform", "starwatch_origin_header"), ("http_config_settings", "starwatch_strict_tls"), *RETIRED_RULES.items()]:
+                if self.ruleset(phase, ref, None, zone):
+                    print("redirects: removed", ref, "from", old)
+            for app in self.cf(f"/accounts/{account}/access/apps"):
+                if app.get("domain") == old:
+                    self.cf(f"/accounts/{account}/access/apps/{app['id']}", "DELETE")
+                    print("redirects: Access application removed for", old)
+            print("redirects:", old, "->", self.host)
+        scripts = {w["id"] for w in self.cf(f"/accounts/{account}/workers/scripts")}
+        for name in self.cfg.get("retire_workers", []):
+            if name in scripts:
+                self.cf(f"/accounts/{account}/workers/scripts/{name}", "DELETE")
+                print("redirects: Worker deleted", name)
 
     # ---------- site ----------
     def site(self):
@@ -294,10 +268,7 @@ class Deploy:
 
     # ---------- verify ----------
     def verify(self):
-        keys = self.keys()
         base = f"https://{self.host}"
-        payload = f"v1.{int(time.time()) + 300}.{secrets.token_hex(16)}"
-        session = "__Host-sw-session=" + payload + "." + hmac.new(keys["session"].encode(), payload.encode(), hashlib.sha256).hexdigest()
 
         class NoRedirect(urllib.request.HTTPRedirectHandler):
             def redirect_request(self, *args, **kwargs):
@@ -305,10 +276,8 @@ class Deploy:
 
         opener = urllib.request.build_opener(NoRedirect)
 
-        def get(path, cookie=None, rng=None, origin=base):
+        def get(path, rng=None, origin=base):
             headers = {"User-Agent": "starwatch-verify"}
-            if cookie:
-                headers["Cookie"] = cookie
             if rng:
                 headers["Range"] = rng
             try:
@@ -317,21 +286,20 @@ class Deploy:
             except urllib.error.HTTPError as exc:
                 return exc.code, exc.headers, b""
 
-        checks = [
-            ("welcome is public", get("/")[0] == 200),
-            ("privacy is public", get("/privacy")[0] == 200),
-            ("login page renders", get("/login")[0] == 200),
-            ("atlas redirects to login", get("/atlas.html")[0] == 302 and get("/atlas.html")[1].get("location", "").startswith("/login")),
-            ("data denied anonymously", get("/data/real.js")[0] == 401),
-            ("data allowed with session", get("/data/real.js", session)[0] == 200),
-            ("forged session refused", get("/data/real.js", session[:-1] + ("0" if session[-1] != "0" else "1"))[0] == 401),
-            ("direct CloudFront refused", get("/atlas.html", session, origin="https://" + self.state.get("cloudfront_domain", self.cfg["cloudfront_domain"]))[0] == 403),
-        ]
+        checks = [("welcome is public", get("/")[0] == 200)]
+        for path in ("/atlas.html", "/spotlight.html", "/pulse.html", "/radar.html", "/data.html", "/about.html", "/privacy.html",
+                     "/data/real.js", "/data/results2026.js", "/data/stats.js"):
+            checks.append((f"{path} is public", get(path)[0] == 200))
+        status, headers, _ = get("/login")
+        checks.append(("old sign-in path goes home", status == 301 and headers.get("location") == "/"))
+        checks.append(("direct CloudFront refused", get("/atlas.html", origin="https://" + self.state.get("cloudfront_domain", self.cfg["cloudfront_domain"]))[0] == 403))
         media = self.cfg.get("verify_media")
         if media:
-            status, headers, _ = get(media, session, "bytes=0-1023")
+            status, headers, _ = get(media, "bytes=0-1023")
             checks.append(("video range served", status == 206 and headers.get("content-range", "").startswith("bytes 0-1023/")))
-            checks.append(("video denied anonymously", get(media, None, "bytes=0-15")[0] == 401))
+        for old in self.cfg.get("redirect_hosts", []):
+            status, headers, _ = get("/atlas.html?city=554782", origin=f"https://{old}")
+            checks.append((f"{old} redirects", status == 301 and headers.get("location") == f"{base}/atlas.html?city=554782"))
         for name, ok in checks:
             print(("PASS " if ok else "FAIL ") + name)
         if not all(ok for _, ok in checks):
@@ -341,7 +309,7 @@ class Deploy:
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--config", required=True, help="JSON config (see deploy/config.example.json)")
-    parser.add_argument("steps", nargs="+", choices=["keys", "cert", "cloudfront", "cloudflare", "worker", "site", "verify"])
+    parser.add_argument("steps", nargs="+", choices=["keys", "cert", "cloudfront", "cloudflare", "redirects", "site", "verify"])
     args = parser.parse_args()
     deploy = Deploy(args.config)
     for step in args.steps:

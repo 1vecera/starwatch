@@ -13,7 +13,7 @@ const chrome = process.env.CHROME || undefined; // default: the browser bundled 
 const browser = await pw.chromium.launch({ executablePath: chrome, headless: true, args: ["--no-sandbox", "--use-angle=swiftshader", "--enable-unsafe-swiftshader"] });
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const results = [], errors = [];
-// Public without sign-in on the edge (everything else redirects to /login).
+// The welcome and About pages load only these light files, so they paint before the snapshot and media.
 const PUBLIC = [/^\/$/, /^\/index\.html$/, /^\/welcome\.html$/, /^\/about\.html$/, /^\/og\.png$/, /^\/favicon\.svg$/, /^\/manifest\.webmanifest$/,
   /^\/ds\.css$/, /^\/nav\.js$/, /^\/data\/stats\.js$/, /^\/robots\.txt$/, /^\/(welcome|brand|fx|img|fonts)\//];
 const BANNED = [/\bstudio\b/i, /\bforecast/i, /\bexpected\b/i, /\breal-time\b/i, /\bmonitoring now\b/i, /\blive (data|alerts?|feed|stream|monitoring)\b/i];

@@ -69,10 +69,10 @@ What I would tell myself before the next night like this. Each point comes from 
 - **Label the mode.** Live, cached, sample and simulated are different; the public app says it is a snapshot of 8–9 October 2026.
 - **Show coverage next to every comparison.** State the window, the denominator and what is missing.
 - **Respect election silence.** Czech law bans publishing poll results in the final days before the vote. Polls and betting odds collected during the night were removed before launch.
-- **Keep data out of Git.** Publish code, recipes and docs; serve collected content only behind sign-in, link to originals and delete the raw scrape after launch.
+- **Keep data out of Git.** Publish code, recipes and docs; serve collected content only from your own site, link to originals and delete the raw scrape after launch.
 
 ## Hosting
 
 - **Know the email limits before choosing email codes.** Amazon Cognito's built-in sender allows 50 emails per day per AWS account. Social sign-in avoids the problem and the password handling.
-- **Gate the origin, not only the page.** Keep the bucket private, let only the CDN read it, and let the CDN serve anything other than the public landing page only to requests that came through the sign-in edge.
+- **Gate the origin, not only the page.** Keep the bucket private, let only the CDN read it, and let the CDN serve only requests that came through the edge you control. The same gate first protected the sign-in and now keeps the public site behind Cloudflare's cache.
 - **Preserve byte ranges end to end.** Video seeking breaks when any proxy drops range requests; test seeking through the full chain.

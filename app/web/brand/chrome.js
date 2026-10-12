@@ -4,7 +4,7 @@
      <script src="mock.js"></script><script src="brand/chrome.js"></script>
      <script>SWChrome.mount(document.body,{active:'atlas',routes:true,onBack:()=>history.back()})</script>
    Floating pills over the page: logo + the snapshot chip (opts.snapshot:false hides it) left, the screen dock
-   centred, then search, the author (Daniel Večeřa, with follow links) and the account menu (About, privacy, source, sign out) right.
+   centred, then search, the author (Daniel Večeřa, with follow links) and the menu (award, About, privacy, source) right.
    routes:true links to atlas/spotlight/pulse/radar/data/about.html; omit it to only fire the 'sw:nav' event / opts.onNav.
    Leave ~64–76px top padding (and ~92px bottom on phones, where the dock floats at the bottom).
    Keys: 1–4 switch screens · ⌘K / Ctrl+K / "/" search · Esc closes palette or menu, else opts.onBack(). */
@@ -24,12 +24,13 @@ const SCREENS=[
 const EXTRA=[
  {k:'data',n:'By the numbers',short:'Data',href:'data.html',i:`<rect x="3.5" y="4" width="10.5" height="3.6" rx="1.8"/><rect x="3.5" y="10.2" width="16.5" height="3.6" rx="1.8"/><rect x="3.5" y="16.4" width="6.5" height="3.6" rx="1.8"/>${SPK(star(16.4,18.2,3.4))}`},
  {k:'about',n:'About Starwatch',short:'About',href:'about.html',i:`<circle cx="11" cy="12.4" r="8.1"/><path d="M11 11.4v5"/>${DOT(11,8.4)}${SPK(star(18.6,5.4,3.3))}`}];
-/* the author, promoted on every screen, and the signed-in user's exits */
-const LINKS={linkedin:'https://www.linkedin.com/in/1vecera/',x:'https://x.com/1vecera',repo:'https://github.com/1vecera/starwatch',privacy:'/privacy',logout:'/auth/logout',about:'about.html'};
+/* the author, promoted on every screen, and where the project came from */
+const LINKS={linkedin:'https://www.linkedin.com/in/1vecera/',x:'https://x.com/1vecera',repo:'https://github.com/1vecera/starwatch',privacy:'privacy.html',about:'about.html',award:'https://hq.agents007.ai/results',demo:'https://www.youtube.com/watch?v=1XVAQxxXz10'};
 const G_IN='<svg class="sw-g" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.23 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z"/></svg>';
 const G_X='<svg class="sw-g" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18.9 1.15h3.68l-8.04 9.19L24 22.85h-7.41l-5.8-7.58-6.64 7.58H.47l8.6-9.83L0 1.15h7.59l5.25 6.93zm-1.29 19.5h2.04L6.49 3.24H4.3z"/></svg>';
 const I_USER='<circle cx="12" cy="8.6" r="3.9"/><path d="M4.6 20.2c.9-3.6 3.9-5.7 7.4-5.7s6.5 2.1 7.4 5.7"/>';
-const I_OUT='<path d="M14 4.5h3.5a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H14"/><path d="M10 8l-4 4 4 4"/><path d="M6 12h9"/>';
+const I_STAR='<path d="M12 3.2l2.6 5.5 6 .76-4.4 4.15 1.13 5.95L12 16.65l-5.33 2.91 1.13-5.95-4.4-4.15 6-.76z"/>';
+const I_PLAY='<circle cx="12" cy="12" r="8.5"/><path d="M10.2 8.9v6.2l5-3.1z"/>';
 const I_EXT='<path d="M9 5H6.5A1.5 1.5 0 0 0 5 6.5v11A1.5 1.5 0 0 0 6.5 19h11a1.5 1.5 0 0 0 1.5-1.5V15"/><path d="M13 5h6v6"/><path d="M19 5l-8 8"/>';
 const CLOCK='<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 4.6V8l2.3 1.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 /* the public snapshot; screens with data pass SW.snapshot / SW.source, public pages use these defaults */
@@ -58,16 +59,17 @@ function mount(host,opts){
 <nav class="c-seg c-pill" role="tablist" aria-label="Screens">${SCREENS.map((s,i)=>`<button role="tab" data-k="${s.k}" aria-selected="false" aria-label="${s.n}">${ICON(s.i,'ic')}<span class="lbl">${s.n}</span><span class="tip">${s.n}<span class="sw-kbd">${i+1}</span></span></button>`).join('')}<i class="c-div" aria-hidden="true"></i>${EXTRA.map(s=>`<button role="tab" class="c-x" data-k="${s.k}" aria-selected="false" aria-label="${s.n}">${ICON(s.i,'ic')}<span class="lbl">${s.short}</span><span class="tip">${s.n}</span></button>`).join('')}</nav>
 <div class="c-right"><button class="c-search c-pill" aria-label="Search" aria-keyshortcuts="${isMac?'Meta+K':'Control+K'}">${ICON(I_SEARCH)}<span class="s-t">Search</span><span class="sw-kbd">${isMac?'⌘K':'Ctrl K'}</span></button>
 <div class="c-author c-pill"><a class="c-by" href="${LINKS.about}#author"><span class="c-av" aria-hidden="true">DV</span><span class="c-nm"><small>Made by</small>Daniel Večeřa</span></a><a class="c-fol" href="${LINKS.linkedin}" target="_blank" rel="noopener" aria-label="Follow Daniel Večeřa on LinkedIn">${G_IN}<span>Follow</span></a><a class="c-fol" href="${LINKS.x}" target="_blank" rel="noopener" aria-label="Follow Daniel Večeřa on X">${G_X}<span>Follow</span></a></div>
-<button class="c-acct c-pill" aria-haspopup="true" aria-expanded="false" aria-label="Menu: author, about, privacy, sign out">${ICON(I_USER)}<span class="c-av" aria-hidden="true">DV</span></button></div>
+<button class="c-acct c-pill" aria-haspopup="true" aria-expanded="false" aria-label="Menu: author, award, about, privacy, source">${ICON(I_USER)}<span class="c-av" aria-hidden="true">DV</span></button></div>
 <div class="c-menu" role="menu" aria-label="Starwatch menu" hidden>
   <div class="m-auth"><span class="c-av big" aria-hidden="true">DV</span><div><b>Daniel Večeřa</b><small>Prague · made Starwatch</small></div></div>
   <div class="m-fol"><a role="menuitem" class="m-btn" href="${LINKS.linkedin}" target="_blank" rel="noopener">${G_IN}Follow on LinkedIn</a><a role="menuitem" class="m-btn" href="${LINKS.x}" target="_blank" rel="noopener">${G_X}Follow on X</a></div>
   <hr>
+  <a role="menuitem" href="${LINKS.award}" target="_blank" rel="noopener" class="m-award">${ICON(I_STAR)}Overall champion, Agents 0.0.7 hackathon</a>
+  <a role="menuitem" href="${LINKS.demo}" target="_blank" rel="noopener">${ICON(I_PLAY)}90-second demo video</a>
+  <hr>
   <a role="menuitem" href="${LINKS.about}">${ICON(EXTRA[1].i)}About Starwatch and the data</a>
   <a role="menuitem" href="${LINKS.privacy}">${ICON(I_LOCK)}Privacy</a>
   <a role="menuitem" href="${LINKS.repo}" target="_blank" rel="noopener">${ICON(I_EXT)}Source code on GitHub</a>
-  <hr>
-  <a role="menuitem" href="${LINKS.logout}" class="m-out">${ICON(I_OUT)}Sign out</a>
 </div>`;
   host.appendChild(el);
   const seg=el.querySelector('.c-seg'),btns=[...seg.querySelectorAll('button')];
@@ -80,7 +82,7 @@ function mount(host,opts){
   /* palette */
   const pal=palette(opts,set);
   el.querySelector('.c-search').addEventListener('click',()=>pal.open());
-  /* account menu: author, about, privacy, source, sign out */
+  /* menu: author, award, about, privacy, source */
   const acct=el.querySelector('.c-acct'),menu=el.querySelector('.c-menu');
   const menuOpen=()=>!menu.hidden;
   function menuSet(on,kb){menu.hidden=!on;acct.setAttribute('aria-expanded',on);if(on){const r=acct.getBoundingClientRect();menu.style.setProperty('--m-right',Math.max(8,innerWidth-r.right)+'px');requestAnimationFrame(()=>menu.classList.add('open'));if(kb){const f=menu.querySelector('a');f&&f.focus({preventScroll:true})}}else menu.classList.remove('open')}

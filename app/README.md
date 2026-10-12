@@ -4,7 +4,7 @@
 
 ![Starwatch](web/og.png)
 
-Starwatch maps the public posts of candidates and party lists in the 2026 Czech municipal elections in ten cities, linked to the people and lists behind them. It is live at [starwatch.agenticanalytics.cz](https://starwatch.agenticanalytics.cz): the welcome page and About are public, and any GitHub, Google or Facebook account can sign in to the rest.
+Starwatch maps the public posts of candidates and party lists in the 2026 Czech municipal elections in ten cities, linked to the people and lists behind them. It is live at [starwatch.danielvecera.com](https://starwatch.danielvecera.com), open to everyone without an account.
 
 It shows a **snapshot**, not live monitoring: public posts collected on 8–9 October 2026 (checkpoint `production-native-009`, exported 9 October 2026 at 06:39 Prague time). Every screen says so in the top bar, and every post opens the public source it was observed on.
 
@@ -44,15 +44,15 @@ City, list, candidate and post parameters are indexes into the exported snapshot
 
 Everything under `web/data/`, `web/media/` and `web/welcome/` stays out of Git.
 
-| File | Contents | On the edge |
+| File | Contents | Published |
 | --- | --- | --- |
-| `data/real.js` | The exported snapshot (`tools/export_real.py`) | Behind sign-in |
+| `data/real.js` | The exported snapshot (`tools/export_real.py`) | Public site |
 | `data/stats.js` | Public aggregate counts for About (`tools/export_stats.py`): coverage by platform, city and topic, plus logo credits. It holds no names, post text or media. | Public |
-| `data/issue-topics.js` | Named local issues, reviewed from captions | Behind sign-in |
-| `data/topic-labels.js` | Optional machine topic labels (`window.SW_TOPIC_LABELS`). They never override a reviewed label, and each carries the phrase it rests on. | Behind sign-in |
-| `data/programs.js`, `data/articles.js` | Optional party programs and news mentions (`window.SW_PROGRAMS`, `window.SW_ARTICLES`) | Behind sign-in |
-| `data/results2026.js` | Optional official 2026 council results (`window.SW_RESULTS2026`, `tools/export_results2026.py`) | Behind sign-in |
-| `media/` | Retained post images, videos, portraits and logos | Behind sign-in |
+| `data/issue-topics.js` | Named local issues, reviewed from captions | Public site |
+| `data/topic-labels.js` | Optional machine topic labels (`window.SW_TOPIC_LABELS`). They never override a reviewed label, and each carries the phrase it rests on. | Public site |
+| `data/programs.js`, `data/articles.js` | Optional party programs and news mentions (`window.SW_PROGRAMS`, `window.SW_ARTICLES`) | Public site |
+| `data/results2026.js` | Optional official 2026 council results (`window.SW_RESULTS2026`, `tools/export_results2026.py`) | Public site |
+| `media/` | Retained post images, videos, portraits and logos | Public site |
 | `welcome/` | Copies of the 53 files on the welcome wall (`tools/copy_welcome_media.py`) | Public |
 
 The public pages load only `/`, `/index.html`, `/welcome.html`, `/about.html`, `/og.png`, `/manifest.webmanifest`, `/ds.css`, `/nav.js`, `/data/stats.js` and the folders `/welcome/`, `/brand/`, `/fx/` and `/img/`, plus Google Fonts. `tools/check-launch.mjs` asserts this.

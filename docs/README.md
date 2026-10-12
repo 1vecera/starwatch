@@ -1,6 +1,6 @@
 # Starwatch documentation
 
-Starwatch shows what candidates in the ten largest Czech cities publish in public, who gets attention and where every number comes from. It is live at [starwatch.agenticanalytics.cz](https://starwatch.agenticanalytics.cz) as a snapshot of public posts collected on 8–9 October 2026. It was built in one night at the Agents 0.0.7 hackathon in Prague by Daniel Večeřa. Code, recipes and documents are MIT-licensed.
+Starwatch shows what candidates in the ten largest Czech cities publish in public, who gets attention and where every number comes from. It is live at [starwatch.danielvecera.com](https://starwatch.danielvecera.com) as a snapshot of public posts collected on 8–9 October 2026. It was built in one night at the Agents 0.0.7 hackathon in Prague by Daniel Večeřa. Code, recipes and documents are MIT-licensed.
 
 ## Start here
 
@@ -8,7 +8,7 @@ Starwatch shows what candidates in the ten largest Czech cities publish in publi
 | --- | --- |
 | [The story](story.md) | How Starwatch was built in one night: decisions with times, the agent setup, the data run, what broke, the demo and the launch |
 | [Methodology](methodology.md) | The evidence model, identity resolution, what the metrics mean, topic labelling, coverage and gaps, and what Starwatch never claims |
-| [Architecture](architecture.md) | Collection pipeline, lakehouse, evidence graph, export, static app, hosting and sign-in |
+| [Architecture](architecture.md) | Collection pipeline, lakehouse, evidence graph, export, static app and hosting |
 
 ## Reuse it
 
