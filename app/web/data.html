@@ -61,12 +61,65 @@ h2{font-size:22px;font-weight:650;letter-spacing:-.02em;line-height:1.15}
 .r26>.h{border-top:0;padding-top:0;font-size:12px;font-weight:600;color:var(--label3)}
 .r26 .c{font-weight:650}
 .r26 .n{font-variant-numeric:tabular-nums;text-align:right}
+.r26>.n{font-family:var(--font);line-height:inherit;letter-spacing:0}
 .r26 .na{color:var(--label3)}
 .r26 a{font-size:12.5px;color:var(--brand);text-decoration:none;white-space:nowrap}.r26 a:hover{text-decoration:underline}
 .r6t{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:6px;font-size:12px;font-weight:600;color:var(--orange);background:color-mix(in srgb,var(--orange) 10%,var(--surface));white-space:nowrap}
 .r6t.fin{color:var(--green);background:color-mix(in srgb,var(--green) 10%,var(--surface))}
 .r26 .mob{display:none}
-@media (max-width:760px){.r26 .mob{display:inline}.r26{grid-template-columns:minmax(0,1fr) auto;row-gap:0}.r26>.h{display:none}.r26>.s{grid-column:1/-1;border-top:0;padding-top:0}.r26>.n{display:none}.r26>.m{grid-column:1/-1;border-top:0;padding-top:0;font-size:12.5px;color:var(--label2)}}
+@media (max-width:760px){.r26 .mob{display:inline}.rxh h3{flex:1 1 100%}.r26{grid-template-columns:minmax(0,1fr) auto;row-gap:0}.r26>.h{display:none}.r26>.s{text-align:right}.r26>.s .na{display:none}.r26>.n{display:none}.r26>.m{grid-column:1/-1;border-top:0;padding-top:0;font-size:12.5px;color:var(--label2)}}
+.r26 .c button{font:inherit;font-weight:650;color:inherit;text-align:left}.r26 .c button:hover{color:var(--brand)}
+/* 2026 results explorer: every list and every candidate per city */
+.rx{margin-top:30px;padding-top:24px;border-top:1px solid var(--hairline);scroll-margin-top:84px}
+.xl,.ct>div{scroll-margin-top:96px;scroll-margin-bottom:24px}
+.rxh{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-bottom:14px}
+.rxh h3{font-size:17px;font-weight:650;letter-spacing:-.015em;margin-right:auto}
+.rxs{position:relative;flex:0 1 300px;min-width:0}
+.rxs input{width:100%;height:36px;padding:0 12px 0 34px;border-radius:10px;border:1px solid var(--hairline-strong);background:var(--surface);font:inherit;font-size:14px;color:var(--label)}
+.rxs input:focus{outline:2px solid var(--brand);outline-offset:1px;border-color:transparent}
+.rxs svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--label3)}
+.rxc{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px}
+.rxc .chip{height:30px;padding:0 12px;font-size:13px}
+.rxi{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;margin-bottom:12px;font-size:13px;color:var(--label2)}
+.rxi b{color:var(--label);font-weight:650;font-variant-numeric:var(--num)}
+.rxi a{color:var(--brand);text-decoration:none;font-weight:550}.rxi a:hover{text-decoration:underline}
+.rxi .seg{margin-left:auto}
+.xl{border-top:1px solid var(--hairline)}
+.xl:last-of-type{border-bottom:1px solid var(--hairline)}
+.xl>summary{list-style:none;display:grid;grid-template-columns:16px minmax(0,1fr) 110px 70px 72px minmax(80px,160px);align-items:center;gap:14px;padding:12px 4px;cursor:pointer;font-variant-numeric:tabular-nums;border-radius:8px}
+.xl>summary::-webkit-details-marker{display:none}
+.xl>summary:hover{background:color-mix(in srgb,var(--sunken) 60%,transparent)}
+.xl>summary:focus-visible{outline:2px solid var(--brand);outline-offset:-2px}
+.xl .chev{width:16px;height:16px;color:var(--label3);transition:transform .2s var(--xo)}
+.xl[open] .chev{transform:rotate(90deg)}
+.xl .ln{display:flex;align-items:center;gap:9px;min-width:0;font-size:14.5px;font-weight:600}
+.xl .ln i{flex:none;width:10px;height:10px;border-radius:3px;background:var(--pc)}
+.xl .ln span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.xl .v{text-align:right;font-size:14px}
+.xl .p{text-align:right;font-family:var(--display);font-size:18px;font-weight:650;letter-spacing:-.02em}
+.xl .s{text-align:right;font-size:14px;color:var(--label2)}.xl .s b{color:var(--label);font-weight:650}
+.xl .bar{height:8px;border-radius:4px;background:rgba(15,23,42,.07);overflow:hidden}.xl .bar i{display:block;height:100%;border-radius:4px;background:var(--pc)}
+.xl .mob{display:none}
+.xc{padding:2px 0 14px 30px}
+.xc .lh{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;color:var(--label2);margin:2px 0 8px}
+.xc .lh a{color:var(--brand);text-decoration:none;font-weight:550}.xc .lh a:hover{text-decoration:underline}
+.ct{display:grid;grid-template-columns:40px minmax(0,1fr) 92px 72px 64px minmax(120px,170px);column-gap:14px;font-size:13.5px;font-variant-numeric:tabular-nums}
+.ct>div{padding:7px 0;border-top:1px solid var(--hairline);min-width:0}
+.ct>.h{border-top:0;padding-top:0;font-size:12px;font-weight:600;color:var(--label3)}
+.ct>.h abbr{text-decoration:underline dotted;text-underline-offset:3px;cursor:help}
+.ct .r{text-align:right}
+.ct .k{color:var(--label3)}
+.ct .nm a{color:var(--label);text-decoration:none;font-weight:600}.ct .nm a:hover{color:var(--brand);text-decoration:underline}
+.ct .nm small{display:none}
+.ct .nm .sub{display:block;font-size:12px;margin-top:1px}
+.ct .o{color:var(--label3);font-size:12.5px}
+.ct .hl{background:var(--brand-soft)}
+.e6{display:inline-flex;align-items:center;gap:6px;color:var(--label);font-weight:600;font-size:13px}
+.e6 i{width:8px;height:8px;border-radius:50%;background:var(--green);flex:none}
+.rxq{margin-bottom:8px}
+.rxq .qh{font-size:12.5px;color:var(--label2);margin-bottom:6px}
+.rxq button.go{font:inherit;color:var(--brand);font-weight:550;text-align:left}.rxq button.go:hover{text-decoration:underline}
+.rxo{margin-top:10px;font-size:12.5px;color:var(--label2)}
 .g2{grid-template-columns:minmax(0,2.1fr) minmax(0,1fr)}
 
 /* attention: three readings in one ledger, not three cards */
@@ -151,6 +204,17 @@ h2{font-size:22px;font-weight:650;letter-spacing:-.02em;line-height:1.15}
   .city:nth-child(2n){border-left:1px solid var(--hairline)}
   .city:nth-child(-n+2){border-top:0}
   .pr{grid-template-columns:18px minmax(0,1fr) 56px;grid-template-areas:"rk nm pv" ". tr tr";gap:6px 10px}
+  .rxs{flex:1 1 100%}
+  .rxi .seg{margin-left:0}
+  .xl>summary{grid-template-columns:14px minmax(0,1fr) auto;grid-template-areas:"ch ln p" ". m m" ". bar bar";gap:4px 10px;padding:12px 0}
+  .xl .chev{grid-area:ch}.xl .ln{grid-area:ln}.xl .p{grid-area:p}.xl .bar{grid-area:bar;height:6px;margin-top:4px}
+  .xl .v,.xl .s{display:none}
+  .xl .mob{display:block;grid-area:m;font-size:12.5px;color:var(--label2)}.xl .mob b{color:var(--label);font-weight:650}
+  .xc{padding-left:0}
+  .ct{grid-template-columns:28px minmax(0,1fr) auto;font-size:13px}
+  .ct>.c3,.ct>.c4,.ct>.c5{display:none}
+  .ct .nm small{display:block;font-size:12px;color:var(--label3);font-weight:400;margin-top:1px}
+  .ct .nm small .e6{font-size:12px}
   .pr .rk{grid-area:rk}.pr b{grid-area:nm}.pr .pv{grid-area:pv}.pr .tr{grid-area:tr}.pr small{display:none}
 }
 @media (prefers-reduced-motion:reduce){
@@ -205,8 +269,15 @@ h2{font-size:22px;font-weight:650;letter-spacing:-.02em;line-height:1.15}
 </section>
 
 <section class="pane g rv" style="--i:4" id="r26S" hidden aria-labelledby="h-r26">
-  <div class="sec"><h2 id="h-r26">2026 results</h2><span class="kick lc">Czech Statistical Office · after voting ended</span></div>
+  <div class="sec"><h2 id="h-r26">2026 results</h2><span class="kick lc" id="r26k">Czech Statistical Office · after voting ended</span></div>
   <div class="r26" id="r26" role="table" aria-label="2026 council results by city"></div>
+  <div class="rx" id="rx" hidden>
+    <div class="rxh"><h3 id="h-rx">Every list and candidate</h3>
+      <label class="rxs"><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><circle cx="7" cy="7" r="5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M11 11l3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><input id="rxq" type="search" placeholder="Find a candidate in any city" aria-label="Find a candidate in any city" autocomplete="off"></label></div>
+    <div class="rxq" id="rxqr" aria-live="polite"></div>
+    <div class="rxc" id="rxc" role="group" aria-label="City"></div>
+    <div id="rxb"></div>
+  </div>
   <p class="note"><span id="r26n"></span></p>
 </section>
 
@@ -285,16 +356,67 @@ if(ex)$('exp').textContent='KV2026 municipal elections · snapshot of public pos
 const targets=[[$('posts'),nPosts,0],[$('vids'),vids,0],[$('imgs'),imgs,0],[$('hours'),dur/3600,1],[$('views'),views,0],[$('likes'),likes,0],[$('comments'),comments,0]];
 document.querySelectorAll('[data-n]').forEach(el=>targets.push([el,+el.dataset.n,0]));
 targets.forEach(([el,v,d])=>el.textContent=fmt(v,d));
-// ---- 2026 results (optional data/results2026.js): status, turnout and seats per city ----
+// ---- 2026 results (optional data/results2026.js): status, turnout and seats per city, then every list and candidate ----
 const R6=SW.r26;
 if(R6&&R6.on&&SW.cities&&SW.cities.length){
   const pc=v=>v==null?'—':fmt(v,1)+'%';
   const rows=SW.cities.map(c=>({c,r:R6.city(c.i),st:R6.status(c.i)}));
   $('r26').innerHTML=`<div class="h">City</div><div class="h">Count</div><div class="h n">Precincts</div><div class="h n">Turnout</div><div class="h n">Seats</div><div class="h">Source</div>`+
-    rows.map(({c,r,st})=>r?`<div class="c" role="row">${esc(c.name)}</div><div class="s"><span class="r6t${st.final?' fin':''}">${st.final?'Final count':'Partial count'}</span>${st.when?` <span class="na">as of ${esc(st.when)}${st.day?', '+esc(st.day):''}</span>`:''}</div><div class="n">${pc(r.precincts_pct)}</div><div class="n">${pc(r.turnout_pct)}</div><div class="n">${fmt(r.seats_total)}</div><div class="m"><span class="mob">${pc(r.turnout_pct)} turnout · ${fmt(r.seats_total)} seats${st.final?'':' · '+pc(r.precincts_pct)+' of precincts'} · </span><a href="${esc(r.source_url)}" target="_blank" rel="noopener">volby.gov.cz ↗</a></div>`
+    rows.map(({c,r,st})=>r?`<div class="c" role="row"><button data-city="${c.i}" title="Show every list and candidate in ${esc(c.name)}">${esc(c.name)}</button></div><div class="s"><span class="r6t${st.final?' fin':''}">${st.final?'Final count':'Partial count'}</span>${st.when?` <span class="na">as of ${esc(st.when)}${st.day?', '+esc(st.day):''}</span>`:''}</div><div class="n">${pc(r.precincts_pct)}</div><div class="n">${pc(r.turnout_pct)}</div><div class="n">${fmt(r.seats_total)}</div><div class="m"><span class="mob">${pc(r.turnout_pct)} turnout · ${fmt(r.seats_total)} seats${st.final?'':' · '+pc(r.precincts_pct)+' of precincts'} · </span><a href="${esc(st.url||r.source_url)}" target="_blank" rel="noopener">volby.gov.cz ↗</a></div>`
       :`<div class="c" role="row">${esc(c.name)}</div><div class="s na">Not published yet</div><div class="n na">—</div><div class="n na">—</div><div class="n na">—</div><div class="m na">—</div>`).join('');
-  $('r26n').textContent=R6.note+' Partial counts change as precincts report; seats on a partial count are provisional.';
+  const allFinal=rows.every(x=>x.st&&x.st.final);
+  $('r26n').textContent=R6.note+' '+R6.votesNote+' '+R6.seatsNote+(allFinal?'':' Partial counts change as precincts report; seats on a partial count are provisional.');
+  if(allFinal){const d=rows[0].st.day;$('r26k').textContent=`Czech Statistical Office · final count${d?' · published '+d+' 2026':''}`}
   $('r26S').hidden=false;
+  explorer();
+}
+function explorer(){
+  const C=SW.cities,LS=SW.lists,K=SW.cands,css=SW.css||(c=>'var(--brand)');
+  const avail=C.filter(c=>R6.city(c.i));if(!avail.length)return;
+  const fold=t=>String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  const ord=n=>{const t=['th','st','nd','rd'],v=n%100;return n+(t[(v-20)%10]||t[v]||t[0])};
+  const p2=v=>v==null?'—':fmt(v,2)+'%';
+  const CHEV='<svg class="chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  let cur=avail[0].i,order='votes';
+  const outcome=(r,c)=>r.elected?`<span class="e6"><i></i>Elected</span>${r.moved_up?`<span class="o"> · moved up from #${c.k}</span>`:''}`:`<span class="o">${r.final||R6.allPeople(c.city)?'Not elected':'Not elected yet'}${r.sub?` · ${ord(r.sub)} substitute`:''}</span>`;
+  const candTable=(li,hl)=>{let xs=R6.listCands(li);if(order==='list')xs=xs.slice().sort((a,b)=>K[a.k].k-K[b.k].k);
+    if(!xs.length)return '<div class="rxo">No candidate results for this list yet.</div>';
+    return `<div class="ct" role="table" aria-label="Candidates of ${esc(LS[li].name)}"><div class="h" title="Position on the ballot list">#</div><div class="h">Candidate</div><div class="h r"><abbr title="${esc(R6.votesNote)}">Votes</abbr></div><div class="h r c3">% of list</div><div class="h r c4" title="Rank by votes on the list">Rank</div><div class="h c5">Result</div>`+
+      xs.map(({k,r})=>{const c=K[k],h=k===hl?' hl':'';return `<div class="k${h}">${c.k}</div><div class="nm${h}"><a href="spotlight.html?cand=${k}">${esc(c.name)}</a><small>${r.rank?`#${r.rank} by votes · `:''}${outcome(r,c)}</small></div><div class="r${h}">${r.votes!=null?fmt(r.votes):'—'}</div><div class="r c3${h}">${p2(r.pct)}</div><div class="r c4${h}">${r.rank?'#'+r.rank:'—'}</div><div class="c5${h}">${outcome(r,c)}</div>`}).join('')+'</div>'};
+  const listBody=li=>{const r=R6.list(li),L=LS[li],u=R6.page(L.city,li);
+    return `<div class="lh"><span>${fmt(L.cands.length)} candidates · ${fmt(r.seats)} seat${r.seats===1?'':'s'}</span>${r.name&&r.name!==L.name?`<span title="${esc(r.name)}">Official name: ${esc(r.name.length>90?r.name.slice(0,88)+'…':r.name)}</span>`:''}<a href="spotlight.html?list=${li}">Open in Spotlight</a>${u?`<a href="${esc(u)}" target="_blank" rel="noopener">Official list result ↗</a>`:''}</div>${candTable(li)}`};
+  function renderCity(ci){cur=ci;const c=C[ci],r=R6.city(ci),st=R6.status(ci),{lists,other}=R6.cityLists(ci),mx=Math.max(1e-9,...lists.map(li=>R6.list(li).pct||0));
+    $('rxc').innerHTML=avail.map(x=>`<button class="chip${x.i===ci?' on':''}" aria-pressed="${x.i===ci}" data-city="${x.i}">${esc(x.name)}</button>`).join('');
+    const nEl=lists.reduce((n,li)=>n+R6.listCands(li).filter(x=>x.r.elected).length,0);
+    $('rxb').innerHTML=`<div class="rxi"><span class="r6t${st.final?' fin':''}">${esc(st.text)}</span><span><b>${fmt(lists.length)}</b> lists</span><span><b>${fmt(c.cands.length)}</b> candidates</span><span><b>${fmt(r.seats_total)}</b> seats${nEl&&nEl!==r.seats_total?` (<b>${fmt(nEl)}</b> of the elected matched)`:''}</span><span>turnout <b>${pc1(r.turnout_pct)}</b></span><a href="${esc(st.url||r.source_url)}" target="_blank" rel="noopener">Official results ↗</a>
+      <span class="seg" role="group" aria-label="Order candidates"><button data-ord="votes" class="${order==='votes'?'on':''}" aria-pressed="${order==='votes'}">By votes</button><button data-ord="list" class="${order==='list'?'on':''}" aria-pressed="${order==='list'}">List order</button></span></div>`+
+      lists.map(li=>{const x=R6.list(li),L=LS[li],col=css(L.col);return `<details class="xl" data-l="${li}" style="--pc:${col}"><summary>${CHEV}<span class="ln"><i></i><span title="${esc(L.name)}">${esc(L.name)}</span></span><span class="v">${fmt(x.votes)}</span><span class="p">${pc1(x.pct)}</span><span class="s"><b>${fmt(x.seats)}</b> seat${x.seats===1?'':'s'}</span><span class="bar" aria-hidden="true"><i style="width:${Math.max(.6,(x.pct||0)/mx*100)}%"></i></span><span class="mob"><b>${fmt(x.votes)}</b> votes · <b>${fmt(x.seats)}</b> seat${x.seats===1?'':'s'}</span></summary><div class="xc"></div></details>`}).join('')+
+      (other.length?`<div class="rxo">${other.length} more list${other.length>1?'s':''} on the ballot, not in the snapshot: ${other.map(o=>`${esc(o.name)} ${pc1(o.pct)}`).join(', ')}.</div>`:'')}
+  const pc1=v=>v==null?'—':fmt(v,v<10?1:1)+'%';
+  const fill=d=>{const li=+d.dataset.l;d.querySelector('.xc').innerHTML=listBody(li)};
+  $('rxb').addEventListener('toggle',e=>{const d=e.target;if(d.classList&&d.classList.contains('xl')&&d.open)fill(d)},true);
+  $('rxb').addEventListener('click',e=>{const b=e.target.closest('[data-ord]');if(!b)return;order=b.dataset.ord;
+    const open=[...document.querySelectorAll('#rxb details[open]')].map(d=>d.dataset.l);renderCity(cur);open.forEach(li=>{const d=document.querySelector(`#rxb details[data-l="${li}"]`);if(d){d.open=true;fill(d)}})});
+  const pick=e=>{const b=e.target.closest('[data-city]');if(!b)return;renderCity(+b.dataset.city);if(e.currentTarget!==$('rxc'))$('rx').scrollIntoView({behavior:'smooth',block:'start'})};
+  $('rxc').addEventListener('click',pick);$('r26').addEventListener('click',pick);
+  // open one list (and mark one person) from a deep link or a search hit
+  function openList(ci,li,k){renderCity(ci);const d=document.querySelector(`#rxb details[data-l="${li}"]`);if(!d)return;d.open=true;d.querySelector('.xc').innerHTML=`${listBody(li).replace(/<div class="ct"[\s\S]*$/,'')}${candTable(li,k)}`;
+    const t=k!=null&&d.querySelector('.hl');setTimeout(()=>t?t.scrollIntoView({behavior:'smooth',block:'center'}):d.scrollIntoView({block:'start'}),60)}
+  // search every covered candidate by name, without accents
+  const idx=K.map(c=>({k:c.i,f:fold(c.name)}));
+  $('rxq').addEventListener('input',()=>{const q=fold($('rxq').value).trim();const box=$('rxqr');if(q.length<2){box.innerHTML='';return}
+    const hits=idx.filter(x=>x.f.includes(q)).map(x=>({k:x.k,r:R6.cand(x.k)})).filter(x=>x.r).sort((a,b)=>(b.r.votes||0)-(a.r.votes||0));
+    if(!hits.length){box.innerHTML=`<div class="qh">No covered candidate matches “${esc($('rxq').value.trim())}”.</div>`;return}
+    box.innerHTML=`<div class="qh">${fmt(hits.length)} candidate${hits.length===1?'':'s'}${hits.length>25?', showing the 25 with most votes':''}</div><div class="ct" role="table" aria-label="Matching candidates"><div class="h" title="Position on the ballot list">#</div><div class="h">Candidate</div><div class="h r"><abbr title="${esc(R6.votesNote)}">Votes</abbr></div><div class="h r c3">% of list</div><div class="h r c4" title="Rank by votes on the list">Rank</div><div class="h c5">Result</div>`+hits.slice(0,25).map(({k,r})=>{const c=K[k],L=LS[c.list];
+      return `<div class="k">${c.k}</div><div class="nm"><a href="spotlight.html?cand=${k}">${esc(c.name)}</a><span class="sub"><button class="go" data-go="${c.city}:${c.list}:${k}" title="Show ${esc(L.name)} in ${esc(C[c.city].name)}">${esc(L.short)} · ${esc(C[c.city].name)}</button></span><small>${outcome(r,c)}</small></div><div class="r">${r.votes!=null?fmt(r.votes):'—'}</div><div class="r c3">${p2(r.pct)}</div><div class="r c4">${r.rank?'#'+r.rank:'—'}</div><div class="c5">${outcome(r,c)}</div>`}).join('')+'</div>'});
+  $('rxqr').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(!b)return;const [ci,li,k]=b.dataset.go.split(':').map(Number);openList(ci,li,k)});
+  // deep links: #results-<municipality code> or #results-<municipality code>/<official list code>
+  const fromHash=()=>{const m=/^#results-(\d+)(?:\/(\d+))?$/.exec(location.hash);if(!m)return false;const c=C.find(x=>x.id===m[1]);if(!c||!R6.city(c.i))return false;
+    const L=m[2]!=null?LS.find(l=>l.city===c.i&&l.id.endsWith(':'+m[2])):null;
+    if(L)openList(c.i,L.i);else{renderCity(c.i);setTimeout(()=>$('rx').scrollIntoView({block:'start'}),60)}return true};
+  $('rx').hidden=false;
+  if(!fromHash())renderCity(cur);
+  addEventListener('hashchange',fromHash);
 }
 const run=()=>{
   document.body.classList.add('go');

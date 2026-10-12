@@ -24,7 +24,7 @@ All platform data was collected through Apify Actors from public profiles and pu
 | YouTube | Video metadata of channels linked from candidates' websites (collected, not admitted to the snapshot) | 9 October 2026 |
 | Google search results | Leads for official websites, social accounts, portrait sources and news. A search result is never treated as proof. | 8–9 October 2026 |
 
-Posts remain the work of their authors. Starwatch shows them behind sign-in for research and commentary, attributes them to the publishing account and links every post to its original. Media is served from the snapshot because the platforms' own media links expire.
+Posts remain the work of their authors. Starwatch shows them for research and commentary, attributes them to the publishing account and links every post to its original. Media is served from the snapshot because the platforms' own media links expire.
 
 ## Reference and enrichment
 

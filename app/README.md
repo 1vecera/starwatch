@@ -4,7 +4,7 @@
 
 ![Starwatch](web/og.png)
 
-Starwatch maps the public posts of candidates and party lists in the 2026 Czech municipal elections in ten cities, linked to the people and lists behind them. It is live at [starwatch.agenticanalytics.cz](https://starwatch.agenticanalytics.cz): the welcome page and About are public, and any GitHub, Google or Facebook account can sign in to the rest.
+Starwatch maps the public posts of candidates and party lists in the 2026 Czech municipal elections in ten cities, linked to the people and lists behind them. It is live at [starwatch.danielvecera.com](https://starwatch.danielvecera.com), open to everyone without an account.
 
 It shows a **snapshot**, not live monitoring: public posts collected on 8–9 October 2026 (checkpoint `production-native-009`, exported 9 October 2026 at 06:39 Prague time). Every screen says so in the top bar, and every post opens the public source it was observed on.
 
@@ -44,15 +44,15 @@ City, list, candidate and post parameters are indexes into the exported snapshot
 
 Everything under `web/data/`, `web/media/` and `web/welcome/` stays out of Git.
 
-| File | Contents | On the edge |
+| File | Contents | Published |
 | --- | --- | --- |
-| `data/real.js` | The exported snapshot (`tools/export_real.py`) | Behind sign-in |
+| `data/real.js` | The exported snapshot (`tools/export_real.py`) | Public site |
 | `data/stats.js` | Public aggregate counts for About (`tools/export_stats.py`): coverage by platform, city and topic, plus logo credits. It holds no names, post text or media. | Public |
-| `data/issue-topics.js` | Named local issues, reviewed from captions | Behind sign-in |
-| `data/topic-labels.js` | Optional machine topic labels (`window.SW_TOPIC_LABELS`). They never override a reviewed label, and each carries the phrase it rests on. | Behind sign-in |
-| `data/programs.js`, `data/articles.js` | Optional party programs and news mentions (`window.SW_PROGRAMS`, `window.SW_ARTICLES`) | Behind sign-in |
-| `data/results2026.js` | Optional official 2026 council results (`window.SW_RESULTS2026`, `tools/export_results2026.py`) | Behind sign-in |
-| `media/` | Retained post images, videos, portraits and logos | Behind sign-in |
+| `data/issue-topics.js` | Named local issues, reviewed from captions | Public site |
+| `data/topic-labels.js` | Optional machine topic labels (`window.SW_TOPIC_LABELS`). They never override a reviewed label, and each carries the phrase it rests on. | Public site |
+| `data/programs.js`, `data/articles.js` | Optional party programs and news mentions (`window.SW_PROGRAMS`, `window.SW_ARTICLES`) | Public site |
+| `data/results2026.js` | Optional official 2026 council results (`window.SW_RESULTS2026`, `tools/export_results2026.py`) | Public site |
+| `media/` | Retained post images, videos, portraits and logos | Public site |
 | `welcome/` | Copies of the 53 files on the welcome wall (`tools/copy_welcome_media.py`) | Public |
 
 The public pages load only `/`, `/index.html`, `/welcome.html`, `/about.html`, `/og.png`, `/manifest.webmanifest`, `/ds.css`, `/nav.js`, `/data/stats.js` and the folders `/welcome/`, `/brand/`, `/fx/` and `/img/`, plus Google Fonts. `tools/check-launch.mjs` asserts this.
@@ -76,15 +76,17 @@ node tools/walkthrough.mjs http://127.0.0.1:5173    # screenshots of the main pa
 
 ## 2026 results
 
-Polls close on Saturday 10 October 2026 at 14:00; the Czech Statistical Office then publishes council results while the votes are counted. The app shows them as soon as `web/data/results2026.js` exists, with no code change:
+Voting ended on Saturday 10 October 2026 at 14:00 and the count is final. The importer reads two official Czech Statistical Office sources: the council results XML per city (count status, turnout, valid votes, each list's votes, share and seats) and the candidate registry processed after the count (`KV2026reg20261011_csv.zip`: every candidate's votes, share of the list's votes, elected flag, seat and substitute order). The app shows them when `web/data/results2026.js` exists, with no code change:
 
 ```sh
-uv run --offline python tools/export_results2026.py --snapshot web/data/real.js --out web/data/results2026.js
-(cd tools && uv run --offline python -m unittest test_export_results2026)   # importer test with a synthetic CSU-shaped file
+uv run --offline python tools/export_results2026.py --snapshot web/data/real.js --out web/data/results2026.js   # downloads both sources
+uv run --offline python tools/export_results2026.py --snapshot web/data/real.js --out web/data/results2026.js --source-dir <xml folder> --registry-dir <csv folder>
+(cd tools && uv run --offline python -m unittest test_export_results2026)   # importer test with synthetic CSU-shaped files
 ```
 
-- **Matching:** the importer matches lists by their official code (`VSTRANA`, the number in the snapshot list id), never by ballot position, which differs for every snapshot list. Elected members match by list and position and must agree on the name. Anything unmatched stays in the file as `unmatched:<ballot number>`.
-- **Where results appear:** Spotlight list and person headers show the 2026 share, seats and elected or not with personal votes. The Atlas islands and inspectors show the 2026 share and seats, and each city's count status. Pulse adds a 2026 column next to 2022 and attention, on separate scales and never combined. By the numbers lists turnout, precincts and seats per city. The Radar watchlist shows the 2026 result too.
+- **Matching:** snapshot list ids end in the official list code (`OSTRANA`). The registry translates each XML list's ballot position to that code and must agree on `VSTRANA`; the ballot position alone never decides. Candidates match by list code and list position and must agree on the name. The importer logs match counts per city and lists anything unmatched, with the reason, under `match` in the output; nothing unmatched is credited. On the final count all 5,405 snapshot candidacies on 127 lists match, and the registry and the XML agree on every list's votes and seats and on all 464 elected members.
+- **Votes:** a vote for a whole list counts once for each of its candidates, so a candidate's votes are not preference votes only. The app calls them "votes" and says so in About and in the tooltips.
+- **Where results appear:** Spotlight shows a person's 2026 votes, rank on the list by votes and elected or not (with substitute order or "moved up"), a list's share, seats and its three candidates with most votes; the people cards show every candidate's votes. The Atlas inspector, island people and candidate lists show the same per person, and each city's count status. Pulse adds a 2026 column next to 2022 and attention, on separate scales and never combined. By the numbers has the per-city status table and "Every list and candidate": per city, every list with votes, share and seats, expandable to all its candidates with votes, share of the list's votes, rank and outcome, with a search across all cities and deep links (`data.html#results-<municipality>/<list code>`). The Radar watchlist shows the 2026 result too. Every results block links to the official CSU results page.
 - **Count status:** a partial count always reads "Partial count · N% of precincts · as of HH:MM" with the source link, and a finished one "Final count". 2022 stays visible.
 - **No causal claims:** results and attention are separate measures, and no screen explains one by the other.
 

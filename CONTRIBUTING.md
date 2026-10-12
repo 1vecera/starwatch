@@ -18,7 +18,7 @@ Run the checks before opening a pull request:
 ```sh
 (cd pipeline && uv sync && uv run --with pytest pytest)
 (cd app && uv run --with pytest pytest tools/test_serve.py)
-(cd deploy/edge && npm ci && npm test)    # sign-in Worker and CloudFront gate; needs Node.js
+node --test deploy/aws/gate.test.mjs     # CloudFront gate; needs Node.js
 ```
 
 Tests must not call Apify, other paid services or live websites; use local fixtures. Collection needs your own `APIFY_TOKEN` in the environment and is described in [docs/apify-recipes.md](docs/apify-recipes.md) and [pipeline/README.md](pipeline/README.md). Never commit credentials, `.env` files, collected posts, media, exported snapshots or DuckDB checkpoints; `.gitignore` keeps the usual locations out, but check `git status` before you commit.
@@ -56,7 +56,7 @@ These rules apply to code, data, issues and pull requests alike.
 - **No voter profiling or targeted persuasion.** Starwatch describes what candidates publish; it does not build audiences or messaging for campaigns.
 - **Metrics are dated observations.** Views, likes and comments measure attention at the time they were observed, not support. Keep the observation time and source with every number.
 - **Respect election law.** Do not add opinion polls, forecasts or betting odds in the days before and during voting, when Czech law bans publishing poll results.
-- **Link to originals.** Show posts with a link to the source; the collected snapshot stays out of Git and behind sign-in.
+- **Link to originals.** Show posts with a link to the source; the collected snapshot stays out of Git.
 
 ## Conduct
 

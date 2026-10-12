@@ -1,6 +1,6 @@
 # Architecture
 
-Starwatch is a batch system with a static front end. Python collects public evidence under a spending ledger, organises it into a versioned evidence graph in DuckDB, and exports one immutable snapshot. A static web app reads that snapshot. In production the app and its media sit in a private AWS bucket behind CloudFront, and a Cloudflare Worker handles sign-in at the edge.
+Starwatch is a batch system with a static front end. Python collects public evidence under a spending ledger, organises it into a versioned evidence graph in DuckDB, and exports one immutable snapshot. A static web app reads that snapshot. In production the app and its media sit in a private AWS bucket behind CloudFront, fronted by Cloudflare, and are open to everyone.
 
 ```mermaid
 flowchart LR
@@ -59,7 +59,7 @@ The app is static HTML, CSS and JavaScript in [app/web/](../app/web/), with vend
 
 | Screen | File | Purpose |
 | --- | --- | --- |
-| Welcome | `welcome.html` | Public landing page: what Starwatch is, the snapshot date, sign-in |
+| Welcome | `welcome.html` | Landing page: what Starwatch is, the snapshot date, the award |
 | Star Atlas | `atlas.html` | Map of Czechia → city → party lists → people → posts and videos |
 | Spotlight | `spotlight.html` | One person or list: accounts, posts, statements, topics, dated metrics, 2022 results |
 | Pulse | `pulse.html` | Comparison of observed activity with stated windows and coverage |
@@ -68,17 +68,16 @@ The app is static HTML, CSS and JavaScript in [app/web/](../app/web/), with vend
 
 Locally, [tools/serve.py](../app/tools/serve.py) serves the app with correct MIME types and single HTTP byte ranges, so videos can seek.
 
-## Hosting and sign-in
+## Hosting
 
-The public site is [starwatch.agenticanalytics.cz](https://starwatch.agenticanalytics.cz).
+The public site is [starwatch.danielvecera.com](https://starwatch.danielvecera.com). Earlier hostnames redirect to it.
 
 - **Storage.** The exported app, snapshot and media (about 20 GB) are in a private, encrypted S3 bucket in Frankfurt. The bucket accepts reads only from its CloudFront distribution.
-- **Edge sign-in.** A Cloudflare Worker serves `/login` and `/auth/*` and implements OAuth sign-in with GitHub, Google and Facebook. There are no passwords and no email codes. `/auth/logout` ends the session.
-- **Origin gate.** CloudFront serves the public welcome page to anyone. Every other page, the snapshot and all media require a request that came through the Worker for a signed-in visitor; anything else is redirected to sign-in or refused.
-- **Responses.** Pages and media are sent with `private, no-store`, `noindex` and `no-referrer`. Video byte ranges are passed through so seeking works.
-- **Secrets.** OAuth client secrets and the origin key live in Cloudflare and AWS secret stores, never in the repository.
+- **Origin gate.** A CloudFront Function accepts only requests that came through Cloudflare, which adds a private origin header; direct requests to the CloudFront hostname are refused. Everything else is public: every page, the snapshot and the media.
+- **Caching.** Cloudflare caches static files with its default rules and leaves HTML uncached, so a deploy is visible at once. Video byte ranges pass through so seeking works.
+- **Secrets.** The origin key lives in AWS Secrets Manager and a Cloudflare rule, never in the repository.
 
-The jury copy on the morning of 9 October went through two earlier versions of this: Amazon Cognito email codes, which ran into Cognito's built-in limit of 50 emails per day per AWS account, and then Cloudflare Access with GitHub only. [The story](story.md) has the details.
+Access went through three earlier versions: Amazon Cognito email codes for the jury on the morning of 9 October, which ran into Cognito's built-in limit of 50 emails per day per AWS account; Cloudflare Access with GitHub only; and an own OAuth sign-in with GitHub, Google and Facebook on a Cloudflare Worker for the launch. On 12 October the sign-in was removed and the site became fully public. [The story](story.md) has the details.
 
 ## Other components in the repository
 

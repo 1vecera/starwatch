@@ -20,9 +20,9 @@ Starwatch looks at what public candidates publish in public. It does not look at
 
 Czech law (§ 30(2) of Act No. 491/2001 Coll., on elections to municipal councils) bans publishing the results of pre-election and election polls from 7 October 2026 until voting ends on Saturday 10 October 2026 at 14:00. During the hackathon night some published polls, seat projections and betting odds were collected for the ten cities. All of them were removed from the snapshot before launch, and Starwatch will not publish poll, forecast or betting data. 2026 election results are added only after the polls close.
 
-## A snapshot, behind sign-in
+## A public snapshot
 
-The app shows public posts collected on 8–9 October 2026. It is not live monitoring. The collected snapshot (posts, images, videos and the exported data file) is not in the public Git repository. It is served only to signed-in visitors (GitHub, Google or Facebook sign-in), with no-index and no-store headers, and every post links to its original on the platform. The welcome page is public.
+The app shows public posts collected on 8–9 October 2026. It is not live monitoring. The collected snapshot (posts, images, videos and the exported data file) is not in the public Git repository. It is served only on the Starwatch site, which is open to everyone without an account since 12 October 2026, and every post links to its original on the platform. Visitors are not tracked: there are no accounts, analytics or advertising cookies.
 
 ## Data retention
 

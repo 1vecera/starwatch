@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /media/
+Disallow: /data/
+
+Sitemap: https://starwatch.danielvecera.com/sitemap.xml

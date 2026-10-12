@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Privacy · Starwatch</title>
+<meta name="description" content="How Starwatch handles data: no accounts, no tracking cookies, public posts of candidates in the 2026 Czech municipal elections with links to the originals.">
+<meta name="theme-color" content="#F2F7F7">
+<link rel="canonical" href="https://starwatch.danielvecera.com/privacy.html">
+<link rel="icon" href="brand/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Sora:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{--canvas:#F2F7F7;--surface:#FFFFFF;--ink:#0F172A;--ink2:#475569;--ink3:#5B6A7E;--teal:#0E6E6B;--rule:rgba(22,37,36,.14)}
+@media (prefers-color-scheme:dark){:root{--canvas:#0B1414;--surface:#121D1D;--ink:#E6EEEE;--ink2:#A3B3B3;--ink3:#8A9C9C;--teal:#5FC4BE;--rule:rgba(230,238,238,.14)}}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;background:var(--canvas);color:var(--ink);font:16px/1.6 'Schibsted Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--teal)}a:focus-visible{outline:2px solid var(--teal);outline-offset:3px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;max-width:1080px;margin:0 auto;padding:22px 20px}
+.brand{display:flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;font:700 19px/1 'Sora','Schibsted Grotesk',system-ui,sans-serif;letter-spacing:-.01em}
+.brand svg{width:26px;height:26px;color:#0E6E6B}
+.top nav{display:flex;gap:18px;font-size:15px}.top nav a{color:var(--ink2);text-decoration:none}.top nav a:hover{color:var(--ink)}
+main{max-width:720px;margin:0 auto;padding:12px 20px 72px}
+h1{font:720 clamp(34px,5vw,48px)/1.04 'Bricolage Grotesque','Schibsted Grotesk',system-ui,sans-serif;letter-spacing:-.03em;margin:8px 0 20px}
+h2{font-size:20px;letter-spacing:-.01em;margin:36px 0 8px}
+p,li{color:var(--ink2)}strong{color:var(--ink)}
+.fine{font-size:14px;color:var(--ink3);margin-top:40px;border-top:1px solid var(--rule);padding-top:20px}
+@media (max-width:620px){.top nav{display:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="./"><svg viewBox="-32 -32 64 64" aria-hidden="true"><path fill="currentColor" d="M-30,0L-10.06,8.55L-6.77,-1.31L-5.21,-0.79L-0.91,-5.09L-10.59,-8.32ZM0,30L8.55,10.06L-1.31,6.77L-0.79,5.21L-5.09,0.91L-8.32,10.59ZM30,0L10.06,-8.55L6.77,1.31L5.21,0.79L0.91,5.09L10.59,8.32ZM0,-30L-8.55,-10.06L1.31,-6.77L0.79,-5.21L5.09,-0.91L8.32,-10.59Z"/></svg>Starwatch</a>
+  <nav><a href="atlas.html">Open the map</a><a href="about.html">About</a><a href="https://github.com/1vecera/starwatch">Open source</a><a href="https://www.linkedin.com/in/1vecera/" rel="me noopener" target="_blank">LinkedIn</a></nav>
+</header>
+<main>
+<article>
+<h1>Privacy</h1>
+<p>Starwatch is an independent, non-commercial open-source project by Daniel Večeřa, Prague, Czech Republic. It shows public social-media activity of candidates in the 2026 Czech municipal elections. Questions and requests: <a href="https://github.com/1vecera/starwatch/issues">github.com/1vecera/starwatch/issues</a>.</p>
+
+<h2>Visiting the site</h2>
+<p><strong>There are no accounts and no sign-in.</strong> Starwatch keeps no database of visitors and sets no advertising, analytics or tracking cookies. Your browser may keep small preferences, such as the last screen you opened, in its own local storage; they never leave your device.</p>
+<p>Pages are delivered by Cloudflare and Amazon Web Services (Frankfurt, EU). Like any website, their systems process your IP address and the requests you make, to deliver pages and stop abuse, and keep short-lived logs. The map tiles come from OpenFreeMap and the fonts from Google Fonts, which see the same technical request data.</p>
+
+<h2>Data about candidates</h2>
+<p>Starwatch shows a snapshot of public posts collected on 8–9 October 2026 from public profiles of candidates in ten Czech cities, with links to the originals, alongside official open data from <a href="https://volby.gov.cz/opendata/">volby.gov.cz</a> and the Czech Statistical Office (the 2022 and 2026 results), and the lists' own published programs. It does not monitor accounts live.</p>
+<p>The purpose is public-interest research into political communication during an election. The legal basis is legitimate interest (GDPR Art. 6(1)(f)); candidates made their political affiliation public themselves (Art. 9(2)(e)). Starwatch does not collect comments, commenters or followers, does not profile voters, does not infer sensitive traits and does not score anyone's character or trustworthiness. Metrics are dated observations, not measures of support.</p>
+<p>If you are a candidate and want something corrected or removed, open a request at <a href="https://github.com/1vecera/starwatch/issues">github.com/1vecera/starwatch/issues</a> or message Daniel on <a href="https://www.linkedin.com/in/1vecera/" rel="me noopener" target="_blank">LinkedIn</a>. You also have the rights of access, rectification, erasure and objection, and you can complain to the Czech data protection authority, <a href="https://uoou.gov.cz/">ÚOOÚ</a>.</p>
+
+<p class="fine">Updated 12 October 2026. Earlier versions of Starwatch asked visitors to sign in with GitHub, Google or Facebook; that sign-in was removed on 12 October 2026 and no account data was ever stored.</p>
+</article>
+</main>
+</body>
+</html>

@@ -396,12 +396,15 @@ const pct=v=>(+v).toLocaleString('en-GB',{maximumFractionDigits:1})+'\u202f%';
 function r22(e){if(e.kind==='list'){const r=e.L.result2022;if(!r||r.votes==null&&r.pct==null)return '';
     return `<span class="r22">2022${r.pct!=null?` <b>${pct(r.pct)}</b>`:''}${r.votes!=null?` <span>${fmtN(r.votes)} votes</span>`:''}${r.seats!=null?` <span>${fmtN(r.seats)} seat${r.seats===1?'':'s'}</span>`:''}</span>`}
   const r=e.c.pref2022;if(!r||r.votes==null)return '';
-  return `<span class="r22">2022 <b>${fmtN(r.votes)}</b> <span>preference votes</span>${r.rank_in_list!=null?` <span>#${r.rank_in_list} on list</span>`:''}${r.elected?' <span class="el">elected</span>':''}</span>`}
+  return `<span class="r22">2022 <b>${fmtN(r.votes)}</b> <span>votes</span>${r.rank_in_list!=null?` <span>#${r.rank_in_list} on list</span>`:''}${r.elected?' <span class="el">elected</span>':''}</span>`}
 // 2026 official result next to 2022 in the watchlist (optional data/results2026.js), with the count status
 function r26(e){const R=SW.r26;if(!R||!R.on)return '';const ci=e.kind==='list'?e.L.city:e.c.city,st=R.status(ci);if(!st)return '';
   const tag=`<span class="r6t${st.final?' fin':''}" title="${esc(st.text)}">${st.final?'final':'partial'}</span>`;
   if(e.kind==='list'){const r=R.list(e.L.i);return r?`<span class="r22">2026 <b>${pct(r.pct)}</b> <span>${fmtN(r.seats)} seat${r.seats===1?'':'s'}</span>${tag}</span>`:''}
-  const k=R.cand(e.c.i);return k?`<span class="r22">2026 <b>${k.elected?'elected':'not elected'}</b>${k.elected&&k.votes!=null?` <span>${fmtN(k.votes)} personal votes</span>`:''}${tag}</span>`:''}
+  // every candidate's votes (they include whole-list votes, R.votesNote), elected or not
+  const k=R.cand(e.c.i);if(!k)return '';
+  if(k.votes==null)return `<span class="r22">2026 <b>${k.elected?'elected':'not elected'}</b>${tag}</span>`;
+  return `<span class="r22">2026 <b title="${esc(R.votesNote)}">${fmtN(k.votes)}</b> <span>votes</span>${k.rank?` <span>#${k.rank} on list</span>`:''}${k.elected?' <span class="el">elected</span>':' <span>not elected</span>'}${tag}</span>`}
 const platN=a=>PLAT[a.plat].n, kindN=a=>a.video?'video':'post';
 const topicOf=a=>a.topics.length?a.topics[0]:null;
 
