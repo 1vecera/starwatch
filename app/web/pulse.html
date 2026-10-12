@@ -521,34 +521,37 @@ const dshort=d=>{const p=String(d||'').split('/').map(d1);if(p.length===2&&p[0]&
   const t=p[0];return t?`${t.getDate()} ${MON[t.getMonth()]} ${t.getFullYear()}`:esc(String(d||''))};
 const pctTxt=v=>(+v).toFixed(+v<10?1:1).replace(/\.0$/,'')+'%';
 function countUp(root){const els=[...root.querySelectorAll('[data-cu]')];if(!els.length)return;const t0=performance.now(),D=900;
-  const go=t=>{const k=Math.min(1,(t-t0)/D),e=1-Math.pow(2,-10*k);els.forEach(el=>{const v=+el.dataset.cu,f=el.dataset.f;el.textContent=f==='pct'?pctTxt(v*(k<1?e:1)):fmt(v*(k<1?e:1))});if(k<1)requestAnimationFrame(go)};requestAnimationFrame(go)}
+  const go=t=>{const k=Math.min(1,(t-t0)/D),e=1-Math.pow(2,-10*k);els.forEach(el=>{const v=+el.dataset.cu,f=el.dataset.f;el.textContent=f==='pct'?pctTxt(v*(k<1?e:1)):f==='n'?SW.fmtN(v*(k<1?e:1)):fmt(v*(k<1?e:1))});if(k<1)requestAnimationFrame(go)};requestAnimationFrame(go)}
 function renderThen(){
   const box=$('#then');const ML=mlab();const party=S.mode==='party';
   const rows=E.map(e=>{const st=stats(e),src=party?lists[e.id]:cands[e.id];
     const r=party?src.result2022:src.pref2022;
     const tv=r?(party?(r.pct!=null?+r.pct:null):(r.votes!=null?+r.votes:null)):null;
-    // 2026 official result (optional): a list's share and seats, or whether a person was elected, with the count status
+    // 2026 official result (optional): a list's share and seats, or a person's votes and whether they were elected,
+    // with the count status; a person's votes include whole-list votes
     const R6=SW.r26&&SW.r26.on?SW.r26:null,r6=R6?(party?R6.list(e.id):R6.cand(e.id)):null,st6=R6&&r6?R6.status(src.city):null;
-    return{e,r,tv,now:st.tot,n:st.nv,r6,st6,c6:R6?R6.city(src.city):null,v6:r6?(party?+r6.pct:(r6.elected&&r6.votes!=null?+r6.votes:null)):null}});
+    const u6=R6&&r6?R6.page(src.city,party?e.id:src.list)||(st6&&st6.url):null;
+    return{e,r,tv,now:st.tot,n:st.nv,r6,st6,u6,c6:R6?R6.city(src.city):null,v6:r6?(party?+r6.pct:(r6.votes!=null?+r6.votes:null)):null}});
   const anyThen=rows.some(x=>x.tv!=null),any26=rows.some(x=>x.r6);
   if(!anyThen&&!any26){box.hidden=true;box.innerHTML='';return}
   box.hidden=false;
   const tmax=Math.max(1e-9,...rows.map(x=>x.tv||0)),nmax=Math.max(1,...rows.map(x=>x.now));
-  const thenUnit=party?'list share':'preference votes';
+  const thenUnit=party?'list share':'votes';
   // computed insight: who leads on each measure, stated as different measures
   const by=k=>rows.filter(x=>x[k]!=null&&x[k]>0).sort((a,b)=>b[k]-a[k]);
   const T=by('tv'),N=by('now');let txt='';
   if(T[0]&&N[0]){
-    const tl=party?`${pctTxt(T[0].tv)} of the vote${T[0].r.seats!=null?` and ${T[0].r.seats} seat${T[0].r.seats===1?'':'s'}`:''}`:`${fmt(T[0].tv)} preference votes`;
-    txt=T[0].e===N[0].e?`${who(T[0].e)} leads on both: the largest 2022 ${party?'result':'preference vote'} (<b>${tl}</b>) and the most observed ${ML} in this snapshot (<b>${fmt(N[0].now)}</b>).`
-      :`${who(T[0].e)} had the strongest 2022 ${party?'result':'personal vote'} (<b>${tl}</b>), but ${who(N[0].e)} drew the most observed ${ML} in this snapshot (<b>${fmt(N[0].now)}</b>).`;
+    const tl=party?`${pctTxt(T[0].tv)} of the vote${T[0].r.seats!=null?` and ${T[0].r.seats} seat${T[0].r.seats===1?'':'s'}`:''}`:`${fmt(T[0].tv)} votes`;
+    txt=T[0].e===N[0].e?`${who(T[0].e)} leads on both: the largest 2022 ${party?'result':'vote count'} (<b>${tl}</b>) and the most observed ${ML} in this snapshot (<b>${fmt(N[0].now)}</b>).`
+      :`${who(T[0].e)} had the strongest 2022 ${party?'result':'vote count'} (<b>${tl}</b>), but ${who(N[0].e)} drew the most observed ${ML} in this snapshot (<b>${fmt(N[0].now)}</b>).`;
     if(!party){const el=rows.filter(x=>x.r&&x.r.elected);if(el.length)txt+=` ${el.length} of ${rows.length} won a seat in 2022.`}
     txt+=' Ballots and attention are different measures; neither predicts the other here.';
   }else if(T[0])txt=`Only ${T.map(x=>who(x.e)).join(', ')} ${T.length>1?'have':'has'} a matched 2022 result in this comparison.`;
   // 2026: stated as its own measure, with the count status; no link is drawn between attention and votes
   if(any26){const partial=rows.some(x=>x.st6&&!x.st6.final);
     if(party){const B=rows.filter(x=>x.v6!=null).sort((a,b)=>b.v6-a.v6)[0];if(B)txt+=` On the 2026 ${partial?'partial ':''}count, ${who(B.e)} has the largest share here (<b>${pctTxt(B.v6)}</b>, ${B.r6.seats} seat${B.r6.seats===1?'':'s'}).`}
-    else{const el=rows.filter(x=>x.r6&&x.r6.elected).length;txt+=` ${el} of ${rows.filter(x=>x.r6).length} ${partial?'are elected on the partial 2026 count':'were elected in 2026'}.`}
+    else{const el=rows.filter(x=>x.r6&&x.r6.elected).length,B=rows.filter(x=>x.v6!=null).sort((a,b)=>b.v6-a.v6)[0];
+      txt+=` ${el} of ${rows.filter(x=>x.r6).length} ${partial?'are elected on the partial 2026 count':'were elected in 2026'}${B&&!partial?`; ${who(B.e)} has the most 2026 votes here (<b>${fmt(B.v6)}</b>)`:''}.`}
     txt+=' Results and attention are separate measures; this view does not explain one by the other.'}
   if(!txt)txt='2026 results for this comparison, shown next to the observed attention.';
 
@@ -556,17 +559,20 @@ function renderThen(){
     const r=x.r,sub=party?[r.votes!=null?`${fmt(+r.votes)} votes`:'',r.seats!=null?`${r.seats} seat${r.seats===1?'':'s'}`:''].filter(Boolean).join(' · ')
       :[r.rank_in_list!=null?`#${r.rank_in_list} on ${r.list_name_2022?esc(r.list_name_2022):'2022 list'}`:'',r.elected?'<span class="el">elected</span>':r.elected===false?'not elected':''].filter(Boolean).join(' · ');
     const lnk=r.source_url?` <a class="src" href="${esc(r.source_url)}" target="_blank" rel="noopener" title="Official 2022 result">↗</a>`:'';
-    return `<div class="tn-m"><div class="tn-v"><span class="num" data-cu="${x.tv}" data-f="${party?'pct':''}">0</span><span>${sub}${lnk}</span></div><div class="tn-t then" style="--c:${x.e.col}"><i style="width:${Math.max(2,x.tv/tmax*100)}%;--d:${k*60}ms"></i></div></div>`};
+    return `<div class="tn-m"><div class="tn-v"><span class="num" data-cu="${x.tv}" data-f="${party?'pct':'n'}">0</span><span>${sub}${lnk}</span></div><div class="tn-t then" style="--c:${x.e.col}"><i style="width:${Math.max(2,x.tv/tmax*100)}%;--d:${k*60}ms"></i></div></div>`};
   const nowCell=(x,k)=>`<div class="tn-m"><div class="tn-v"><span class="num" data-cu="${x.now}">0</span><span>${x.n} post${x.n===1?'':'s'}</span></div><div class="tn-t now" style="--c:${x.e.col}"><i style="width:${Math.max(x.now?2:0,x.now/nmax*100)}%;--d:${350+k*60}ms"></i></div></div>`;
   const m6max=Math.max(1e-9,...rows.map(x=>x.v6||0));
+  const ord6=n=>{const t=['th','st','nd','rd'],v=n%100;return n+(t[(v-20)%10]||t[v]||t[0])};
   const r26Cell=(x,k)=>{if(!x.r6)return `<div class="tn-m"><span class="tn-na">${x.c6?'No matched 2026 result':'No 2026 result for this city yet'}</span></div>`;
     const tag=x.st6?`<span class="r6t${x.st6.final?' fin':''}" title="${esc(x.st6.text)}">${x.st6.final?'final':'partial'}</span>`:'';
-    const lnk=x.st6&&x.st6.url?` <a class="src" href="${esc(x.st6.url)}" target="_blank" rel="noopener" title="Official 2026 result">↗</a>`:'';
+    const lnk=x.u6?` <a class="src" href="${esc(x.u6)}" target="_blank" rel="noopener" title="Official 2026 result on volby.gov.cz">↗</a>`:'';
     if(party)return `<div class="tn-m"><div class="tn-v"><span class="num">${pctTxt(x.r6.pct)}</span><span>${x.r6.seats} seat${x.r6.seats===1?'':'s'} ${tag}${lnk}</span></div><div class="tn-t r26" style="--c:${x.e.col}"><i style="width:${Math.max(2,x.v6/m6max*100)}%;--d:${700+k*60}ms"></i></div></div>`;
-    return `<div class="tn-m"><div class="tn-v"><span class="num">${x.r6.elected?'Elected':'Not elected'}</span><span>${x.r6.elected&&x.r6.votes!=null?`${fmt(x.r6.votes)} personal votes `:''}${tag}${lnk}</span></div></div>`};
+    const out=x.r6.elected?'<span class="el">elected</span>':'not elected',rk=x.r6.rank?` · <span title="${esc(ord6(x.r6.rank))} most votes of ${x.r6.of} candidates on the list">#${x.r6.rank} of ${x.r6.of}</span>`:'';
+    if(x.v6==null)return `<div class="tn-m"><div class="tn-v"><span class="num">${x.r6.elected?'Elected':'Not elected'}</span><span>${tag}${lnk}</span></div></div>`;
+    return `<div class="tn-m"><div class="tn-v"><span class="num" data-cu="${x.v6}" data-f="n" title="${esc(fmt(x.v6)+' votes. '+SW.r26.votesNote)}">0</span><span>votes · ${out}${rk} ${tag}${lnk}</span></div><div class="tn-t r26" style="--c:${x.e.col}"><i style="width:${Math.max(2,x.v6/m6max*100)}%;--d:${700+k*60}ms"></i></div></div>`};
   const st6=rows.map(x=>x.st6).filter(Boolean),stText=!st6.length?'':st6.every(s=>s.final)?'final count':st6.length===1||st6.every(s=>s.text===st6[0].text)?st6[0].text.toLowerCase():'count status per row';
-  const ms=[anyThen&&['then','2022 election',thenUnit,'Ballots',thenCell],['now','At collection',`observed ${ML}, own posts`,'Attention',nowCell],any26&&['r26','2026 election',`${party?'list share and seats':'elected or not'} · ${stText}`,'Ballots',r26Cell]].filter(Boolean);
-  const lede=[anyThen?`2022 municipal ${party?'result':'preference votes'}`:'',`observed ${ML} on own posts in the ${DAYS} days before collection`,any26?'official 2026 result from the Czech Statistical Office':''].filter(Boolean);
+  const ms=[anyThen&&['then','2022 election',thenUnit,'Ballots',thenCell],['now','At collection',`observed ${ML}, own posts`,'Attention',nowCell],any26&&['r26','2026 election',`${party?'list share and seats':'votes, elected or not'} · ${stText}`,'Ballots',r26Cell]].filter(Boolean);
+  const lede=[anyThen?`2022 municipal ${party?'result':'votes'}`:'',`observed ${ML} on own posts in the ${DAYS} days before collection`,any26?'official 2026 result from the Czech Statistical Office':''].filter(Boolean);
   box.innerHTML=`<header class="ph"><div><h2>${any26?'2022 result, attention at collection and the 2026 result':'2022 result and attention at collection'}</h2><p>${lede.join(' · ')} · separate scales, never combined${any26?' · attention is not support':''}</p></div></header>${ai(txt,any26?'observed posts and official 2022 and 2026 results':'observed posts and official 2022 results')}
   <div class="tn" style="--tc:minmax(0,1.4fr) repeat(${ms.length},minmax(0,2fr));--m:${ms.length}">
     <div class="tn-h en0">${party?'Party list':'Candidate'}</div>

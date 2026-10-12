@@ -1,0 +1,8 @@
+OKRES,KODZASTUP,COBVODU,POR_STR_HL,OSTRANA,PORCISLO,JMENO,PRIJMENI,TITULPRED,TITULZA,VEK,POVOLANI,BYDLISTEN,PSTRANA,NSTRANA,PLATNOST,POCHLASU,PRESKOCENI,POCPROCVSE,MANDAT,PORADIMAND,PORADINAHR
+1100,554782,1,1,1,1,"A","B","","",40,"tester","Praha 1",99,1,"A",999,"N",9.99,"N",0,1
+1100,554782,1,1,1,2,"C","D","Ing.","",41,"tester","Praha 2",99,1,"A",1500,"A",15,"A",1,0
+1100,554782,1,1,1,3,"E","F","","",42,"tester","Praha 3",99,1,"A",999,"N",9.99,"N",0,2
+1100,554782,1,1,1,4,"G","H","","",43,"tester","Praha 4",99,1,"N",0,"N",0,"N",0,0
+1100,554782,1,1,1,5,"I","J","","",44,"tester","Praha 5",99,1,"A",10,"N",.1,"N",0,3
+1100,554782,1,3,903,1,"Kateřina","Lá","","",45,"tester","Praha 6",99,80,"A",350,"N",87.5,"A",2,0
+7102,500496,1,1,5,1,"M","N","","",46,"tester","Olomouc",99,5,"A",50,"N",100,"N",0,0

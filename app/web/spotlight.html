@@ -67,6 +67,13 @@ body #sheet{position:relative;width:min(1440px,calc(100% - 64px));margin:var(--t
 .r6t{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:6px;font-size:12px;font-weight:600;color:var(--orange);background:color-mix(in srgb,var(--orange) 10%,var(--surface))}
 .r6t.fin{color:var(--green);background:color-mix(in srgb,var(--green) 10%,var(--surface))}
 .r6n{margin-top:8px;font-size:12px;line-height:1.45;color:var(--label3)}
+.vbig abbr{text-decoration:underline dotted color-mix(in srgb,var(--label3) 70%,transparent);text-underline-offset:3px;cursor:help}
+.vtop{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 10px;margin-top:6px;font-size:13px;color:var(--label2);text-align:left;width:100%}
+.vtop b{color:var(--label);font-weight:650;font-variant-numeric:var(--num);text-align:right}
+.vtop span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vtop:hover span{color:var(--brand)}
+.e6{display:inline-flex;align-items:center;gap:4px;color:var(--label);font-weight:600}
+.e6 i{width:7px;height:7px;border-radius:50%;background:var(--green);flex:none}
 .take{margin-top:12px;font-size:14px;line-height:1.5;color:var(--label2);max-width:62ch}
 .take b{color:var(--label);font-weight:650}
 .rnone{padding:4px 16px 6px 64px;font-size:12px;line-height:1.45;color:var(--label3)}
@@ -122,6 +129,8 @@ body.spot .t-cap{font-size:12.5px;font-weight:600;color:var(--label2)}
 .pp .nm em{display:block;font-style:normal;font-weight:400;font-size:12px;color:var(--label3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pp.dim .pf{opacity:.62}
 .pp.dim .nm{color:var(--label2);font-weight:500}
+.pp .v6{display:flex;align-items:center;flex-wrap:wrap;gap:2px 6px;margin-top:-4px;font-size:12px;color:var(--label2);font-variant-numeric:var(--num)}
+.pp .v6 b{font-weight:650;color:var(--label)}
 .pmore{margin-top:16px}
 .rise{animation-delay:calc(var(--d,0) * 30ms)}
 
@@ -628,21 +637,27 @@ const portrait=(c,cls,d)=>`<span class="${cls}" style="--pc:${S.css(lists[c.list
 const lmark=L=>{const p=L.logos&&L.logos[0]&&L.logos[0].path;return p?`<img src="${esc(p)}" alt="${esc(L.short)} logo" title="${esc(L.logos[0].source_url||'')}" onerror="this.remove()">`:''};
 const pref=c=>c&&c.pref2022&&c.pref2022.votes!=null?c.pref2022:null;
 const res=L=>L&&L.result2022&&(L.result2022.pct!=null||L.result2022.votes!=null)?L.result2022:null;
-// 2026 result (optional): the person's outcome and the list's share and seats, always with the count status and source
+// 2026 result (optional): the person's votes, rank on the list and outcome, and the list's share and seats, always with
+// the count status and the official CSU page. A candidate's votes include whole-list votes (R.votesNote, in the tooltip).
+const v26=c=>{const R=SW.r26;if(!R||!R.on||!c)return null;const k=R.cand(c.i);return k&&k.votes!=null?k:null};
+const pct2=v=>(+v).toLocaleString('en-GB',{minimumFractionDigits:2,maximumFractionDigits:2});
 function vote26(c,L){const R=SW.r26;if(!R||!R.on)return '';const st=R.status(L.city),r6=R.list(L.i),k6=c?R.cand(c.i):null;if(!st||(!r6&&!k6))return '';
-  const city=R.city(L.city);let h='';
-  if(k6)h+=`<div class="vrow">${k6.elected&&k6.votes!=null?`<div class="vbig">${nf(k6.votes)}<small>personal votes</small></div>`:''}<div class="vline"><span class="el${k6.elected?'':' no'}"><i></i>${k6.elected?(st.final?'Elected':'Elected on the partial count'):(st.final?'Not elected':'Not elected on the partial count')}</span></div></div>`;
+  const city=R.city(L.city),fin=st.final,url=R.page(L.city,L.i)||st.url;let h='';
+  if(k6){const tip=k6.votes!=null?`${nf(k6.votes)} votes${k6.pct!=null?`, ${pct2(k6.pct)} % of the list's votes`:''}. ${R.votesNote}`:'';
+    h+=`<div class="vrow">${k6.votes!=null?`<div class="vbig">${nf(k6.votes)}<small><abbr title="${esc(tip)}">votes</abbr></small></div>`:''}<div class="vline"><span class="el${k6.elected?'':' no'}"><i></i>${k6.elected?(fin?'Elected':'Elected on the partial count'):(fin?'Not elected':'Not elected on the partial count')}</span>${k6.rank?`<span title="${esc(R.seatsNote)}"><b>#${k6.rank}</b> of ${k6.of} by votes on ${esc(L.short)}</span>`:''}${k6.moved_up?`<span>moved up from <b>#${c.k}</b> on the list</span>`:''}${k6.sub?`<span><b>${ord(k6.sub)}</b> substitute</span>`:''}</div></div>`}
   if(r6)h+=`<div class="vrow">${c?`<div class="vline" style="margin:0 0 6px">${esc(L.short)} in ${esc(E.city.name)}</div>`:''}<div class="vbig">${r6.pct!=null?pctf(r6.pct)+' %':nf(r6.votes)}<small>${r6.pct!=null?'of the vote':'votes'}</small></div><div class="vline"><span><b>${nf(r6.votes)}</b> votes</span><span><b>${r6.seats}</b> seat${r6.seats===1?'':'s'}${city&&city.seats_total?` of ${city.seats_total}`:''}</span></div>${r6.pct!=null?`<div class="pbar" title="${pctf(r6.pct)} % of valid votes"><i style="width:${Math.min(100,+r6.pct)}%"></i></div>`:''}</div>`;
-  h+=`<div class="vline r6s"><span class="r6t${st.final?' fin':''}">${esc(st.text)}</span>${st.url?`<a class="vsrc" href="${esc(st.url)}" target="_blank" rel="noopener">volby.gov.cz ↗</a>`:''}</div><p class="r6n">${esc(R.note)}</p>`;
+  if(!c&&r6){const tp=R.listCands(L.i).filter(x=>x.r.votes!=null).slice(0,3);
+    if(tp.length)h+=`<div class="vrow"><div class="vline" style="margin:0 0 2px">Most votes on the list</div>${tp.map(x=>`<button class="vtop" data-c="${x.k}" title="${esc(R.votesNote)}"><b>${nf(x.r.votes)}</b><span>${esc(cands[x.k].name)}${x.r.elected?' · elected':''}</span></button>`).join('')}</div>`}
+  h+=`<div class="vline r6s"><span class="r6t${fin?' fin':''}">${esc(st.text)}</span>${url?`<a class="vsrc" href="${esc(url)}" target="_blank" rel="noopener" title="Official results on volby.gov.cz">volby.gov.cz ↗</a>`:''}</div><p class="r6n">${esc(R.note)}</p>`;
   return h}
 function voteBlock(c,L){
   const p=pref(c),r=res(L),h26=vote26(c,L);
   if(!p&&!r&&!h26)return '';
   let h='';
-  if(p)h+=`<div class="vrow"><div class="vbig">${nf(p.votes)}<small>preference votes</small></div><div class="vline">${p.rank_in_list!=null?`<span><b>#${p.rank_in_list}</b> by preference votes on ${p.list_name_2022?esc(p.list_name_2022):'its list'}</span>`:''}${p.elected!=null?`<span class="el${p.elected?'':' no'}"><i></i>${p.elected?'Elected':'Not elected'}</span>`:''}${p.source_url?`<a class="vsrc" href="${esc(p.source_url)}" target="_blank" rel="noopener">volby.gov.cz ↗</a>`:''}</div></div>`;
+  if(p)h+=`<div class="vrow"><div class="vbig">${nf(p.votes)}<small>votes</small></div><div class="vline">${p.rank_in_list!=null?`<span><b>#${p.rank_in_list}</b> by votes on ${p.list_name_2022?esc(p.list_name_2022):'its list'}</span>`:''}${p.elected!=null?`<span class="el${p.elected?'':' no'}"><i></i>${p.elected?'Elected':'Not elected'}</span>`:''}${p.source_url?`<a class="vsrc" href="${esc(p.source_url)}" target="_blank" rel="noopener">volby.gov.cz ↗</a>`:''}</div></div>`;
   if(r)h+=`<div class="vrow">${c?`<div class="vline" style="margin:0 0 6px">${esc(L.short)} in ${esc(E.city.name)}</div>`:''}<div class="vbig">${r.pct!=null?pctf(r.pct)+' %':nf(r.votes)}<small>${r.pct!=null?'of the vote':'votes'}</small></div><div class="vline">${r.pct!=null&&r.votes!=null?`<span><b>${nf(r.votes)}</b> votes</span>`:''}${r.seats!=null?`<span><b>${r.seats}</b> seat${r.seats===1?'':'s'}</span>`:''}${r.source_url?`<a class="vsrc" href="${esc(r.source_url)}" target="_blank" rel="noopener">volby.gov.cz ↗</a>`:''}</div>${r.pct!=null?`<div class="pbar" title="${pctf(r.pct)} % of valid votes"><i style="width:${Math.min(100,+r.pct)}%"></i></div>`:''}${r.seats>0&&r.seats<=40?`<div class="seats" aria-hidden="true">${Array.from({length:r.seats},(_,k)=>`<i style="animation-delay:${400+k*35}ms"></i>`).join('')}</div>`:''}</div>`;
   if(!c&&r){const tp=L.cands.map(k=>cands[k]).filter(pref).sort((a,b)=>pref(b).votes-pref(a).votes).slice(0,3);
-    if(tp.length)h+=`<div class="vrow"><div class="vline" style="margin:0 0 4px">Most preference votes</div>${tp.map(x=>`<button class="vline" data-c="${x.i}" style="margin-top:4px;text-align:left"><b>${nf(pref(x).votes)}</b><span>${esc(x.name)}${pref(x).elected?' · elected':''}</span></button>`).join('')}</div>`}
+    if(tp.length)h+=`<div class="vrow"><div class="vline" style="margin:0 0 2px">Most votes on the list</div>${tp.map(x=>`<button class="vtop" data-c="${x.i}"><b>${nf(pref(x).votes)}</b><span>${esc(x.name)}${pref(x).elected?' · elected':''}</span></button>`).join('')}</div>`}
   const head='2022 municipal election',first=x=>x.replace('<div class="vrow">','<div class="vrow" style="margin-top:0;padding-top:0;border-top:0">');
   return `<aside class="vote rv" style="--d:5" aria-label="${h26?'2026 and 2022 municipal elections':head}">${h26?`<div class="t-cap">2026 municipal election</div>${first(h26)}`:''}${h?`<div class="t-cap"${h26?' style="margin-top:22px"':''}>${head}</div>${first(h)}`:''}</aside>`}
 const ord=n=>{const s=['th','st','nd','rd'],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0])};
@@ -682,16 +697,18 @@ function renderHero(){
   $('#reopen').innerHTML=`${c?face(c,38):`<span class="face" style="width:38px;height:38px;--pc:${E.col}"></span>`}<span>Spotlight · <b>${E.name}</b></span><button class="pill primary up" id="reup">${IC.up} Open <kbd style="background:rgba(0,0,0,.15);color:var(--brand-ink)">⏎</kbd></button>`;
   $('#flabel').innerHTML=`${E.name} <span>· ${c?L.short+' · ':''}${E.city.name}</span>`;
 }
-/* party view: everyone on the list as a portrait, ranked by reach (then 2022 preference votes, then list position) */
+/* party view: everyone on the list as a portrait, ranked by reach (then 2026 votes, 2022 votes, list position: an order, never a combined score) */
 let pplAll=false;
 function renderPeople(){
   if(E.kind!=='list'){$('#people').innerHTML='';return}
-  const L=E.L,ppl=L.cands.map(k=>({c:cands[k],r:entReach(cands[k].assets)})).sort((a,b)=>cmpR(a.r,b.r)||((pref(b.c)||{votes:-1}).votes-(pref(a.c)||{votes:-1}).votes)||a.c.k-b.c.k);
+  const vv=c=>(v26(c)||{votes:-1}).votes,L=E.L,ppl=L.cands.map(k=>({c:cands[k],r:entReach(cands[k].assets)})).sort((a,b)=>cmpR(a.r,b.r)||vv(b.c)-vv(a.c)||((pref(b.c)||{votes:-1}).votes-(pref(a.c)||{votes:-1}).votes)||a.c.k-b.c.k);
   const lead=ppl.filter(o=>o.r.n).slice(0,3),rest=ppl.filter(o=>!lead.includes(o)),cap=pplAll?rest.length:Math.min(rest.length,innerWidth<760?9:lead.length?16:19),obs=ppl.filter(o=>o.r.n).length;
-  const pv=c=>{const p=pref(c);return p?`${nf(p.votes)} pref. votes 2022${p.elected?' · elected':''}`:''};
+  const has26=ppl.some(o=>v26(o.c));
+  const el6=k=>k.elected?`<span class="e6"><i></i>elected</span>`:'';
+  const pv=c=>{const k=v26(c),p=pref(c);if(k)return `<b>${nf(k.votes)}</b> votes in 2026 ${el6(k)}`;return p?`${nf(p.votes)} votes in 2022${p.elected?' · elected':''}`:''};
   const ld=(o,k)=>{const[v,u]=rNum(o.r);return `<button class="ld3 rise" style="--d:${k}" data-c="${o.c.i}">${portrait(o.c,'pf')}<span><span class="rkn">${k+1} by reach · #${o.c.k} on the list</span><span class="nm" style="display:block">${esc(o.c.name)}</span><span class="rr"><b>${v}</b>${u}</span>${pv(o.c)?`<span class="pv" style="display:block">${pv(o.c)}</span>`:''}</span></button>`};
-  const pp=(o,k)=>{const[v,u]=rNum(o.r),p=pref(o.c);return `<button class="pp rise${o.r.n?'':' dim'}" style="--d:${Math.min(k,18)+3}" data-c="${o.c.i}" title="${esc(o.c.name)} · #${o.c.k} on the list${o.r.n?` · ${v} ${u}`:' · no posts collected'}${p?` · ${nf(p.votes)} preference votes in 2022`:''}">${portrait(o.c,'pf')}<span class="nm">${esc(o.c.name)}<em>${o.r.n?`${v} ${u==='likes + comments'?'likes + comm.':u}`:p?`${nf(p.votes)} pref. votes`:`#${o.c.k} on the list`}</em></span></button>`};
-  $('#people').innerHTML=`<div class="ppl"><div class="psh"><h2>People on this list</h2><span class="s">${obs} of ${ppl.length} with collected posts, ranked by reach; the rest have none collected yet</span><span class="grow"></span>${L.assets.length?`<button class="pill acct" data-acct="1">${lmark(L)}Party account · ${L.assets.length} post${L.assets.length===1?'':'s'}</button>`:''}</div>
+  const pp=(o,k)=>{const[v,u]=rNum(o.r),p=pref(o.c),k6=v26(o.c);return `<button class="pp rise${o.r.n?'':' dim'}" style="--d:${Math.min(k,18)+3}" data-c="${o.c.i}" title="${esc(o.c.name)} · #${o.c.k} on the list${o.r.n?` · ${v} ${u}`:' · no posts collected'}${k6?` · ${nf(k6.votes)} votes in 2026${k6.elected?', elected':''}`:''}${p?` · ${nf(p.votes)} votes in 2022`:''}">${portrait(o.c,'pf')}<span class="nm">${esc(o.c.name)}<em>${o.r.n?`${v} ${u==='likes + comments'?'likes + comm.':u}`:!has26&&p?`${nf(p.votes)} votes in 2022`:`#${o.c.k} on the list`}</em></span>${k6?`<span class="v6"><b>${nf(k6.votes)}</b> votes ${el6(k6)}</span>`:''}</button>`};
+  $('#people').innerHTML=`<div class="ppl"><div class="psh"><h2>People on this list</h2><span class="s">${obs} of ${ppl.length} with collected posts, ranked by reach; the rest have none collected yet${has26?' and are ordered by 2026 votes':''}</span><span class="grow"></span>${L.assets.length?`<button class="pill acct" data-acct="1">${lmark(L)}Party account · ${L.assets.length} post${L.assets.length===1?'':'s'}</button>`:''}</div>
     ${lead.length?`<div class="lead">${lead.map(ld).join('')}</div>`:''}<div class="rest">${rest.slice(0,cap).map(pp).join('')}</div>
     ${rest.length>cap||pplAll?`<button class="pill pmore" data-pall>${pplAll?'Show fewer':`Show all ${ppl.length}`}</button>`:''}</div>`}
 

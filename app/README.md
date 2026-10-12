@@ -76,15 +76,17 @@ node tools/walkthrough.mjs http://127.0.0.1:5173    # screenshots of the main pa
 
 ## 2026 results
 
-Polls close on Saturday 10 October 2026 at 14:00; the Czech Statistical Office then publishes council results while the votes are counted. The app shows them as soon as `web/data/results2026.js` exists, with no code change:
+Voting ended on Saturday 10 October 2026 at 14:00 and the count is final. The importer reads two official Czech Statistical Office sources: the council results XML per city (count status, turnout, valid votes, each list's votes, share and seats) and the candidate registry processed after the count (`KV2026reg20261011_csv.zip`: every candidate's votes, share of the list's votes, elected flag, seat and substitute order). The app shows them when `web/data/results2026.js` exists, with no code change:
 
 ```sh
-uv run --offline python tools/export_results2026.py --snapshot web/data/real.js --out web/data/results2026.js
-(cd tools && uv run --offline python -m unittest test_export_results2026)   # importer test with a synthetic CSU-shaped file
+uv run --offline python tools/export_results2026.py --snapshot web/data/real.js --out web/data/results2026.js   # downloads both sources
+uv run --offline python tools/export_results2026.py --snapshot web/data/real.js --out web/data/results2026.js --source-dir <xml folder> --registry-dir <csv folder>
+(cd tools && uv run --offline python -m unittest test_export_results2026)   # importer test with synthetic CSU-shaped files
 ```
 
-- **Matching:** the importer matches lists by their official code (`VSTRANA`, the number in the snapshot list id), never by ballot position, which differs for every snapshot list. Elected members match by list and position and must agree on the name. Anything unmatched stays in the file as `unmatched:<ballot number>`.
-- **Where results appear:** Spotlight list and person headers show the 2026 share, seats and elected or not with personal votes. The Atlas islands and inspectors show the 2026 share and seats, and each city's count status. Pulse adds a 2026 column next to 2022 and attention, on separate scales and never combined. By the numbers lists turnout, precincts and seats per city. The Radar watchlist shows the 2026 result too.
+- **Matching:** snapshot list ids end in the official list code (`OSTRANA`). The registry translates each XML list's ballot position to that code and must agree on `VSTRANA`; the ballot position alone never decides. Candidates match by list code and list position and must agree on the name. The importer logs match counts per city and lists anything unmatched, with the reason, under `match` in the output; nothing unmatched is credited. On the final count all 5,405 snapshot candidacies on 127 lists match, and the registry and the XML agree on every list's votes and seats and on all 464 elected members.
+- **Votes:** a vote for a whole list counts once for each of its candidates, so a candidate's votes are not preference votes only. The app calls them "votes" and says so in About and in the tooltips.
+- **Where results appear:** Spotlight shows a person's 2026 votes, rank on the list by votes and elected or not (with substitute order or "moved up"), a list's share, seats and its three candidates with most votes; the people cards show every candidate's votes. The Atlas inspector, island people and candidate lists show the same per person, and each city's count status. Pulse adds a 2026 column next to 2022 and attention, on separate scales and never combined. By the numbers has the per-city status table and "Every list and candidate": per city, every list with votes, share and seats, expandable to all its candidates with votes, share of the list's votes, rank and outcome, with a search across all cities and deep links (`data.html#results-<municipality>/<list code>`). The Radar watchlist shows the 2026 result too. Every results block links to the official CSU results page.
 - **Count status:** a partial count always reads "Partial count · N% of precincts · as of HH:MM" with the source link, and a finished one "Final count". 2022 stays visible.
 - **No causal claims:** results and attention are separate measures, and no screen explains one by the other.
 

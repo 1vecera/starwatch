@@ -16,7 +16,10 @@ SW.TOPIC_NOTE='Reviewed labels come from a checked sample; machine labels cover 
 SW.topicMeta=(a,t)=>({label:(SW.TOP[t]||[])[0]||'',issue:false,machine:false,reviewed:false,evidence:null});
 SW.topicSource={reviewed:0,machine:0};
 // 2026 results (optional data/results2026.js); every screen asks SW.r26 and shows nothing when it is off
-SW.r26={on:false,note:'2026 results come from the Czech Statistical Office after voting ended. Attention is still not support.',city:()=>null,list:()=>null,cand:()=>null,status:()=>null};
+SW.r26={on:false,note:'2026 results come from the Czech Statistical Office after voting ended. Attention is still not support.',
+  votesNote:'Votes include whole-list votes: a vote for a list counts once for each of its candidates.',
+  seatsNote:'Seats on a list go first to candidates with at least 10% more votes than the list\'s average per candidate, in order of votes; the rest follow the list order.',
+  city:()=>null,list:()=>null,cand:()=>null,allPeople:()=>false,listCands:()=>[],cityLists:()=>({lists:[],other:[]}),page:()=>null,status:()=>null};
 // a screen can require a minimum of verified assets before it trusts the snapshot (data-min-assets on this script tag)
 const me=document.currentScript, minA=me&&+me.dataset.minAssets||0, nReal=RAW&&RAW.assets?RAW.assets.length:0;
 if(RAW&&want!=='sim'&&nReal<minA){SW.source={kind:'sim',fallback:true,label:'Simulated universe',detail:`The snapshot has ${nReal} verified assets; this screen needs ${minA}+ to be meaningful, so it shows the simulated universe instead.`};return}
@@ -167,28 +170,45 @@ SW.topicMeta=(a,t)=>{const T=TOP[t]||[];const issue=T[4]==='issue';const machine
 SW.TOPIC_NOTE='Reviewed labels come from a checked sample; machine labels cover the rest, each backed by a quoted phrase, and can be wrong.';
 if(SW.topicsPending)SW.source.detail+=' · topic labels independently reviewed, pending promotion';
 
-// Official 2026 results, matched to the snapshot by the importer (lists by official code, people by list position).
-// A partial count is always labelled with the share of precincts and the time; nothing here is combined with attention.
+// Official 2026 results, matched to the snapshot by the importer (lists by official code, people by list code, position and
+// name). A partial count is always labelled with the share of precincts and the time; nothing here is combined with attention.
 const R26=window.SW_RESULTS2026;
 if(R26&&R26.cities){
-
   const info=cities.map(c=>{const r=R26.cities[c.id];return r?Object.assign({},r):null});
   const listR=new Array(lists.length).fill(null);
   lists.forEach(L=>{const r=info[L.city],x=r&&r.lists&&r.lists[L.id];if(x)listR[L.i]=x});
-  const el=R26.elected||{};
+  // every candidate's votes come from the CSU registry once the count is processed (people:'all'); before that only
+  // elected members are known (people:'elected', or the older `elected` map), and nobody else is shown as not elected for sure
+  const P=R26.candidates||R26.elected||{};
   const hm=s=>{if(!s)return '';const m=/T(\d{2}:\d{2})/.exec(s);if(m&&!/[zZ]|[+-]\d{2}:?\d{2}$/.test(s))return m[1]; // CSU stamps are Prague local time
     const d=new Date(s);return isNaN(d)?'':d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Prague'})};
   const day=s=>{const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(s||'');return m?`${+m[3]} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m[2]-1]}`:''};
   const fmtP=v=>v==null?'?':(+v).toLocaleString('en-GB',{maximumFractionDigits:v<10?1:0});
-  SW.r26={on:info.some(Boolean),note:SW.r26.note,source:R26.source||'Czech Statistical Office',generated_at:R26.generated_at,
+  const cand=ki=>{const c=cands[ki];if(!c)return null;const r=info[c.city];if(!r||!listR[c.list])return null;const p=P[c.id],final=!!r.counted;
+    if(p)return {elected:p.elected!==false,votes:p.votes!=null?p.votes:null,pct:p.pct!=null?p.pct:null,rank:p.rank||null,of:lists[c.list].cands.length,
+      seat:p.seat||null,sub:p.sub||null,pref:!!p.pref,moved_up:!!p.moved_up,final};
+    // with the full registry a missing person failed to match: show no result rather than guess one
+    return r.people==='all'?null:{elected:false,votes:null,pct:null,rank:null,of:lists[c.list].cands.length,final}};
+  const page=(ci,li)=>{const r=info[ci];if(!r)return null;const L=li!=null?listR[li]:null;
+    return r.page_url?r.page_url+(L&&L.ballot?'____'+L.ballot:''):r.source_url||null};
+  SW.r26={on:info.some(Boolean),note:SW.r26.note,votesNote:SW.r26.votesNote,seatsNote:SW.r26.seatsNote,source:R26.source||'Czech Statistical Office',generated_at:R26.generated_at,
     city:ci=>info[ci]||null,
     list:li=>listR[li],
-    // a person: elected (with personal votes) or not; on a partial count both are provisional
-    cand:ki=>{const c=cands[ki];if(!c)return null;const r=info[c.city];if(!r||!listR[c.list])return null;const e=el[c.id];
-      return e?{elected:true,votes:e.votes,pct:e.pct,final:!!r.counted}:{elected:false,final:!!r.counted}},
-    status:ci=>{const r=info[ci];if(!r)return null;const when=hm(r.observed_at);
-      return r.counted?{final:true,text:'Final count',short:'final count',url:r.source_url,when,day:day(r.observed_at)}
-        :{final:false,text:`Partial count · ${fmtP(r.precincts_pct)}% of precincts${when?` · as of ${when}`:''}`,short:`partial count, ${fmtP(r.precincts_pct)}% of precincts`,url:r.source_url,when,day:day(r.observed_at)}}};
+    // a person: votes for everyone once the registry is processed, elected or not; on a partial count both are provisional
+    cand,
+    // whether every person in the city has votes (registry) or only elected members are known yet
+    allPeople:ci=>!!(info[ci]&&info[ci].people==='all'),
+    // the list's candidates with results, most votes first (ties by list position)
+    listCands:li=>lists[li]?lists[li].cands.map(k=>({k,r:cand(k)})).filter(x=>x.r).sort((a,b)=>(b.r.votes||0)-(a.r.votes||0)||cands[a.k].k-cands[b.k].k):[],
+    // the city's lists with results, most votes first, plus official lists the snapshot does not hold
+    cityLists:ci=>{const r=info[ci];if(!r)return {lists:[],other:[]};
+      return {lists:cities[ci].lists.filter(li=>listR[li]).sort((a,b)=>listR[b].votes-listR[a].votes),
+        other:Object.entries(r.lists||{}).filter(([k])=>k.startsWith('unmatched:')).map(([,v])=>v)}},
+    // the official CSU results page for a city or one of its lists (the data file when no page is known)
+    page,
+    status:ci=>{const r=info[ci];if(!r)return null;const when=hm(r.observed_at),url=page(ci);
+      return r.counted?{final:true,text:'Final count',short:'final count',url,data:r.source_url,when,day:day(r.observed_at)}
+        :{final:false,text:`Partial count · ${fmtP(r.precincts_pct)}% of precincts${when?` · as of ${when}`:''}`,short:`partial count, ${fmtP(r.precincts_pct)}% of precincts`,url,data:r.source_url,when,day:day(r.observed_at)}}};
 }
 if(issueCoverage.length)SW.source.detail+=` · ${issueCoverage.length} caption-reviewed issue topics · partial topic coverage`;
 })();
