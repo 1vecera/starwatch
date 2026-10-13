@@ -20,6 +20,7 @@ const BASE = "https://starwatch.danielvecera.com/";
 const ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const OUT = join(ROOT, "tmp/captures");
 const DESKTOP = { viewport: { width: 1600, height: 900 }, deviceScaleFactor: 1.5 };
+const SHARP = { viewport: { width: 1600, height: 900 }, deviceScaleFactor: 2.5 };
 const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true };
 
 const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
@@ -81,6 +82,8 @@ async function open(browser, options, path) {
   await page.goto(BASE + path, { waitUntil: "networkidle", timeout: 90000 });
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(1500);
+  // Park the pointer on an empty margin so no hover state or tooltip shows up in a frame.
+  await page.mouse.move(options.viewport.width - 2, Math.round(options.viewport.height * 0.66));
   await settleImages(page, 8000);
   return { context, page };
 }
@@ -158,19 +161,21 @@ const TAKES = {
   },
 
   // Petr Hlaváček's Spotlight: profile and 2026 result, then down to the grid of his best posts.
+  // The stop (750 px) leaves no half-hidden row under the floating top bar.
   async spotlight(browser, dir) {
     const { context, page } = await open(browser, DESKTOP, "spotlight.html");
     const top = await boxes(page, { name: "h1", best: "h2" });
-    const values = await scrollTake(page, dir, { from: 0, to: 700, count: 150 });
+    const values = await scrollTake(page, dir, { from: 0, to: 750, count: 150 });
     await context.close();
     return { url: BASE + "spotlight.html", scroll: values, boxes: { top } };
   },
 
   // Pulse: the head-to-head chart, then down to the 2022 and 2026 results next to attention.
+  // The stop (1190 px) clears the topic labels of the panel above from under the top bar.
   async pulse(browser, dir) {
     const { context, page } = await open(browser, DESKTOP, "pulse.html");
     const top = await boxes(page, { title: "h1" });
-    const values = await scrollTake(page, dir, { from: 0, to: 1170, count: 150 });
+    const values = await scrollTake(page, dir, { from: 0, to: 1190, count: 150 });
     await context.close();
     return { url: BASE + "pulse.html", scroll: values, boxes: { top } };
   },
@@ -207,9 +212,32 @@ const TAKES = {
     return { urls: out };
   },
 
+  // The comparison: Prague's most-watched candidate and its most-voted one, each on Spotlight
+  // (stills at 2.5× so the camera can push in on names and numbers), then both side by side on Pulse.
+  async kastovsky(browser, dir) {
+    return spotlightStill(browser, dir, "Tomáš Kaštovský");
+  },
+  async hlavacek(browser, dir) {
+    return spotlightStill(browser, dir, "Petr Hlaváček");
+  },
+  async versus(browser, dir) {
+    const probe = await open(browser, DESKTOP, "pulse.html");
+    const ids = await probe.page.evaluate(() => ["Tomáš Kaštovský", "Petr Hlaváček"].map((n) => SW.cands.findIndex((c) => c.name === n && SW.cities[c.city]?.name === "Praha")));
+    await probe.context.close();
+    const path = `pulse.html?mode=person&cands=${ids.join(",")}`;
+    const { context, page } = await open(browser, SHARP, path);
+    const to = await page.evaluate(() => {
+      const h = [...document.querySelectorAll("h2")].find((e) => e.textContent.startsWith("2022 result"));
+      return Math.round(h.getBoundingClientRect().top + scrollY - 140);
+    });
+    const values = await scrollTake(page, dir, { from: 0, to, count: 90 });
+    await context.close();
+    return { url: BASE + path, ids, scroll: values, deviceScaleFactor: 2.5 };
+  },
+
   // Desktop welcome: the candidate wall and the Starwatch card.
   async welcome(browser, dir) {
-    const { context, page } = await open(browser, DESKTOP, "");
+    const { context, page } = await open(browser, SHARP, "");
     await page.waitForTimeout(2500);
     await settleImages(page, 10000);
     await page.screenshot({ path: join(dir, "0000.png") });
@@ -218,6 +246,21 @@ const TAKES = {
     return { url: BASE, boxes: { card } };
   },
 };
+
+/** A Spotlight page for one Prague candidate, as a single sharp still. */
+async function spotlightStill(browser, dir, name) {
+  const probe = await open(browser, DESKTOP, "spotlight.html");
+  const id = await probe.page.evaluate((n) => SW.cands.findIndex((c) => c.name === n && SW.cities[c.city]?.name === "Praha"), name);
+  await probe.context.close();
+  const path = `spotlight.html?cand=${id}`;
+  const { context, page } = await open(browser, SHARP, path);
+  await page.waitForTimeout(1500);
+  await settleImages(page, 10000);
+  await page.screenshot({ path: join(dir, "0000.png") });
+  const title = await page.title();
+  await context.close();
+  return { url: BASE + path, title, deviceScaleFactor: 2.5 };
+}
 
 const wanted = process.argv.slice(2).length ? process.argv.slice(2) : Object.keys(TAKES);
 const browser = await chromium.launch({

@@ -8,7 +8,7 @@ Run from video/ after `npm run capture` has written tmp/captures/:
     uv run showreel/prepare.py --audio ../../tmp/showreel/audio
 
 Captures are copied unchanged. The score is ElevenLabs take 4, cut to start 3.762 s in (two bars of
-its intro) and kept as WAV; the effects are the Mluva showreel's takes, reused.
+its intro) and kept as WAV; three effects are the Mluva showreel's takes, reused.
 """
 
 import argparse
@@ -22,22 +22,14 @@ ROOT = Path(__file__).resolve().parents[1]
 REPO = ROOT.parent
 CAPTURES = ROOT / "tmp/captures"
 OUT = ROOT / "public/showreel"
-TAKES = ["atlas", "spotlight", "pulse", "radar", "results", "welcome", "phone"]
-BRAND = ["lockup-white.svg", "mark.svg"]
+TAKES = ["welcome", "atlas", "kastovsky", "hlavacek", "versus", "results", "phone"]
+BRAND = ["lockup.svg"]
+IMG = ["bg-topo.svg", "bg-grid.svg"]
 SCORE = ("score-4.mp3", 3.762)
 SFX = {
     "impact": "massive-cinematic-sub-bass_k2oyp.mp3",
     "impact-long": "massive-cinematic-sub-bass_VRBuW.mp3",
-    "whoosh": "fast-airy-whoosh_8m4uS.mp3",
     "whoosh-soft": "fast-airy-whoosh_hk3nd.mp3",
-    "glitch": "short-digital-glitch_KuJyn.mp3",
-    "tick": "tiny-soft-ui_A0IpI.mp3",
-    "riser": "tense-white-noise-riser_PRkdb.mp3",
-    "key": "single-deep-mechanical_qDf6b.mp3",
-    "flap": "split-flap-departure-board_qaW6O.mp3",
-    "flash": "bright-flash-pop_2eU6P.mp3",
-    "jelly": "soft-glossy-jelly_jdBPe.mp3",
-    "blips": "rapid-subtle-computer_Ztd92.mp3",
 }
 
 
@@ -53,6 +45,9 @@ def main() -> None:
     (OUT / "brand").mkdir(exist_ok=True)
     for name in BRAND:
         shutil.copy2(REPO / "app/web/brand" / name, OUT / "brand" / name)
+    (OUT / "img").mkdir(exist_ok=True)
+    for name in IMG:
+        shutil.copy2(REPO / "app/web/img" / name, OUT / "img" / name)
     audio = OUT / "audio"
     audio.mkdir(exist_ok=True)
     name, start = SCORE
