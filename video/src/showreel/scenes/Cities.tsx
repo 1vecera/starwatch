@@ -1,6 +1,6 @@
 import { AbsoluteFill, useCurrentFrame } from "remotion";
 import { hBlur } from "../parts/Blur";
-import { Words } from "../parts/Kinetic";
+import { Letters, Words } from "../parts/Kinetic";
 import { C, DISPLAY, easeIn, easeOut, expoOut, ramp, WORDMARK } from "../theme";
 import { beatAt, beatFrame as F } from "../timing";
 
@@ -10,7 +10,7 @@ const CITIES = ["Praha", "Brno", "Ostrava", "Plzeň", "Liberec", "Olomouc", "Če
 const ROWS = [0, 1, 2, 3, 4];
 const SPEED = [7, -9, 6, -8, 7.5];
 export const CITIES_OUT = F(76);
-export const CTA_OUT = F(83.25);
+export const CTA_OUT = F(83);
 
 export const Cities: React.FC = () => {
   const frame = useCurrentFrame();
@@ -57,13 +57,10 @@ export const Cities: React.FC = () => {
         : null}
       <AbsoluteFill style={{ transform: "rotate(5deg) scale(0.893)" }}>
         <div style={{ position: "absolute", top: 452, left: 0, width: 1920, textAlign: "center" }}>
-          <Words
-            words={[
-              { text: "Look", at: F(76.5) },
-              { text: "up", at: F(76.75) },
-              { text: "your", at: F(77) },
-              { text: "city.", at: F(77.25) },
-            ]}
+          <Letters
+            text="Look up your city."
+            at={F(76.5)}
+            step={1.2}
             out={CTA_OUT}
             style={{ fontFamily: DISPLAY, fontVariationSettings: "'opsz' 96", fontWeight: 720, fontSize: 168, letterSpacing: "-0.036em", lineHeight: 0.98, color: C.label }}
           />

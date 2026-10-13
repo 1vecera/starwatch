@@ -57,28 +57,40 @@
       "note": "wall columns land"
     },
     {
-      "frame": 230,
-      "sfx": "flap",
+      "frame": 247,
+      "sfx": "thud",
       "gain_db": -12,
+      "note": "the posts become 12,595"
+    },
+    {
+      "frame": 249,
+      "sfx": "flap",
+      "gain_db": -14,
       "note": "12,595"
     },
     {
-      "frame": 338,
+      "frame": 342,
       "sfx": "whoosh-soft",
       "gain_db": -20,
-      "note": "card flip"
+      "note": "5,405 arrives from behind"
     },
     {
-      "frame": 347,
+      "frame": 344,
+      "sfx": "whoosh",
+      "gain_db": -16,
+      "note": "12,595 flies through the camera"
+    },
+    {
+      "frame": 344,
       "sfx": "flap",
       "gain_db": -14,
       "note": "5,405"
     },
     {
-      "frame": 406,
-      "sfx": "whoosh-soft",
-      "gain_db": -22,
-      "note": "card leaves"
+      "frame": 417,
+      "sfx": "whoosh",
+      "gain_db": -18,
+      "note": "5,405 flies through the camera"
     },
     {
       "frame": 440,
@@ -305,6 +317,24 @@
       "sfx": "whoosh",
       "gain_db": -16,
       "note": "mark spins up"
+    },
+    {
+      "frame": 2391,
+      "sfx": "tick",
+      "gain_db": -12,
+      "note": "mark ratchet"
+    },
+    {
+      "frame": 2420,
+      "sfx": "tick",
+      "gain_db": -12,
+      "note": "mark ratchet"
+    },
+    {
+      "frame": 2448,
+      "sfx": "tick",
+      "gain_db": -12,
+      "note": "mark ratchet"
     },
     {
       "frame": 2476,

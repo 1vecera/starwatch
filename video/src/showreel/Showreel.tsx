@@ -2,7 +2,7 @@ import { AbsoluteFill, Audio, Sequence, staticFile, useCurrentFrame } from "remo
 import { BlurDefs } from "./parts/Blur";
 import { Canvas } from "./parts/Canvas";
 import { BladeSweep, sweepSwap } from "./parts/Mark";
-import { kick } from "./parts/track";
+import { kick, whip } from "./parts/track";
 import { Champion, CHAMPION } from "./scenes/Champion";
 import { Cities, CTA_OUT } from "./scenes/Cities";
 import { Czechia } from "./scenes/Czechia";
@@ -45,6 +45,10 @@ const shake = (frame: number) => {
   return { k: Math.min(1, k), x: Math.sin(frame * 2.1) * 9 * k, y: Math.cos(frame * 2.7) * 7 * k };
 };
 
+// The ground pans a little with each whip, so the whips read as one camera moving over the canvas;
+// the pan resets under the teal blade.
+const pan = (frame: number) => (frame < SWAP ? -150 * (whip(frame, WHIP_AT) + whip(frame, F(40))) : 0);
+
 // Studio preview only; renders are muted and showreel/mix.py masters the same cue sheet.
 const Soundtrack: React.FC = () => (
   <>
@@ -73,7 +77,7 @@ export const StarwatchShowreel: React.FC<{ audio?: boolean }> = ({ audio = true 
     <AbsoluteFill style={{ backgroundColor: C.canvas }}>
       <BlurDefs />
       <AbsoluteFill style={{ transform: `translate(${s.x}px, ${s.y}px) scale(${1 + 0.02 * s.k})` }}>
-        {fullBleed ? null : <Canvas draw={ramp(frame, 0, F(5), easeOut)} lift={lift} zoom={1 + 0.0007 * frame} />}
+        {fullBleed ? null : <Canvas draw={ramp(frame, 0, F(5), easeOut)} lift={lift} zoom={1 + 0.0007 * frame} dx={pan(frame)} />}
         {SCENES.map(({ from, to, View }, i) => (frame >= from && frame < to ? <View key={i} /> : null))}
         {frame >= F(88) ? <EndCard /> : null}
         <BladeSweep at={SWEEP.at} dur={SWEEP.dur} />

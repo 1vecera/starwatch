@@ -102,11 +102,25 @@ export const Odometer: React.FC<{ value: string; from: number; dur: number; out?
   const prev = valueAt(frame - 1);
   const y = rise(frame, from, out);
   const ySpeed = (y - rise(frame - 1, from, out)) * size;
+  // When the count lands, the figure kicks once, like a counter hitting its stop.
+  const landed = from + 2 + Math.round(dur * 0.55);
+  const kickT = frame < landed ? 0 : Math.max(0, 1 - (frame - landed) / 12);
+  const punch = 1 + 0.06 * kickT * kickT;
   let k = -1;
   let shown = 0;
   return (
-    <span style={{ ...MASK, fontSize: size, lineHeight: style.lineHeight, visibility: frame < from || frame > out + 10 ? "hidden" : "visible" }}>
-      <span style={{ ...style, display: "inline-flex", alignItems: "flex-start", fontVariantNumeric: "tabular-nums", transform: `translateY(${y * 100}%)`, filter: vBlur(ySpeed) }}>
+    <span style={{ ...MASK, fontSize: size, lineHeight: style.lineHeight, paddingRight: "0.12em", marginRight: "-0.12em", visibility: frame < from || frame > out + 10 ? "hidden" : "visible" }}>
+      <span
+        style={{
+          ...style,
+          display: "inline-flex",
+          alignItems: "flex-start",
+          fontVariantNumeric: "tabular-nums",
+          transform: `translateY(${y * 100}%) scale(${punch})`,
+          transformOrigin: "0 80%",
+          filter: vBlur(ySpeed),
+        }}
+      >
         {chars.map((ch, i) => {
           const cell: React.CSSProperties = { display: "inline-block", height: "1em", lineHeight: "1em" };
           if (!/\d/.test(ch)) return <span key={i} style={{ ...cell, opacity: shown }}>{ch === " " ? " " : ch}</span>;

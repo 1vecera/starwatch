@@ -1,9 +1,9 @@
 import { AbsoluteFill, Img, useCurrentFrame } from "remotion";
 import { vBlur } from "../parts/Blur";
-import { Odometer, Words } from "../parts/Kinetic";
-import { Card, Stage, transformOf } from "../parts/Stage";
+import { Words } from "../parts/Kinetic";
+import { Stage, transformOf } from "../parts/Stage";
 import { track } from "../parts/track";
-import { asset, C, clamp01, display, easeIn, easeInOut, expoOut, label, pop, ramp } from "../theme";
+import { asset, C, clamp01, DISPLAY, easeIn, expoOut, label, ramp } from "../theme";
 import { beatFrame as F } from "../timing";
 
 // The welcome screen's wall, as the app builds it: the 48 most-viewed posts in columns that scroll at
@@ -35,36 +35,59 @@ const Column: React.FC<{ col: number; frame: number }> = ({ col, frame }) => {
   );
 };
 
-const FlipCard: React.FC<{ frame: number }> = ({ frame }) => {
-  const rise = pop(frame, F(8), 0.9, 1.2);
-  const p = track(frame, [
-    { f: F(8), y: 1500, rx: 30 },
-    { f: F(8) + 40, y: 560, rx: 0, e: expoOut },
-    { f: F(14.4), y: 560, rx: 0 },
-    { f: F(15.2), y: -900, rx: -50, e: easeIn },
-  ]);
-  const y = frame < F(8) + 40 ? 1500 + (560 - 1500) * rise : p.y;
-  const flip = 180 * ramp(frame, F(12), F(12) + 22, easeInOut);
-  const dip = 1 - 0.08 * Math.sin((flip / 180) * Math.PI);
+// The posts become the numbers: each figure set huge in the app's display face, filled with the mosaic
+// of the same 48 tiles scrolling like the wall, while the wall washes back behind it. 12,595 slams in
+// from the camera and flies back through it; 5,405 (the tiles under the one teal) arrives from behind
+// as it passes, and flies through in turn before the wall does.
+const POSTS = { at: F(8.75), out: F(11.9) };
+const CANDIDATES = { at: F(11.9) + 6, out: F(14.5) };
+
+const FillNumber: React.FC<{
+  frame: number;
+  at: number;
+  out: number;
+  from: number;
+  to: number;
+  behind?: boolean;
+  tint?: string;
+  stroke: string;
+  label: { text: string; at: number }[];
+}> = ({ frame, at, out, from, to, behind = false, tint, stroke, label: words }) => {
+  const inT = expoOut(clamp01((frame - at) / 16));
+  const outT = easeIn(clamp01((frame - out) / 12));
+  const count = Math.round(from + (to - from) * expoOut(clamp01((frame - at - 2) / 26)));
+  const kick = frame >= at + 22 ? Math.max(0, 1 - (frame - at - 22) / 12) ** 2 : 0;
+  const s = (behind ? 0.25 + 0.75 * inT : 2.2 - 1.2 * inT) * (1 + 0.05 * kick) * (1 + 6 * outT);
+  if (frame < at || outT >= 1) return null;
+  const mosaic = `url(${asset("tiles/mosaic.jpg")})`;
   return (
-    <div style={{ position: "absolute", left: 0, top: 0, transformStyle: "preserve-3d", transform: transformOf({ x: 960, y, rx: p.rx, ry: flip, s: dip }) }}>
-      <Card pose={{ x: 0, y: 0 }} w={1140} h={520}>
-        <div style={{ position: "absolute", left: 84, top: 70 }}>
-          <Odometer value="12,595" from={F(8) + 4} dur={46} style={display(250)} />
-        </div>
-        <div style={{ position: "absolute", left: 90, top: 352 }}>
-          <Words words={[{ text: "public posts from", at: F(9) }, { text: "candidates’ own accounts", at: F(9.5) }]} style={label(46)} gap={0.28} />
-        </div>
-      </Card>
-      <Card pose={{ x: 0, y: 0, ry: 180 }} w={1140} h={520}>
-        <div style={{ position: "absolute", left: 84, top: 70 }}>
-          <Odometer value="5,405" from={F(12.3)} dur={34} style={display(250, C.brand)} />
-        </div>
-        <div style={{ position: "absolute", left: 90, top: 352 }}>
-          <Words words={[{ text: "candidates in ten Czech cities", at: F(12.9) }]} style={label(46)} />
-        </div>
-      </Card>
-    </div>
+    <AbsoluteFill style={{ alignItems: "center", justifyContent: "center", flexDirection: "column", opacity: clamp01((frame - at) / 4) * (1 - outT), transform: `scale(${s})` }}>
+      <div
+        style={{
+          fontFamily: DISPLAY,
+          fontVariationSettings: "'opsz' 96",
+          fontWeight: 800,
+          fontSize: 470,
+          letterSpacing: "-0.045em",
+          lineHeight: 1,
+          fontVariantNumeric: "tabular-nums",
+          backgroundImage: tint ? `linear-gradient(${tint}, ${tint}), ${mosaic}` : mosaic,
+          backgroundBlendMode: tint ? "multiply" : undefined,
+          backgroundSize: tint ? "100% 100%, 1300px auto" : "1300px auto",
+          backgroundPosition: tint ? `0 0, ${-(frame - at) * 0.8}px ${-(frame - at) * 3.2}px` : `${-(frame - at) * 0.8}px ${-(frame - at) * 3.2}px`,
+          WebkitBackgroundClip: "text",
+          backgroundClip: "text",
+          color: "transparent",
+          WebkitTextStroke: `3px ${stroke}`,
+          marginTop: -40,
+        }}
+      >
+        {count.toLocaleString("en-GB")}
+      </div>
+      <div style={{ marginTop: 18 }}>
+        <Words words={words} out={out - 4} style={label(54, C.label, 600)} gap={0.28} />
+      </div>
+    </AbsoluteFill>
   );
 };
 
@@ -85,9 +108,30 @@ export const Wall: React.FC = () => {
           ))}
         </div>
       </Stage>
-      <Stage perspective={1800}>
-        <FlipCard frame={frame} />
-      </Stage>
+      <AbsoluteFill style={{ background: C.canvas, opacity: 0.86 * ramp(frame, F(8.5), F(9.25), expoOut) * (1 - ramp(frame, CANDIDATES.out, CANDIDATES.out + 12, easeIn)) }} />
+      <FillNumber
+        frame={frame}
+        at={CANDIDATES.at}
+        out={CANDIDATES.out}
+        from={4000}
+        to={5405}
+        behind
+        tint="rgba(14,110,107,0.82)"
+        stroke="#094F4C"
+        label={[{ text: "candidates in ten Czech cities", at: F(12.6) }]}
+      />
+      <FillNumber
+        frame={frame}
+        at={POSTS.at}
+        out={POSTS.out}
+        from={10000}
+        to={12595}
+        stroke={C.label}
+        label={[
+          { text: "public posts from", at: F(9.25) },
+          { text: "candidates’ own accounts", at: F(9.6) },
+        ]}
+      />
     </AbsoluteFill>
   );
 };

@@ -19,16 +19,23 @@ export const MarkBuild: React.FC = () => {
   const m = track(frame, [
     { f: F(83.5), x: 960, y: 540, w: 40, r: -540 },
     { f: F(84.25), x: 960, y: 540, w: 760, r: -60, e: expoOut },
-    { f: F(87.25), x: 960, y: 540, w: 640, r: 210 },
-    { f: F(87.75), x: 960, y: 540, w: 730, r: 194, e: easeOut },
+    { f: F(87.25), x: 960, y: 540, w: 640, r: 75 },
+    { f: F(87.75), x: 960, y: 540, w: 730, r: 59, e: easeOut },
     { f: F(88), x: MARK_AT.x, y: MARK_AT.y, w: 176, r: 540, e: easeIn },
   ]);
-  // Between the spin-up and the wind-back, a quarter turn snaps in on each beat with a small kick.
-  const b = beatAt(frame);
-  if (b >= 84.25 && b < 87.25) {
-    m.r = -60 + 90 * (Math.floor(b) - 85 + expoOut(Math.min(1, 4 * (b - Math.floor(b)))));
-    m.w *= 1 + 0.06 * kick(frame, F(Math.floor(b)), 10);
+  // Between the spin-up and the wind-back, an eighth turn snaps in on each beat with a kick (a quarter
+  // turn would land on the same pose: the mark has four-fold symmetry).
+  const turnAt = (f: number) => {
+    const b = beatAt(f);
+    if (b < 84.25 || b >= 87.25) return null;
+    return -60 + 45 * (Math.floor(b) - 85 + expoOut(Math.min(1, (f - F(Math.floor(b))) / 8)));
+  };
+  const turn = turnAt(frame);
+  if (turn !== null) {
+    m.r = turn;
+    m.w *= 1 + 0.14 * kick(frame, F(Math.floor(beatAt(frame))), 10);
   }
+  const spin = turn !== null && turnAt(frame - 1) !== null ? turn - (turnAt(frame - 1) as number) : 0;
   const fade = 1 - ramp(frame, F(88) - 1, F(88) + 5, (t) => t);
   const rings = Array.from({ length: 4 }, (_, i) => {
     const t = clamp01((frame - F(84 + i)) / 40);
@@ -40,18 +47,22 @@ export const MarkBuild: React.FC = () => {
       <svg width={1920} height={1080} style={{ position: "absolute", inset: 0 }}>
         {rings.map((ring, i) => (ring ? <circle key={i} cx={960} cy={540} r={ring.r} fill="none" stroke={C.brand} strokeWidth={2.5} strokeOpacity={ring.o} /> : null))}
       </svg>
-      <Img
-        src={asset("img/mark-3d.webp")}
-        style={{
-          position: "absolute",
-          left: m.x - m.w / 2,
-          top: m.y - (m.w * 640) / 619 / 2,
-          width: m.w,
-          height: (m.w * 640) / 619,
-          transform: `rotate(${m.r}deg)`,
-          opacity: fade,
-        }}
-      />
+      {/* While it snaps, two ghosts trail the turn: the mark's own motion blur. */}
+      {(spin > 3 ? [[12, 0.15], [6, 0.35], [0, 1]] : [[0, 1]]).map(([back, o]) => (
+        <Img
+          key={back}
+          src={asset("img/mark-3d.webp")}
+          style={{
+            position: "absolute",
+            left: m.x - m.w / 2,
+            top: m.y - (m.w * 640) / 619 / 2,
+            width: m.w,
+            height: (m.w * 640) / 619,
+            transform: `rotate(${m.r - back}deg)`,
+            opacity: fade * o,
+          }}
+        />
+      ))}
     </AbsoluteFill>
   );
 };

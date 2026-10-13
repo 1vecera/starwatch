@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REPO = ROOT.parent
 CAPTURES = ROOT / "tmp/captures"
 OUT = ROOT / "public/showreel"
-TAKES = ["atlas", "tiles", "parts", "spotlight", "pulse", "radar", "results", "phone"]
+TAKES = ["atlas-open", "tiles", "parts", "spotlight", "pulse", "radar", "results", "phone"]
 BRAND = ["lockup.svg", "icon-spotlight.svg", "icon-pulse.svg", "icon-radar.svg", "icon-data.svg"]
 IMG = ["bg-topo.svg", "bg-grid.svg", "mark-3d.webp"]
 SCORE = ("score-4.mp3", 3.762)
@@ -70,6 +70,13 @@ def main() -> None:
     )  # fmt: skip
     for key, file in SFX.items():
         shutil.copy2(args.audio / "sfx" / file, audio / f"{key}.mp3")
+    # The 48 wall tiles as one mosaic, the fill for the "12,595" that the posts become.
+    tiles = sorted((OUT / "tiles").glob("[0-9][0-9][0-9][0-9].png"))
+    subprocess.run(
+        ["magick", "montage", *map(str, tiles), "-tile", "8x6", "-geometry", "282x351+10+10", "-background", "#0F172A",
+         str(OUT / "tiles/mosaic.jpg")],
+        check=True,
+    )  # fmt: skip
     topo(REPO / "app/web/img/bg-topo.svg", ROOT / "src/showreel/parts/topo.ts")
     manifest = {
         str(path.relative_to(OUT)): hashlib.sha256(path.read_bytes()).hexdigest()

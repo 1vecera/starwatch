@@ -2,7 +2,7 @@ import { AbsoluteFill, Easing, useCurrentFrame } from "remotion";
 import { Letters, Words } from "../parts/Kinetic";
 import { Mark } from "../parts/Mark";
 import { track } from "../parts/track";
-import { C, clamp01, display, expoOut, pop, ramp } from "../theme";
+import { C, clamp01, display, easeOut, expoOut, pop, ramp } from "../theme";
 import { beatFrame as F } from "../timing";
 
 export const LOCK = F(1.5);
@@ -52,7 +52,8 @@ export const OpenMark: React.FC = () => {
   const m = track(frame, [
     { f: F(2), x: 960, y: 540, u: 4.4, r: 0 },
     { f: F(2.75), x: 206, y: 236, u: 1.6, r: 90, e: expoOut },
-    { f: F(5.75), x: 206, y: 236, u: 1.6, r: 90 },
+    { f: F(5.25), x: 206, y: 236, u: 1.6, r: 90 },
+    { f: F(5.6), x: 214, y: 242, u: 1.36, r: 80, e: easeOut },
     { f: F(6.75), x: 420, y: 360, u: 64, r: 270, e: DIVE },
   ]);
   return (

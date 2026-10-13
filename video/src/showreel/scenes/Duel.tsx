@@ -119,22 +119,25 @@ export const Duel: React.FC = () => {
   // Kaštovský: solo on the left; off frame with the whip; from beat 47 he flies back in to meet
   // Hlaváček in the middle on the clash, and both recoil to their corners on a spring.
   const kp = track(frame, [
-    { f: F(31), x: 470, y: 540, ry: 16, rz: -2, s: 1 },
-    { f: APPROACH - 1, x: 470, y: 540, ry: 16, rz: -2, s: 1 },
+    { f: F(31), x: 470, y: 540, ry: 18, rz: -2, s: 1 },
+    { f: H_AT, x: 486, y: 534, ry: 9, rz: -1, s: 1.03, e: (t: number) => t },
+    { f: APPROACH - 1, x: 486, y: 534, ry: 9, rz: -1, s: 1.03 },
     { f: APPROACH, x: -1450, y: 500, ry: 30, rz: -8, s: 0.8 },
     { f: CLASH, x: 770, y: 450, ry: 6, rz: 0, s: 0.72, e: easeIn },
   ]) as P;
   const hp = track(frame, [
-    { f: F(39), x: 1450, y: 540, ry: -16, rz: 2, s: 1 },
-    { f: APPROACH, x: 1450, y: 540, ry: -16, rz: 2, s: 1 },
+    { f: F(39), x: 1450, y: 540, ry: -18, rz: 2, s: 1 },
+    { f: APPROACH, x: 1434, y: 534, ry: -9, rz: 1, s: 1.03, e: (t: number) => t },
     { f: CLASH, x: 1150, y: 450, ry: -6, rz: 0, s: 0.72, e: easeIn },
   ]) as P;
   const recoil = frame >= CLASH ? pop(frame, CLASH, 1.4, 1) : 0;
   const k = frame >= CLASH ? { ...kp, x: 770 + (300 - 770) * recoil, ry: 6 + 8 * recoil } : kp;
   const h = frame >= CLASH ? { ...hp, x: 1150 + (1620 - 1150) * recoil, ry: -6 - 8 * recoil } : hp;
   const squash = 1 + 0.08 * kick(frame, CLASH, 10);
+  // A slow push through each part of the duel, reset under each whip and on the clash.
+  const push = frame < H_AT ? ramp(frame, WHIP_AT, H_AT, (t) => t) : frame < CLASH ? ramp(frame, H_AT, APPROACH, (t) => t) : ramp(frame, CLASH, DUEL_OUT, (t) => t);
   return (
-    <AbsoluteFill>
+    <AbsoluteFill style={{ transform: `scale(${1 + 0.035 * push})` }}>
       <AbsoluteFill style={{ transform: `translateX(${kx}px) scale(${land(frame, WHIP_AT)})`, filter: hBlur(kx - kLayer(frame - 1)) }}>
         {frame < H_AT + 10 ? (
           <Solo x={856} tag="1st by reach in Prague" first="Tomáš" last="Kaštovský" at={32} views="25M" votes="85,284" votesLabel="votes in 2026, elected" votesColor={C.label} out={1e9} />
@@ -142,7 +145,7 @@ export const Duel: React.FC = () => {
       </AbsoluteFill>
       <AbsoluteFill style={{ transform: `translateX(${hx}px) scale(${land(frame, H_AT)})`, filter: hBlur(hx - hLayer(frame - 1)) }}>
         {frame >= H_AT - 10 && frame < APPROACH + 12 ? (
-          <Solo x={146} tag="1st by votes in Prague" first="Petr" last="Hlaváček" at={40} views="999k" votes="100,907" votesLabel="votes in 2026, the most in Prague" votesColor={C.brand} out={F(47.5)} />
+          <Solo x={146} tag="1st by votes in Prague" first="Petr" last="Hlaváček" at={40} views="999k" votes="100,907" votesLabel="votes in 2026, the most in Prague" votesColor={C.brand} out={F(47.75)} />
         ) : null}
       </AbsoluteFill>
       {frame >= CLASH ? (

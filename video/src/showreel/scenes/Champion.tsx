@@ -1,6 +1,6 @@
 import { AbsoluteFill, useCurrentFrame } from "remotion";
 import { vBlur } from "../parts/Blur";
-import { Words } from "../parts/Kinetic";
+import { Letters, Words } from "../parts/Kinetic";
 import { Mark } from "../parts/Mark";
 import { display, easeIn, label, ramp } from "../theme";
 import { beatFrame as F } from "../timing";
@@ -26,7 +26,7 @@ export const Champion: React.FC = () => {
     >
       <Mark cx={1560} cy={540} unit={15} color="rgba(255,255,255,0.09)" rotate={(frame - CHAMPION.from) * 0.6} />
       <div style={{ position: "absolute", left: 140, top: 368 }}>
-        <Words words={[{ text: "Overall", at: F(68) }, { text: "champion", at: F(68.25) }]} style={display(168, "#FFFFFF")} />
+        <Letters text="Overall champion" at={F(68)} step={1} style={display(168, "#FFFFFF")} />
       </div>
       <div style={{ position: "absolute", left: 148, top: 576 }}>
         <Words words={[{ text: "Agents 0.0.7 hackathon, Prague.", at: F(69) }, { text: "38 projects.", at: F(69.5) }]} style={label(50, "rgba(255,255,255,0.88)", 560)} gap={0.3} />

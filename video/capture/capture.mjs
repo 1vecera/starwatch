@@ -91,8 +91,25 @@ async function open(browser, options, path) {
 const TAKES = {
   // Czechia overview, a camera flight into Prague, the city with its party islands, then a slow drift.
   async atlas(browser, dir) {
+    return atlasTake(browser, dir, false);
+  },
+
+  // The same flight with both side panels closed through the app's own close buttons, so the map and
+  // its islands fill the frame.
+  async "atlas-open"(browser, dir) {
+    return atlasTake(browser, dir, true);
+  },
+};
+
+async function atlasTake(browser, dir, shut) {
+  {
     const { context, page } = await open(browser, DESKTOP, "atlas.html");
     await page.waitForFunction(() => window.map && map.loaded(), null, { timeout: 30000 });
+    if (shut) {
+      await page.click("#sideX");
+      await page.click("#inspX");
+      await page.waitForTimeout(900);
+    }
     // Settled = no camera movement and every tile in view loaded; then two frames so it is painted.
     const idle = () =>
       page.evaluate(
@@ -157,8 +174,11 @@ const TAKES = {
       frames.push({ lng, lat: end.lat, zoom, city: 0 });
     }
     await context.close();
-    return { url: BASE + "atlas.html", flight: FLIGHT, drift: DRIFT, c0, c1, frames, boxes: { overview, city } };
-  },
+    return { url: BASE + "atlas.html", panels: shut ? "closed" : "open", flight: FLIGHT, drift: DRIFT, c0, c1, frames, boxes: { overview, city } };
+  }
+}
+
+Object.assign(TAKES, {
 
   // Petr Hlaváček's Spotlight: profile and 2026 result, then down to the grid of his best posts.
   // The stop (750 px) leaves no half-hidden row under the floating top bar.
@@ -245,7 +265,7 @@ const TAKES = {
     await context.close();
     return { url: BASE, boxes: { card } };
   },
-};
+});
 
 // Element takes: real pieces of the app the reel moves as separate layers. Each PNG is an element
 // screenshot (tiles at 3×, Spotlight parts at 5× so the portraits hold up large), so nothing is
