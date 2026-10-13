@@ -30,7 +30,7 @@ export const Sheet: React.FC<{ src: string; cam: Cam; under?: string; mix?: numb
         top: VIEW.y,
         width: VIEW.w,
         height: VIEW.h,
-        borderRadius: 18,
+        borderRadius: 20,
         overflow: "hidden",
         background: C.canvas,
         boxShadow: `0 0 0 1px ${C.hairline}, ${ELEV3}`,

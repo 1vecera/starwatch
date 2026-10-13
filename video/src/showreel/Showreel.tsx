@@ -3,7 +3,7 @@ import { Canvas } from "./parts/Canvas";
 import { Cam, Sheet, VIEW } from "./parts/Sheet";
 import { Captions, Line } from "./parts/Caption";
 import { shot } from "./parts/Take";
-import { asset, C, easeInOut, easeOut, ramp, TEXT, WORDMARK } from "./theme";
+import { asset, C, easeInOut, easeOut, ELEV3, ramp, TEXT, WORDMARK } from "./theme";
 import { beatFrame, DURATION } from "./timing";
 import cues from "./cues.json";
 
@@ -18,11 +18,11 @@ const hold = (index: number) => () => index;
 // CSS pixels of the 1600×900 page, read off the captures.
 const SHOTS: Shot[] = [
   // The welcome screen: the wall of campaign posts, easing toward the tagline card.
-  { from: 0, to: 8, take: "welcome", keys: [{ beat: 0, m: 1, cx: 800, cy: 450 }, { beat: 8, m: 1.34, cx: 390, cy: 345 }] },
+  { from: 0, to: 8, take: "welcome", keys: [{ beat: 0, m: 1, cx: 800, cy: 450 }, { beat: 8, m: 1.3, cx: 615, cy: 300 }] },
   // Star Atlas over Czechia, drifting toward Prague's marker.
-  { from: 8, to: 24, take: "atlas", index: hold(0), keys: [{ beat: 8, m: 1, cx: 800, cy: 470 }, { beat: 24, m: 1.16, cx: 690, cy: 440 }] },
+  { from: 8, to: 24, take: "atlas", index: hold(0), keys: [{ beat: 8, m: 1, cx: 800, cy: 470 }, { beat: 24, m: 1.335, cx: 599, cy: 440 }] },
   // The drop: the real camera flight into Prague (110 captured frames, one per reel frame).
-  { from: 24, to: 28, take: "atlas", index: (f) => Math.min(109, rel(f, 24)), keys: [{ beat: 24, m: 1.16, cx: 690, cy: 440 }, { beat: 26, m: 1, cx: 800, cy: 450 }] },
+  { from: 24, to: 28, take: "atlas", index: (f) => Math.min(109, rel(f, 24)), keys: [{ beat: 24, m: 1.335, cx: 599, cy: 440 }, { beat: 26.5, m: 1, cx: 800, cy: 450 }] },
   // Prague's lists as islands of their posts, then in to SPOLU pro Prahu's island.
   {
     from: 28,
@@ -43,9 +43,9 @@ const SHOTS: Shot[] = [
     take: "kastovsky",
     keys: [
       { beat: 36, m: 1.12, cx: 780, cy: 470 },
-      { beat: 39.5, m: 1.3, cx: 760, cy: 470 },
-      { beat: 40.5, m: 1.45, cx: 965, cy: 300 },
-      { beat: 44, m: 1.48, cx: 965, cy: 300 },
+      { beat: 39.5, m: 1.43, cx: 960, cy: 476 },
+      { beat: 40.5, m: 1.38, cx: 1000, cy: 390 },
+      { beat: 44, m: 1.4, cx: 1000, cy: 392 },
     ],
   },
   // The candidate with the most votes in Prague: his views, then his 2026 result.
@@ -55,9 +55,9 @@ const SHOTS: Shot[] = [
     take: "hlavacek",
     keys: [
       { beat: 44, m: 1.12, cx: 780, cy: 560 },
-      { beat: 47.5, m: 1.3, cx: 760, cy: 560 },
-      { beat: 48.5, m: 1.45, cx: 965, cy: 330 },
-      { beat: 52, m: 1.48, cx: 965, cy: 330 },
+      { beat: 47.5, m: 1.43, cx: 960, cy: 560 },
+      { beat: 48.5, m: 1.38, cx: 1000, cy: 400 },
+      { beat: 52, m: 1.4, cx: 1000, cy: 402 },
     ],
   },
   // Pulse with the two side by side: the chart, then down to attention next to votes.
@@ -68,9 +68,9 @@ const SHOTS: Shot[] = [
     index: (f) => Math.min(89, Math.max(0, Math.round((rel(f, 54) * 90) / (beatFrame(56) - beatFrame(54))))),
     keys: [
       { beat: 52, m: 1, cx: 800, cy: 450 },
-      { beat: 56, m: 1, cx: 800, cy: 450 },
-      { beat: 57.5, m: 1.15, cx: 800, cy: 478 },
-      { beat: 60, m: 1.18, cx: 800, cy: 478 },
+      { beat: 55, m: 1, cx: 800, cy: 450 },
+      { beat: 56, m: 1, cx: 800, cy: 480 },
+      { beat: 60, m: 1.02, cx: 800, cy: 482 },
     ],
   },
   // By the numbers: the official results per city, then every list in Prague.
@@ -87,7 +87,7 @@ const SHOTS: Shot[] = [
     ],
   },
   // Look up your city: the Atlas again, in on the list of the ten cities.
-  { from: 76, to: 88, take: "atlas", index: hold(0), keys: [{ beat: 76, m: 1, cx: 800, cy: 470 }, { beat: 80, m: 1.45, cx: 560, cy: 600 }, { beat: 88, m: 1.5, cx: 552, cy: 610 }] },
+  { from: 76, to: 88, take: "atlas", index: hold(0), keys: [{ beat: 76, m: 1, cx: 800, cy: 470 }, { beat: 80, m: 1.45, cx: 560, cy: 590 }, { beat: 88, m: 1.48, cx: 556, cy: 590 }] },
 ];
 
 const LINES: Line[] = [
@@ -98,16 +98,15 @@ const LINES: Line[] = [
   { beat: 28, until: 32, text: "Each list becomes an island of its posts." },
   { beat: 32, until: 36, text: "Most reach in Prague: SPOLU pro Prahu, 26M." },
   { beat: 36, until: 40, text: "Tomáš Kaštovský: 25M video views since 2023." },
-  { beat: 40, until: 44, text: "85,284 votes. Elected, 11th by votes on his list." },
+  { beat: 40, until: 44, text: "85,284 votes. 11th on his list." },
   { beat: 44, until: 48, text: "Petr Hlaváček: 999k video views since 2023." },
   { beat: 48, until: 52, text: "100,907 votes, the most in Prague." },
   { beat: 52, until: 56, text: "Pulse puts them side by side." },
-  { beat: 56, until: 60, text: "Attention and votes: separate measures, never one score." },
+  { beat: 56, until: 60, text: "Attention and votes stay separate." },
   { beat: 60, until: 64, text: "Official 2026 results, final count." },
-  { beat: 64, until: 68, text: "All 5,405 candidates, next to what they posted." },
+  { beat: 64, until: 68, text: "Every list in Prague, with its votes and seats." },
   { beat: 68, until: 72, text: "Open to everyone. No sign-in." },
-  { beat: 76, until: 82, text: "Look up your city at starwatch.danielvecera.com." },
-  { beat: 82, until: 88, text: "Open source under MIT on GitHub." },
+  { beat: 76, until: 88, text: "Look up your city at starwatch.danielvecera.com." },
 ];
 
 // Ease between camera keys.
@@ -153,7 +152,7 @@ const Phone: React.FC = () => {
         height: h,
         borderRadius: 46,
         overflow: "hidden",
-        boxShadow: `0 0 0 1px ${C.hairline}, 0 0 0 9px ${C.surface}, 0 0 0 10px ${C.hairline}, 0 2px 4px rgb(15 23 42 / .05), 0 32px 64px -16px rgb(15 23 42 / .22)`,
+        boxShadow: `0 0 0 1px ${C.hairline}, 0 0 0 9px ${C.surface}, 0 0 0 10px ${C.hairline}, ${ELEV3}`,
         transform: `scale(${1 + 0.025 * push})`,
       }}
     >
@@ -169,8 +168,8 @@ const Hackathon: React.FC = () => {
   const b = ramp(frame, beatFrame(73), beatFrame(73) + 10);
   return (
     <div style={{ position: "absolute", left: 0, right: 0, top: 410, textAlign: "center", fontFamily: TEXT }}>
-      <div style={{ fontSize: 54, fontWeight: 620, letterSpacing: "-0.02em", color: C.label, opacity: a }}>Built at the Agents 0.0.7 hackathon in Prague.</div>
-      <div style={{ fontSize: 34, fontWeight: 500, color: C.label2, marginTop: 22, opacity: b }}>Overall winner among 38 projects, 8–9 October 2026.</div>
+      <div style={{ fontSize: 40, fontWeight: 560, letterSpacing: "-0.01em", color: C.label, opacity: a }}>Built at the Agents 0.0.7 hackathon in Prague.</div>
+      <div style={{ fontSize: 30, fontWeight: 500, color: C.label2, marginTop: 18, opacity: b }}>Overall winner among 38 projects.</div>
     </div>
   );
 };

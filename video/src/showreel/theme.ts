@@ -12,7 +12,7 @@ export const C = {
   label2: "#475569",
   label3: "#5B6A7E",
   brand: "#0E6E6B",
-  hairline: "rgba(15,23,42,0.10)",
+  hairline: "rgba(22,37,36,0.10)",
 };
 // --elev-3 from ds.css: a contact shadow plus a soft ambient one.
 export const ELEV3 = "0 2px 4px rgb(15 23 42 / .05), 0 12px 24px -6px rgb(15 23 42 / .10), 0 32px 64px -16px rgb(15 23 42 / .20)";
