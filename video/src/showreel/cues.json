@@ -1,0 +1,285 @@
+{
+  "fps": 60,
+  "duration_frames": 2700,
+  "score": {
+    "file": "score.wav",
+    "source": "ElevenLabs Music v2.5 take 4 (flow 5UuhkrWsLlYeXmYy7dPT), from 3.762 s",
+    "gain_db": 0,
+    "fade_out_from_frame": 2610
+  },
+  "sfx_peaks_s": {
+    "impact": 0.0,
+    "impact-long": 0.0,
+    "whoosh": 0.03,
+    "whoosh-soft": 0.04,
+    "glitch": 0.14,
+    "tick": 0.02,
+    "riser": 1.6,
+    "key": 0.12,
+    "flap": 0.21,
+    "flash": 0.0,
+    "jelly": 0.04,
+    "blips": 0.09
+  },
+  "cues": [
+    {
+      "frame": 2,
+      "sfx": "flash",
+      "gain_db": -18,
+      "note": "the mark glints"
+    },
+    {
+      "frame": 29,
+      "sfx": "tick",
+      "gain_db": -15
+    },
+    {
+      "frame": 43,
+      "sfx": "tick",
+      "gain_db": -15
+    },
+    {
+      "frame": 57,
+      "sfx": "tick",
+      "gain_db": -15
+    },
+    {
+      "frame": 113,
+      "sfx": "tick",
+      "gain_db": -15
+    },
+    {
+      "frame": 127,
+      "sfx": "tick",
+      "gain_db": -15
+    },
+    {
+      "frame": 141,
+      "sfx": "tick",
+      "gain_db": -15
+    },
+    {
+      "frame": 156,
+      "sfx": "tick",
+      "gain_db": -15
+    },
+    {
+      "frame": 71,
+      "sfx": "jelly",
+      "gain_db": -14,
+      "note": "mark as full stop"
+    },
+    {
+      "frame": 170,
+      "sfx": "jelly",
+      "gain_db": -14
+    },
+    {
+      "frame": 254,
+      "sfx": "flap",
+      "gain_db": -13,
+      "note": "figure lands"
+    },
+    {
+      "frame": 282,
+      "sfx": "flap",
+      "gain_db": -13,
+      "note": "figure lands"
+    },
+    {
+      "frame": 310,
+      "sfx": "flap",
+      "gain_db": -13,
+      "note": "figure lands"
+    },
+    {
+      "frame": 338,
+      "sfx": "flap",
+      "gain_db": -13,
+      "note": "figure lands"
+    },
+    {
+      "frame": 381,
+      "sfx": "blips",
+      "gain_db": -18
+    },
+    {
+      "frame": 465,
+      "sfx": "tick",
+      "gain_db": -14,
+      "note": "pipeline node"
+    },
+    {
+      "frame": 493,
+      "sfx": "tick",
+      "gain_db": -14,
+      "note": "pipeline node"
+    },
+    {
+      "frame": 521,
+      "sfx": "tick",
+      "gain_db": -14,
+      "note": "pipeline node"
+    },
+    {
+      "frame": 549,
+      "sfx": "tick",
+      "gain_db": -14,
+      "note": "pipeline node"
+    },
+    {
+      "frame": 577,
+      "sfx": "tick",
+      "gain_db": -14,
+      "note": "pipeline node"
+    },
+    {
+      "frame": 634,
+      "sfx": "whoosh-soft",
+      "gain_db": -16,
+      "note": "node opens into the window"
+    },
+    {
+      "frame": 676,
+      "sfx": "impact",
+      "gain_db": -9,
+      "note": "the drop: Star Atlas"
+    },
+    {
+      "frame": 676,
+      "sfx": "whoosh",
+      "gain_db": -15
+    },
+    {
+      "frame": 732,
+      "sfx": "whoosh-soft",
+      "gain_db": -17,
+      "note": "flight into Prague"
+    },
+    {
+      "frame": 843,
+      "sfx": "flash",
+      "gain_db": -15,
+      "note": "islands appear"
+    },
+    {
+      "frame": 1013,
+      "sfx": "whoosh",
+      "gain_db": -15,
+      "note": "next screen slides in"
+    },
+    {
+      "frame": 1238,
+      "sfx": "whoosh",
+      "gain_db": -15,
+      "note": "next screen slides in"
+    },
+    {
+      "frame": 1463,
+      "sfx": "whoosh",
+      "gain_db": -15,
+      "note": "next screen slides in"
+    },
+    {
+      "frame": 1688,
+      "sfx": "whoosh",
+      "gain_db": -15,
+      "note": "next screen slides in"
+    },
+    {
+      "frame": 2026,
+      "sfx": "jelly",
+      "gain_db": -11,
+      "note": "mark forms"
+    },
+    {
+      "frame": 2054,
+      "sfx": "impact",
+      "gain_db": -12,
+      "note": "Overall champion"
+    },
+    {
+      "frame": 2251,
+      "sfx": "tick",
+      "gain_db": -12,
+      "note": "montage cut"
+    },
+    {
+      "frame": 2279,
+      "sfx": "tick",
+      "gain_db": -12,
+      "note": "montage cut"
+    },
+    {
+      "frame": 2307,
+      "sfx": "tick",
+      "gain_db": -12,
+      "note": "montage cut"
+    },
+    {
+      "frame": 2335,
+      "sfx": "tick",
+      "gain_db": -12,
+      "note": "montage cut"
+    },
+    {
+      "frame": 2363,
+      "sfx": "glitch",
+      "gain_db": -19,
+      "note": "eighth-note cut"
+    },
+    {
+      "frame": 2377,
+      "sfx": "glitch",
+      "gain_db": -19,
+      "note": "eighth-note cut"
+    },
+    {
+      "frame": 2391,
+      "sfx": "glitch",
+      "gain_db": -19,
+      "note": "eighth-note cut"
+    },
+    {
+      "frame": 2406,
+      "sfx": "glitch",
+      "gain_db": -19,
+      "note": "eighth-note cut"
+    },
+    {
+      "frame": 2420,
+      "sfx": "glitch",
+      "gain_db": -19,
+      "note": "eighth-note cut"
+    },
+    {
+      "frame": 2434,
+      "sfx": "glitch",
+      "gain_db": -19,
+      "note": "eighth-note cut"
+    },
+    {
+      "frame": 2448,
+      "sfx": "glitch",
+      "gain_db": -19,
+      "note": "eighth-note cut"
+    },
+    {
+      "frame": 2462,
+      "sfx": "glitch",
+      "gain_db": -19,
+      "note": "eighth-note cut"
+    },
+    {
+      "frame": 2476,
+      "sfx": "impact-long",
+      "gain_db": -6,
+      "note": "final hit: the lockup"
+    },
+    {
+      "frame": 2476,
+      "sfx": "flash",
+      "gain_db": -13
+    }
+  ]
+}

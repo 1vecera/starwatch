@@ -19,3 +19,7 @@
 **/.wrangler/
 *.log
 launch-checks/
+
+# Showreel media staged from captures and audio
+video/public/showreel/
+video/out/
