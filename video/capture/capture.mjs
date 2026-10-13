@@ -247,6 +247,70 @@ const TAKES = {
   },
 };
 
+// Element takes: real pieces of the app the reel moves as separate layers. Each PNG is an element
+// screenshot (tiles at 3×, Spotlight parts at 5× so the portraits hold up large), so nothing is
+// redrawn; the reel only moves, scales and masks them.
+const ELEMENT = { viewport: { width: 1600, height: 900 }, deviceScaleFactor: 3 };
+const ELEMENT_LARGE = { ...ELEMENT, deviceScaleFactor: 5 };
+
+Object.assign(TAKES, {
+  // The welcome wall: each of the most-viewed posts as its own tile, with its views badge.
+  // The Starwatch card is hidden so it does not cover tiles; the tiles themselves are untouched.
+  async tiles(browser, dir) {
+    const { context, page } = await open(browser, ELEMENT, "");
+    await page.waitForTimeout(2500);
+    // Unroll the wall: columns stop scrolling and grow to their full height, so every tile can be shot.
+    await page.addStyleTag({
+      content: `.wrap { display: none !important }
+        .feed { position: absolute !important; inset: 0 0 auto 0 !important; height: auto !important; overflow: visible !important }
+        .col { overflow: visible !important; opacity: 1 !important; animation: none !important }
+        .track { animation: none !important; transform: none !important }`,
+    });
+    const tiles = page.locator(".tile");
+    const count = await tiles.count();
+    const seen = new Set();
+    const out = [];
+    for (let i = 0; i < count; i++) {
+      const tile = tiles.nth(i);
+      const src = await tile.locator("img").getAttribute("src");
+      if (seen.has(src)) continue;
+      seen.add(src);
+      await tile.scrollIntoViewIfNeeded();
+      await settleImages(page, 6000);
+      const views = (await tile.locator("b").innerText()).replace(/\s+/g, " ").trim();
+      const file = `${pad(out.length)}.png`;
+      await tile.screenshot({ path: join(dir, file) });
+      out.push({ file, src, views });
+    }
+    await context.close();
+    return { url: BASE, tiles: out };
+  },
+
+  // Both candidates' Spotlight heroes, cut into the portrait, the name, the 2026 result and the
+  // line of totals (followers, posts, video views).
+  async parts(browser, dir) {
+    const out = {};
+    for (const [key, name] of [["kastovsky", "Tomáš Kaštovský"], ["hlavacek", "Petr Hlaváček"]]) {
+      const probe = await open(browser, DESKTOP, "spotlight.html");
+      const id = await probe.page.evaluate((n) => SW.cands.findIndex((c) => c.name === n && SW.cities[c.city]?.name === "Praha"), name);
+      await probe.context.close();
+      const path = `spotlight.html?cand=${id}`;
+      const { context, page } = await open(browser, ELEMENT_LARGE, path);
+      await page.waitForTimeout(1500);
+      await settleImages(page, 10000);
+      const shots = { portrait: "#hero .pt", identity: "#hero .idt", vote: "#hero .vote", strip: "#strip" };
+      out[key] = { url: BASE + path };
+      for (const [part, selector] of Object.entries(shots)) {
+        const el = page.locator(selector).first();
+        await el.screenshot({ path: join(dir, `${key}-${part}.png`) });
+        out[key][part] = await el.evaluate((e) => e.innerText.replace(/\s+/g, " ").trim().slice(0, 240));
+      }
+      await context.close();
+    }
+    return out;
+  },
+});
+
 /** A Spotlight page for one Prague candidate, as a single sharp still. */
 async function spotlightStill(browser, dir, name) {
   const probe = await open(browser, DESKTOP, "spotlight.html");

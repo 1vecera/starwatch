@@ -413,11 +413,11 @@
       "css": ".ds-dock{display:inline-flex;align-items:center;height:46px;padding:4px;gap:2px;border-radius:999px;background:rgba(255,255,255,.74);backdrop-filter:blur(16px) saturate(1.5);border:1px solid rgba(15,23,42,.09);box-shadow:0 1px 2px rgba(15,23,42,.06),0 10px 28px -10px rgba(15,23,42,.18)} .ds-dock button{height:36px;padding:6px 14px;border-radius:999px;border:0;background:none;font:550 13.5px/1 'Schibsted Grotesk',system-ui,sans-serif;color:#475569;cursor:pointer;transition:background .2s cubic-bezier(.2,.8,.2,1),transform .2s} .ds-dock button:hover,.ds-dock button.ds-on{color:#0F172A;background:rgba(15,23,42,.06)} .ds-dock button:active{transform:scale(.94)} .ds-dock button:focus-visible{outline:2px solid #0E6E6B;outline-offset:2px}"
     },
     {
-      "name": "Film Sheet and Caption",
+      "name": "Film Headline and Odometer",
       "kind": "custom",
-      "description": "The product film's frame: one rounded window with elev-3 on the topographic canvas, a sentence-case caption below.",
-      "html": "<div class=\"ds-film\"><div class=\"ds-sheet\"></div><div class=\"ds-cap\">100,907 votes, the most in Prague.</div></div>",
-      "css": ".ds-film{background:#F2F7F7;padding:24px} .ds-sheet{height:160px;border-radius:18px;background:#fff;box-shadow:0 0 0 1px rgba(15,23,42,.10),0 2px 4px rgb(15 23 42 / .05),0 12px 24px -6px rgb(15 23 42 / .10),0 32px 64px -16px rgb(15 23 42 / .20)} .ds-cap{margin-top:16px;font:560 19px/1.2 'Schibsted Grotesk',sans-serif;letter-spacing:-.01em;color:#0F172A}"
+      "description": "The product film's type: a Bricolage 720 headline whose decisive phrase sits on a teal block in white, and an odometer figure in tabular numerals on the topographic canvas.",
+      "html": "<div class=\"ds-film\"><div class=\"ds-n\">100,907</div><div class=\"ds-h\">Most watched. <span>Not most voted.</span></div></div>",
+      "css": ".ds-film{background:#F2F7F7;padding:24px} .ds-n{font:720 64px/1 'Bricolage Grotesque',sans-serif;letter-spacing:-.036em;font-variant-numeric:tabular-nums;color:#0E6E6B} .ds-h{margin-top:14px;font:720 30px/1.1 'Bricolage Grotesque',sans-serif;letter-spacing:-.036em;color:#0F172A} .ds-h span{background:#0E6E6B;color:#fff;border-radius:.06em;padding:0 .08em}"
     }
   ],
   "narrative": {
@@ -464,14 +464,14 @@
       "**Do** show attention and votes side by side as separate measures.",
       "**Do** use proportional numerals by default and tabular numerals only in aligned columns.",
       "**Do** animate transform and opacity with exponential ease-out (`cubic-bezier(.16,1,.3,1)` or `(.25,1,.5,1)`), and honour reduced motion.",
-      "**Do** show the real app in any film or marketing surface: captures inside the sheet, never a redrawn UI."
+      "**Do** show the real app in any film or marketing surface: real captures and element screenshots, moved and masked but never redrawn."
     ],
     "donts": [
       "**Don't** add a galaxy, sky, glow, halo, text shadow or yellow (The No Glow Rule).",
       "**Don't** make content cards translucent or blurred; translucency is for floating chrome.",
       "**Don't** set data in a monospace face.",
       "**Don't** use tracked uppercase for section labels; labels are sentence case.",
-      "**Don't** use bounce or spring overshoot easing.",
+      "**Don't** use bounce or spring overshoot easing in the app UI (the product film is the one exception).",
       "**Don't** merge attention and votes into one score, ranking or combined visual."
     ]
   }

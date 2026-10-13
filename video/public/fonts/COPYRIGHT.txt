@@ -3,4 +3,6 @@ Copyright 2019 The Sora Project Authors (https://github.com/sora-xor/sora-font)
 
 Copyright 2023 The Schibsted-Grotesk Project Authors (https://github.com/schibsted/schibsted-grotesk)
 
+Copyright 2022 The Bricolage Grotesque Project Authors (https://github.com/ateliertriay/bricolage)
+
 These fonts are licensed under the SIL Open Font License 1.1: https://openfontlicense.org

@@ -1,201 +1,48 @@
-import { AbsoluteFill, Audio, Img, interpolate, Sequence, staticFile, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Audio, Sequence, staticFile, useCurrentFrame } from "remotion";
+import { BlurDefs } from "./parts/Blur";
 import { Canvas } from "./parts/Canvas";
-import { Cam, Sheet, VIEW } from "./parts/Sheet";
-import { Captions, Line } from "./parts/Caption";
-import { shot } from "./parts/Take";
-import { asset, C, easeInOut, easeOut, ELEV3, ramp, TEXT, WORDMARK } from "./theme";
-import { beatFrame, DURATION } from "./timing";
+import { BladeSweep, sweepSwap } from "./parts/Mark";
+import { kick } from "./parts/track";
+import { Champion, CHAMPION } from "./scenes/Champion";
+import { Cities, CTA_OUT } from "./scenes/Cities";
+import { Czechia } from "./scenes/Czechia";
+import { Duel } from "./scenes/Duel";
+import { EndCard, MarkBuild } from "./scenes/Finale";
+import { Flight, WHIP_AT } from "./scenes/Flight";
+import { LOCK, Open, OpenMark } from "./scenes/Open";
+import { Phone } from "./scenes/Phone";
+import { Tools, TOOLS_TO } from "./scenes/Tools";
+import { Wall } from "./scenes/Wall";
+import { C, easeOut, ramp } from "./theme";
+import { beatAt, beatFrame as F } from "./timing";
 import cues from "./cues.json";
 
-// A camera keyframe: at `beat`, scale `m` (1 = the sheet's width) centred on CSS point (cx, cy).
-type Key = { beat: number } & Cam;
-type Shot = { from: number; to: number; take: string; index?: (frame: number) => number; keys: Key[] };
+export { EndCard, LOCKUP, LOCKUP_AT, REST } from "./scenes/Finale";
 
-const rel = (frame: number, beat: number) => frame - beatFrame(beat);
-const hold = (index: number) => () => index;
+// The teal blade covers the frame just before beat 56, so the reveal lands on the first tool.
+const SWEEP = { at: F(56) - 16, dur: 26 };
+const SWAP = sweepSwap(SWEEP.at, SWEEP.dur);
 
-// Every shot is a real capture of starwatch.danielvecera.com (capture/capture.mjs). Coordinates are
-// CSS pixels of the 1600×900 page, read off the captures.
-const SHOTS: Shot[] = [
-  // The welcome screen: the wall of campaign posts, easing toward the tagline card.
-  { from: 0, to: 8, take: "welcome", keys: [{ beat: 0, m: 1, cx: 800, cy: 450 }, { beat: 8, m: 1.3, cx: 615, cy: 300 }] },
-  // Star Atlas over Czechia, drifting toward Prague's marker.
-  { from: 8, to: 24, take: "atlas", index: hold(0), keys: [{ beat: 8, m: 1, cx: 800, cy: 470 }, { beat: 24, m: 1.335, cx: 599, cy: 440 }] },
-  // The drop: the real camera flight into Prague (110 captured frames, one per reel frame).
-  { from: 24, to: 28, take: "atlas", index: (f) => Math.min(109, rel(f, 24)), keys: [{ beat: 24, m: 1.335, cx: 599, cy: 440 }, { beat: 26.5, m: 1, cx: 800, cy: 450 }] },
-  // Prague's lists as islands of their posts, then in to SPOLU pro Prahu's island.
-  {
-    from: 28,
-    to: 36,
-    take: "atlas",
-    index: (f) => 110 + Math.min(169, Math.max(0, rel(f, 28))),
-    keys: [
-      { beat: 28, m: 1, cx: 800, cy: 450 },
-      { beat: 31, m: 1, cx: 800, cy: 450 },
-      { beat: 33.5, m: 1.38, cx: 520, cy: 470 },
-      { beat: 36, m: 1.42, cx: 515, cy: 470 },
-    ],
-  },
-  // Its most-watched candidate: his views, then his 2026 result.
-  {
-    from: 36,
-    to: 44,
-    take: "kastovsky",
-    keys: [
-      { beat: 36, m: 1.12, cx: 780, cy: 470 },
-      { beat: 39.5, m: 1.43, cx: 960, cy: 476 },
-      { beat: 40.5, m: 1.38, cx: 1000, cy: 390 },
-      { beat: 44, m: 1.4, cx: 1000, cy: 392 },
-    ],
-  },
-  // The candidate with the most votes in Prague: his views, then his 2026 result.
-  {
-    from: 44,
-    to: 52,
-    take: "hlavacek",
-    keys: [
-      { beat: 44, m: 1.12, cx: 780, cy: 560 },
-      { beat: 47.5, m: 1.43, cx: 960, cy: 560 },
-      { beat: 48.5, m: 1.38, cx: 1000, cy: 400 },
-      { beat: 52, m: 1.4, cx: 1000, cy: 402 },
-    ],
-  },
-  // Pulse with the two side by side: the chart, then down to attention next to votes.
-  {
-    from: 52,
-    to: 60,
-    take: "versus",
-    index: (f) => Math.min(89, Math.max(0, Math.round((rel(f, 54) * 90) / (beatFrame(56) - beatFrame(54))))),
-    keys: [
-      { beat: 52, m: 1, cx: 800, cy: 450 },
-      { beat: 55, m: 1, cx: 800, cy: 450 },
-      { beat: 56, m: 1, cx: 800, cy: 480 },
-      { beat: 60, m: 1.02, cx: 800, cy: 482 },
-    ],
-  },
-  // By the numbers: the official results per city, then every list in Prague.
-  {
-    from: 60,
-    to: 68,
-    take: "results",
-    index: (f) => (rel(f, 64) < 0 ? 122 : Math.min(209, 122 + Math.round(rel(f, 64) * 2.4))),
-    keys: [
-      { beat: 60, m: 1, cx: 800, cy: 360 },
-      { beat: 63.5, m: 1.08, cx: 800, cy: 350 },
-      { beat: 64, m: 1, cx: 800, cy: 450 },
-      { beat: 68, m: 1.06, cx: 800, cy: 470 },
-    ],
-  },
-  // Look up your city: the Atlas again, in on the list of the ten cities.
-  { from: 76, to: 88, take: "atlas", index: hold(0), keys: [{ beat: 76, m: 1, cx: 800, cy: 470 }, { beat: 80, m: 1.45, cx: 560, cy: 590 }, { beat: 88, m: 1.48, cx: 556, cy: 590 }] },
+// Scene windows on absolute frames; neighbours overlap where one transitions into the next.
+const SCENES: { from: number; to: number; View: React.FC }[] = [
+  { from: 0, to: F(7.1), View: Open },
+  { from: F(6), to: F(16), View: Wall },
+  { from: 0, to: F(7.1), View: OpenMark },
+  { from: F(16), to: F(24), View: Czechia },
+  { from: F(24), to: WHIP_AT + 9, View: Flight },
+  { from: WHIP_AT - 9, to: SWAP, View: Duel },
+  { from: SWAP, to: TOOLS_TO + 4, View: Tools },
+  { from: F(63.7), to: CHAMPION.in + 1, View: Phone },
+  { from: CHAMPION.out, to: CTA_OUT + 16, View: Cities },
+  { from: CHAMPION.from, to: CHAMPION.to, View: Champion },
+  { from: F(83.4), to: F(88) + 6, View: MarkBuild },
 ];
 
-const LINES: Line[] = [
-  { beat: 0.5, until: 8, text: "Candidates’ public posts in ten Czech cities, before the 2026 vote." },
-  { beat: 8, until: 16, text: "Each city sized by the attention its candidates got." },
-  { beat: 16, until: 24, text: "Collected 8–9 October 2026. A snapshot, not live." },
-  { beat: 24, until: 28, text: "Fly into a city." },
-  { beat: 28, until: 32, text: "Each list becomes an island of its posts." },
-  { beat: 32, until: 36, text: "Most reach in Prague: SPOLU pro Prahu, 26M." },
-  { beat: 36, until: 40, text: "Tomáš Kaštovský: 25M video views since 2023." },
-  { beat: 40, until: 44, text: "85,284 votes. 11th on his list." },
-  { beat: 44, until: 48, text: "Petr Hlaváček: 999k video views since 2023." },
-  { beat: 48, until: 52, text: "100,907 votes, the most in Prague." },
-  { beat: 52, until: 56, text: "Pulse puts them side by side." },
-  { beat: 56, until: 60, text: "Attention and votes stay separate." },
-  { beat: 60, until: 64, text: "Official 2026 results, final count." },
-  { beat: 64, until: 68, text: "Every list in Prague, with its votes and seats." },
-  { beat: 68, until: 72, text: "Open to everyone. No sign-in." },
-  { beat: 76, until: 88, text: "Look up your city at starwatch.danielvecera.com." },
-];
-
-// Ease between camera keys.
-const camAt = (keys: Key[], frame: number): Cam => {
-  const t = (k: Key) => beatFrame(k.beat);
-  if (frame <= t(keys[0])) return keys[0];
-  for (let i = 0; i < keys.length - 1; i++) {
-    const a = keys[i];
-    const b = keys[i + 1];
-    if (frame <= t(b)) {
-      const p = interpolate(frame, [t(a), t(b)], [0, 1], { easing: easeInOut, extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-      return { m: a.m + (b.m - a.m) * p, cx: a.cx + (b.cx - a.cx) * p, cy: a.cy + (b.cy - a.cy) * p };
-    }
-  }
-  return keys[keys.length - 1];
-};
-
-const ShotView: React.FC = () => {
-  const frame = useCurrentFrame();
-  const s = SHOTS.find((x) => frame >= beatFrame(x.from) && frame < beatFrame(x.to));
-  if (!s) return null;
-  const index = s.index ? s.index(frame) : 0;
-  const cam = camAt(s.keys, frame);
-  // Flight to islands: a nine-frame dissolve between the last flight frame and Prague after selection.
-  const arrive = beatFrame(28);
-  const dissolve = s.from === 28 ? ramp(frame, arrive, arrive + 9) : 1;
-  return <Sheet src={shot(s.take, index)} under={s.from === 28 && dissolve < 1 ? shot("atlas", 109) : undefined} mix={dissolve} cam={cam} />;
-};
-
-// Open to everyone: the welcome screen on a phone (390×844 at 3×), a real capture.
-const Phone: React.FC = () => {
-  const frame = useCurrentFrame();
-  const push = ramp(frame, beatFrame(68), beatFrame(72), easeInOut);
-  const h = 800;
-  const w = (h * 390) / 844;
-  return (
-    <div
-      style={{
-        position: "absolute",
-        left: 960 - w / 2,
-        top: VIEW.y + (VIEW.h - h) / 2,
-        width: w,
-        height: h,
-        borderRadius: 46,
-        overflow: "hidden",
-        boxShadow: `0 0 0 1px ${C.hairline}, 0 0 0 9px ${C.surface}, 0 0 0 10px ${C.hairline}, ${ELEV3}`,
-        transform: `scale(${1 + 0.025 * push})`,
-      }}
-    >
-      <Img src={asset("phone/welcome.png")} style={{ width: "100%", height: "100%" }} />
-    </div>
-  );
-};
-
-// The hackathon, said once and plainly.
-const Hackathon: React.FC = () => {
-  const frame = useCurrentFrame();
-  const a = ramp(frame, beatFrame(72), beatFrame(72) + 10);
-  const b = ramp(frame, beatFrame(73), beatFrame(73) + 10);
-  return (
-    <div style={{ position: "absolute", left: 0, right: 0, top: 410, textAlign: "center", fontFamily: TEXT }}>
-      <div style={{ fontSize: 40, fontWeight: 560, letterSpacing: "-0.01em", color: C.label, opacity: a }}>Built at the Agents 0.0.7 hackathon in Prague.</div>
-      <div style={{ fontSize: 30, fontWeight: 500, color: C.label2, marginTop: 18, opacity: b }}>Overall winner among 38 projects.</div>
-    </div>
-  );
-};
-
-// End card on the final hit: the lockup as the brand file itself (checked by StarwatchLockupCheck).
-export const LOCKUP = { w: 260.9 * 3, h: 66 * 3 };
-export const LOCKUP_AT = { x: Math.round(960 - (260.9 * 3) / 2), y: 330 };
-export const REST = 14;
-export const EndCard: React.FC<{ start?: number }> = ({ start = beatFrame(88) }) => {
-  const frame = useCurrentFrame() - start;
-  const logo = ramp(frame, 0, REST, easeOut);
-  const line = (d: number) => ramp(frame, d, d + 12);
-  const fade = ramp(frame, DURATION - start - 22, DURATION - start - 2, (t) => t, 1, 0);
-  return (
-    <AbsoluteFill style={{ opacity: fade }}>
-      <Img
-        src={asset("brand/lockup.svg")}
-        style={{ position: "absolute", left: LOCKUP_AT.x, top: LOCKUP_AT.y, width: LOCKUP.w, height: LOCKUP.h, opacity: logo, transform: frame < REST ? `translateY(${(1 - logo) * 18}px)` : undefined }}
-      />
-      <div style={{ position: "absolute", left: 0, right: 0, top: 600, textAlign: "center" }}>
-        <div style={{ fontFamily: WORDMARK, fontWeight: 700, fontSize: 46, color: C.label, letterSpacing: "-0.01em", opacity: line(8) }}>starwatch.danielvecera.com</div>
-        <div style={{ fontFamily: TEXT, fontSize: 28, color: C.label2, marginTop: 26, opacity: line(18) }}>Open source: github.com/1vecera/starwatch</div>
-        <div style={{ fontFamily: TEXT, fontSize: 28, color: C.label3, marginTop: 10, opacity: line(26) }}>Made by Daniel Večeřa, Prague</div>
-      </div>
-    </AbsoluteFill>
-  );
+// Hits that shake the whole frame a little: the drop, the head-to-head clash, the final hit.
+const HITS = [F(24), F(48), F(88)];
+const shake = (frame: number) => {
+  const k = HITS.reduce((sum, at) => sum + kick(frame, at, 16), 0);
+  return { k: Math.min(1, k), x: Math.sin(frame * 2.1) * 9 * k, y: Math.cos(frame * 2.7) * 7 * k };
 };
 
 // Studio preview only; renders are muted and showreel/mix.py masters the same cue sheet.
@@ -215,29 +62,22 @@ const Soundtrack: React.FC = () => (
 
 export const StarwatchShowreel: React.FC<{ audio?: boolean }> = ({ audio = true }) => {
   const frame = useCurrentFrame();
-  const sheet = SHOTS.some((x) => frame >= beatFrame(x.from) && frame < beatFrame(x.to));
-  const disclose = ramp(frame, 10, 24) * (sheet ? 1 : 0);
+  const b = beatAt(frame);
+  // The contours: drawn on in the opening, lifted by the lock and, from the drop to the end card, by every kick.
+  const phase = b - Math.floor(b);
+  const groove = b >= 24 && b < 88 ? 0.55 * Math.exp(-6 * phase) : 0;
+  const lift = Math.max(groove, kick(frame, LOCK, 30), kick(frame, F(88), 40));
+  const s = shake(frame);
+  const fullBleed = (frame >= F(21.75) && frame < WHIP_AT - 9) || (frame >= CHAMPION.in && frame < CHAMPION.out);
   return (
-    <AbsoluteFill>
-      <Canvas />
-      <ShotView />
-      {frame >= beatFrame(68) && frame < beatFrame(72) ? <Phone /> : null}
-      {frame >= beatFrame(72) && frame < beatFrame(76) ? <Hackathon /> : null}
-      {frame >= beatFrame(88) ? <EndCard /> : null}
-      <Captions lines={LINES} />
-      <div
-        style={{
-          position: "absolute",
-          right: 1920 - (VIEW.x + VIEW.w) + 6,
-          top: VIEW.y + VIEW.h + 48,
-          fontFamily: TEXT,
-          fontSize: 20,
-          color: C.label3,
-          opacity: disclose,
-        }}
-      >
-        Real captures of the live app
-      </div>
+    <AbsoluteFill style={{ backgroundColor: C.canvas }}>
+      <BlurDefs />
+      <AbsoluteFill style={{ transform: `translate(${s.x}px, ${s.y}px) scale(${1 + 0.02 * s.k})` }}>
+        {fullBleed ? null : <Canvas draw={ramp(frame, 0, F(5), easeOut)} lift={lift} zoom={1 + 0.0007 * frame} />}
+        {SCENES.map(({ from, to, View }, i) => (frame >= from && frame < to ? <View key={i} /> : null))}
+        {frame >= F(88) ? <EndCard /> : null}
+        <BladeSweep at={SWEEP.at} dur={SWEEP.dur} />
+      </AbsoluteFill>
       {audio ? <Soundtrack /> : null}
     </AbsoluteFill>
   );

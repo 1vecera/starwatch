@@ -249,11 +249,13 @@ One radius scale with semantic aliases: chips 6px, controls 8px, cards 12px, pan
 - **Style:** value 24px/700 in proportional numerals, label 11.5px in secondary ink, delta 11.5px/600 in status green or red.
 
 ### Product film (video/src/showreel)
-The 45-second film applies this system rather than adding to it: it is the app's own page in motion.
-- **The sheet:** every real capture plays inside one rounded app window, fixed in place (1808×832 on a 1920×1080 frame, 56px inset), with a hairline ring and the overlay elevation (elev-3). The ground around it is the app's ground: slate canvas, topographic contours over the 192px grid, the contours drifting a few pixels over the film as the only non-camera motion.
-- **Captions:** one at a time, in a fixed place under the sheet's left edge, Schibsted Grotesk 38px/560 in ink, sentence case, plain fades in and out. A small disclosure line ("Real captures of the live app", 20px, tertiary ink) sits under the sheet's right edge while captures are on screen.
-- **Camera:** the camera does the storytelling: eased push-ins and pans on the real UI (in-out ease between keyframes) until names and numbers are legible, cut on the score's bars. No graphics are drawn over the captures.
-- **End card:** the brand lockup file itself, rising 18px and fading in with the expo ease-out, then the URL in the Sora wordmark face (700, 46px) and two Schibsted lines in secondary and tertiary ink. Bricolage appears only inside the captured screens and the lockup.
+The 45-second film is a motion-design surface in the app's own world: same canvas, ink, one teal, white sheets and display face, but driven by the score. Daniel asked on 13 October 2026 for the pop and action transitions of the Mluva reel in this design, with far fewer screens in a frame, so the film allows what the app UI does not: spring overshoot, motion blur, 3D and full-bleed teal.
+- **Ground:** the slate canvas with the app's topographic contours (drawn on from the centre in the opening, lifting on every kick from the drop to the end card) over the 192px grid.
+- **Type:** Bricolage Grotesque 720 at -0.036em for every headline and number (112–250px), Schibsted Grotesk 560–640 for labels (44–50px), ink by default, teal for the one thing that matters. Words rise out of their own baseline masks on a spring with vertical motion blur; the opening line rises letter by letter. A teal block wipes in behind the decisive phrase ("attention?", "Not most voted.") and turns it white.
+- **Numbers:** odometers in tabular figures count up from zero to the app's exact figure, each digit turning only on a carry, so no figure above the target and no leading zero ever shows.
+- **Real pieces:** the welcome wall's tiles and the Spotlight portraits are element screenshots, moved as 3D cards with the app's 20px sheet radius and elev-3; the map flight and the tool pages are per-frame captures on sheets. Nothing is redrawn; the end card discloses "App footage: real captures of the live app".
+- **Transitions:** whip pans on one shared curve (`cubic-bezier(.75,0,.25,1)` over 16 frames, fastest on the beat) with directional blur; the mark's blade as the brand wipe; a teal disc from Prague that opens into the flight; a hard cut on the bar; the teal champion card on a slant.
+- **End card:** the app's 3D mark slams into the lockup on the final hit with a 12% punch and two contour rings; at rest the lockup is the brand file itself (0 px diff), then the URL in the Sora wordmark face and two Schibsted lines.
 
 ## Do's and Don'ts
 
@@ -264,12 +266,12 @@ The 45-second film applies this system rather than adding to it: it is the app's
 - **Do** show attention and votes side by side as separate measures.
 - **Do** use proportional numerals by default and tabular numerals only in aligned columns.
 - **Do** animate transform and opacity with exponential ease-out (`cubic-bezier(.16,1,.3,1)` or `(.25,1,.5,1)`), and honour reduced motion.
-- **Do** show the real app in any film or marketing surface: captures inside the sheet, never a redrawn UI.
+- **Do** show the real app in any film or marketing surface: real captures and element screenshots, moved and masked but never redrawn.
 
 ### Don't:
 - **Don't** add a galaxy, sky, glow, halo, text shadow or yellow (The No Glow Rule).
 - **Don't** make content cards translucent or blurred; translucency is for floating chrome.
 - **Don't** set data in a monospace face.
 - **Don't** use tracked uppercase for section labels; labels are sentence case.
-- **Don't** use bounce or spring overshoot easing.
+- **Don't** use bounce or spring overshoot easing in the app UI (the product film is the one exception, above).
 - **Don't** merge attention and votes into one score, ranking or combined visual.
