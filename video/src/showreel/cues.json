@@ -1,0 +1,357 @@
+{
+  "fps": 60,
+  "duration_frames": 2700,
+  "score": {
+    "file": "score.wav",
+    "source": "ElevenLabs Music v2.5 take 4 (flow 5UuhkrWsLlYeXmYy7dPT), from 3.762 s",
+    "gain_db": 0,
+    "fade_out_from_frame": 2610
+  },
+  "sfx_peaks_s": {
+    "impact": 0.0,
+    "impact-long": 0.0,
+    "whoosh-soft": 0.04,
+    "whoosh": 0.03,
+    "pop": 0.0,
+    "pop-2": 0.05,
+    "flap": 0.0,
+    "thud": 0.12,
+    "jelly": 0.05,
+    "tick": 0.02,
+    "riser": 1.16
+  },
+  "cues": [
+    {
+      "frame": 43,
+      "sfx": "jelly",
+      "gain_db": -16,
+      "note": "the mark's blades lock"
+    },
+    {
+      "frame": 64,
+      "sfx": "tick",
+      "gain_db": -8,
+      "note": "tagline"
+    },
+    {
+      "frame": 113,
+      "sfx": "tick",
+      "gain_db": -8
+    },
+    {
+      "frame": 163,
+      "sfx": "whoosh-soft",
+      "gain_db": -22,
+      "note": "tagline leaves"
+    },
+    {
+      "frame": 186,
+      "sfx": "whoosh",
+      "gain_db": -16,
+      "note": "dive through the mark"
+    },
+    {
+      "frame": 226,
+      "sfx": "thud",
+      "gain_db": -14,
+      "note": "wall columns land"
+    },
+    {
+      "frame": 247,
+      "sfx": "thud",
+      "gain_db": -12,
+      "note": "the posts become 12,595"
+    },
+    {
+      "frame": 249,
+      "sfx": "flap",
+      "gain_db": -14,
+      "note": "12,595"
+    },
+    {
+      "frame": 342,
+      "sfx": "whoosh-soft",
+      "gain_db": -20,
+      "note": "5,405 arrives from behind"
+    },
+    {
+      "frame": 344,
+      "sfx": "whoosh",
+      "gain_db": -16,
+      "note": "12,595 flies through the camera"
+    },
+    {
+      "frame": 344,
+      "sfx": "flap",
+      "gain_db": -14,
+      "note": "5,405"
+    },
+    {
+      "frame": 417,
+      "sfx": "whoosh",
+      "gain_db": -18,
+      "note": "5,405 flies through the camera"
+    },
+    {
+      "frame": 440,
+      "sfx": "whoosh",
+      "gain_db": -16,
+      "note": "fly through the wall"
+    },
+    {
+      "frame": 451,
+      "sfx": "thud",
+      "gain_db": -16,
+      "note": "cut to the Atlas"
+    },
+    {
+      "frame": 493,
+      "sfx": "tick",
+      "gain_db": -10,
+      "note": "who got the attention?"
+    },
+    {
+      "frame": 535,
+      "sfx": "pop",
+      "gain_db": -8,
+      "note": "highlight"
+    },
+    {
+      "frame": 620,
+      "sfx": "pop-2",
+      "gain_db": -12,
+      "note": "Prague"
+    },
+    {
+      "frame": 676,
+      "sfx": "riser",
+      "gain_db": -20,
+      "note": "riser into the drop"
+    },
+    {
+      "frame": 676,
+      "sfx": "impact",
+      "gain_db": -10,
+      "note": "the drop: the flight opens from Prague"
+    },
+    {
+      "frame": 676,
+      "sfx": "whoosh",
+      "gain_db": -16
+    },
+    {
+      "frame": 788,
+      "sfx": "thud",
+      "gain_db": -16,
+      "note": "islands"
+    },
+    {
+      "frame": 901,
+      "sfx": "whoosh",
+      "gain_db": -14,
+      "note": "whip to Kaštovský"
+    },
+    {
+      "frame": 929,
+      "sfx": "flap",
+      "gain_db": -14,
+      "note": "25M"
+    },
+    {
+      "frame": 1006,
+      "sfx": "flap",
+      "gain_db": -14,
+      "note": "85,284"
+    },
+    {
+      "frame": 1126,
+      "sfx": "whoosh",
+      "gain_db": -14,
+      "note": "whip to Hlaváček"
+    },
+    {
+      "frame": 1154,
+      "sfx": "flap",
+      "gain_db": -14,
+      "note": "999k"
+    },
+    {
+      "frame": 1231,
+      "sfx": "flap",
+      "gain_db": -14,
+      "note": "100,907"
+    },
+    {
+      "frame": 1331,
+      "sfx": "whoosh-soft",
+      "gain_db": -18,
+      "note": "both fly in"
+    },
+    {
+      "frame": 1351,
+      "sfx": "impact",
+      "gain_db": -12,
+      "note": "clash"
+    },
+    {
+      "frame": 1372,
+      "sfx": "flap",
+      "gain_db": -18,
+      "note": "views"
+    },
+    {
+      "frame": 1414,
+      "sfx": "flap",
+      "gain_db": -18,
+      "note": "votes"
+    },
+    {
+      "frame": 1506,
+      "sfx": "pop",
+      "gain_db": -6,
+      "note": "not most voted"
+    },
+    {
+      "frame": 1562,
+      "sfx": "whoosh",
+      "gain_db": -14,
+      "note": "blade sweep"
+    },
+    {
+      "frame": 1576,
+      "sfx": "whoosh-soft",
+      "gain_db": -20,
+      "note": "tool cut"
+    },
+    {
+      "frame": 1576,
+      "sfx": "tick",
+      "gain_db": -10
+    },
+    {
+      "frame": 1632,
+      "sfx": "whoosh-soft",
+      "gain_db": -20,
+      "note": "tool cut"
+    },
+    {
+      "frame": 1632,
+      "sfx": "tick",
+      "gain_db": -10
+    },
+    {
+      "frame": 1688,
+      "sfx": "whoosh-soft",
+      "gain_db": -20,
+      "note": "tool cut"
+    },
+    {
+      "frame": 1688,
+      "sfx": "tick",
+      "gain_db": -10
+    },
+    {
+      "frame": 1745,
+      "sfx": "whoosh-soft",
+      "gain_db": -20,
+      "note": "tool cut"
+    },
+    {
+      "frame": 1745,
+      "sfx": "tick",
+      "gain_db": -10
+    },
+    {
+      "frame": 1798,
+      "sfx": "whoosh-soft",
+      "gain_db": -22,
+      "note": "phone drops"
+    },
+    {
+      "frame": 1808,
+      "sfx": "jelly",
+      "gain_db": -16,
+      "note": "phone lands"
+    },
+    {
+      "frame": 1908,
+      "sfx": "whoosh",
+      "gain_db": -16,
+      "note": "teal card"
+    },
+    {
+      "frame": 1913,
+      "sfx": "pop",
+      "gain_db": -6
+    },
+    {
+      "frame": 2015,
+      "sfx": "whoosh-soft",
+      "gain_db": -20,
+      "note": "card lifts"
+    },
+    {
+      "frame": 2031,
+      "sfx": "whoosh",
+      "gain_db": -18,
+      "note": "cities"
+    },
+    {
+      "frame": 2138,
+      "sfx": "whoosh-soft",
+      "gain_db": -22,
+      "note": "rows sink"
+    },
+    {
+      "frame": 2152,
+      "sfx": "tick",
+      "gain_db": -8
+    },
+    {
+      "frame": 2195,
+      "sfx": "tick",
+      "gain_db": -10
+    },
+    {
+      "frame": 2352,
+      "sfx": "whoosh",
+      "gain_db": -16,
+      "note": "mark spins up"
+    },
+    {
+      "frame": 2391,
+      "sfx": "tick",
+      "gain_db": -12,
+      "note": "mark ratchet"
+    },
+    {
+      "frame": 2420,
+      "sfx": "tick",
+      "gain_db": -12,
+      "note": "mark ratchet"
+    },
+    {
+      "frame": 2448,
+      "sfx": "tick",
+      "gain_db": -12,
+      "note": "mark ratchet"
+    },
+    {
+      "frame": 2476,
+      "sfx": "riser",
+      "gain_db": -18,
+      "note": "riser into the final hit"
+    },
+    {
+      "frame": 2476,
+      "sfx": "impact-long",
+      "gain_db": -10,
+      "note": "final hit: the lockup"
+    },
+    {
+      "frame": 2497,
+      "sfx": "tick",
+      "gain_db": -10
+    }
+  ]
+}

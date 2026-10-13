@@ -1,0 +1,33 @@
+{
+  "name": "starwatch-showreel",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Starwatch showreel '26: a 45-second motion-design reel built from real captures of the live app",
+  "type": "module",
+  "scripts": {
+    "capture": "node capture/capture.mjs",
+    "prepare": "uv run showreel/prepare.py",
+    "render": "remotion render src/index.ts StarwatchShowreel out/starwatch-showreel.mp4 --muted --crf=14 --concurrency=10",
+    "preview": "remotion render src/index.ts StarwatchShowreel out/starwatch-showreel-preview.mp4 --muted --scale=0.5 --concurrency=10",
+    "master": "uv run showreel/mix.py out/starwatch-showreel.mp4",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/bundler": "4.0.526",
+    "@remotion/cli": "4.0.526",
+    "@remotion/fonts": "4.0.526",
+    "@remotion/motion-blur": "4.0.526",
+    "@remotion/noise": "4.0.526",
+    "@remotion/renderer": "4.0.526",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "remotion": "4.0.526"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.1",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "playwright-core": "1.63.0",
+    "typescript": "7.0.2"
+  }
+}
